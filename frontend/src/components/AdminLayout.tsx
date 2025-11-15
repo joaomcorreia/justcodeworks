@@ -27,6 +27,12 @@ const adminNavItems = [
     href: '/admin/users',
     icon: '👥',
   },
+  // [ADMIN]
+  {
+    name: 'Sites',
+    href: '/admin/sites',
+    icon: '🌐',
+  },
   {
     name: 'Templates',
     href: '/admin/templates',
@@ -61,7 +67,7 @@ export default function AdminLayout({ children, locale, user }: AdminLayoutProps
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 m-0 p-0">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -136,7 +142,7 @@ export default function AdminLayout({ children, locale, user }: AdminLayoutProps
       </div>
 
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 mt-0">
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -181,8 +187,8 @@ export default function AdminLayout({ children, locale, user }: AdminLayoutProps
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="p-6">
+        {/* [ADMIN] Main Content Area - no top spacing */}
+        <main className="px-6 pb-6">
           <div className="mx-auto max-w-7xl">
             {children}
           </div>

@@ -2,7 +2,7 @@ import base64
 import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
-from .models import Template, SiteTemplate, SiteProject, Page, Section, Field, BugReport, BugScreenshot, NavigationItem, HeroSlide, DashboardTemplate, DashboardBlock
+from .models import Template, SiteTemplate, TemplateSection, SiteProject, Page, Section, Field, BugReport, BugScreenshot, NavigationItem, HeroSlide, DashboardTemplate, DashboardBlock, QuoteRequest
 
 
 class TemplateSerializer(serializers.ModelSerializer):
@@ -80,6 +80,8 @@ class SiteProjectTemplateAssignSerializer(serializers.Serializer):
 
 
 class AdminSiteTemplateSerializer(serializers.ModelSerializer):
+    site_count = serializers.SerializerMethodField()
+    
     class Meta:
         model = SiteTemplate
         fields = (
@@ -94,7 +96,13 @@ class AdminSiteTemplateSerializer(serializers.ModelSerializer):
             "usage_count",
             "is_active",
             "updated_at",  # from TimeStampedModel
+            "site_count",
         )
+    
+    def get_site_count(self, obj):
+        """Count of SiteProjects using this template"""
+        from .models import SiteProject
+        return SiteProject.objects.filter(site_template=obj).count()
 
 
 class AdminSiteTemplateDetailSerializer(serializers.ModelSerializer):
@@ -130,6 +138,34 @@ class AdminSiteTemplateDetailSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.preview_image.url)
         return None
+
+
+# [TEMPLAB] Template Section serializer for admin API
+class AdminTemplateSectionSerializer(serializers.ModelSerializer):
+    """
+    Admin serializer for TemplateSection with all fields for Template Lab management.
+    """
+    site_template_key = serializers.CharField(source="site_template.key", read_only=True)
+    
+    class Meta:
+        model = TemplateSection
+        fields = (
+            "id",
+            "site_template_key",
+            "identifier", 
+            "internal_name",
+            "code",
+            "group",
+            "variant_index",
+            "default_order",
+            "is_active",
+            "notes",
+            "preview_image",
+            # [TEMPLAB] New classification fields
+            "section_type",
+            "min_plan", 
+            "is_interactive",
+        )
 
 
 # [ASSETS] serializer
@@ -227,6 +263,62 @@ class SiteProjectSerializer(serializers.ModelSerializer):
             template = Template.objects.filter(id=template_id).first()
         instance = SiteProject.objects.create(template=template, **validated_data)
         return instance
+
+
+# [ADMIN]
+class AdminSiteProjectSerializer(serializers.ModelSerializer):
+    """
+    Admin serializer for SiteProject with additional read-only fields for admin panel.
+    """
+    owner_email = serializers.EmailField(source="owner.email", read_only=True)
+    site_template_name = serializers.CharField(
+        source="site_template.name", read_only=True
+    )
+    template_name = serializers.CharField(
+        source="template.name", read_only=True, default=None
+    )
+
+    class Meta:
+        model = SiteProject
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "owner_email",
+            "is_master_template",
+            "template_name",
+            "site_template_name",
+            "primary_locale",
+            "is_active",
+            "created_at",
+        ]
+
+
+# [ADMIN-EXPLORER] Sites Explorer Serializer
+class AdminSitesListSerializer(serializers.ModelSerializer):
+    """
+    Lightweight serializer for admin sites explorer page.
+    Lists all SiteProjects with essential information.
+    """
+    owner_username = serializers.CharField(source="owner.username", read_only=True)
+    owner_email = serializers.CharField(source="owner.email", read_only=True) 
+    site_template_key = serializers.CharField(source="site_template.key", read_only=True)
+    site_template_name = serializers.CharField(source="site_template.name", read_only=True)
+
+    class Meta:
+        model = SiteProject
+        fields = [
+            "id",
+            "name", 
+            "slug",
+            "site_template_key",
+            "site_template_name",
+            "owner_username",
+            "owner_email",
+            "primary_locale", 
+            "is_active",
+            "created_at"
+        ]
 
 
 # Field Serializer
@@ -653,7 +745,7 @@ class SectionPublicSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Section
-        fields = ["identifier", "internal_name", "order", "fields"]
+        fields = ["id", "identifier", "internal_name", "order", "fields"]
 
 
 class PagePublicSerializer(serializers.ModelSerializer):
@@ -713,3 +805,92 @@ class SiteProjectPublicSerializer(serializers.ModelSerializer):
             "site_template_key",
             "pages"
         ]
+
+
+# [SEO] Page SEO Update Serializer
+class PageSeoUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating Page SEO fields only.
+    """
+    class Meta:
+        model = Page
+        fields = [
+            "meta_title",
+            "meta_description", 
+            "meta_slug",
+            "indexable",
+        ]
+
+
+# [CONTENT] Field and Section Content Update Serializers
+class FieldUpdateSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    value = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+
+
+class SectionContentUpdateSerializer(serializers.Serializer):
+    """
+    Payload to update fields of a single Section.
+    """
+    fields = FieldUpdateSerializer(many=True)
+
+    def update(self, instance, validated_data):
+        fields_data = validated_data.get("fields", [])
+        field_map = {f.key: f for f in instance.fields.all()}
+
+        for item in fields_data:
+            key = item.get("key")
+            value = item.get("value", "")
+            field = field_map.get(key)
+            if field:
+                field.value = value
+                field.save()
+
+        return instance
+
+    def create(self, validated_data):
+        raise NotImplementedError("Use update() with an existing Section.")
+
+
+# [GARAGE-FORM] Quote Request Serializer
+class QuoteRequestSerializer(serializers.ModelSerializer):
+    """
+    Serializer for garage quote form submissions.
+    Validates customer data and vehicle information.
+    """
+    class Meta:
+        model = QuoteRequest
+        fields = [
+            'name',
+            'email', 
+            'phone',
+            'license_plate',
+            'car_make_model',
+            'service_type',
+            'message',
+            'source_page_slug',
+            'locale',
+            'consent_marketing'
+        ]
+        
+    def validate(self, data):
+        """
+        Ensure at least one contact method (email or phone) is provided.
+        """
+        email = data.get('email', '').strip()
+        phone = data.get('phone', '').strip()
+        
+        if not email and not phone:
+            raise serializers.ValidationError(
+                "Deve fornecer pelo menos um contacto: email ou telefone."
+            )
+            
+        return data
+        
+    def validate_name(self, value):
+        """
+        Validate customer name is not empty.
+        """
+        if not value or not value.strip():
+            raise serializers.ValidationError("O nome é obrigatório.")
+        return value.strip()

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Staff Login and API Test</title>
+</head>
+<body>
+    <h1>Complete Staff Login and API Test</h1>
+    <button id="loginAndTest">Login as Staff and Test Admin API</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('loginAndTest').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Step 1: Get CSRF token
+                console.log('[DEBUG] Getting CSRF token...');
+                const csrfResponse = await fetch("http://localhost:8000/api/csrf/", {
+                    credentials: "include",
+                });
+                
+                if (!csrfResponse.ok) {
+                    throw new Error('Failed to get CSRF token');
+                }
+                
+                const csrfData = await csrfResponse.json();
+                const csrfToken = csrfData.csrfToken;
+                console.log('[DEBUG] CSRF token:', csrfToken);
+                
+                // Step 2: Login with staff user
+                console.log('[DEBUG] Logging in as staff user...');
+                const loginResponse = await fetch("http://localhost:8000/api/auth/login/", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: JSON.stringify({
+                        username: "admin",
+                        password: "admin123"
+                    })
+                });
+                
+                if (!loginResponse.ok) {
+                    const errorText = await loginResponse.text();
+                    throw new Error(`Login failed: ${loginResponse.status} - ${errorText}`);
+                }
+                
+                const loginData = await loginResponse.json();
+                console.log('[DEBUG] Login successful:', loginData);
+                
+                if (!loginData.user?.is_staff) {
+                    throw new Error('User is not staff');
+                }
+                
+                resultDiv.innerHTML += '<p>✓ Login successful as staff user</p>';
+                
+                // Step 3: Test admin sites API
+                console.log('[DEBUG] Testing admin sites API...');
+                const sitesResponse = await fetch("http://localhost:8000/api/admin/sites/", {
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                
+                console.log('[DEBUG] Sites response status:', sitesResponse.status);
+                
+                if (sitesResponse.ok) {
+                    const sitesData = await sitesResponse.json();
+                    console.log('[DEBUG] Sites data:', sitesData);
+                    resultDiv.innerHTML += `<p>✓ Admin Sites API successful</p>`;
+                    resultDiv.innerHTML += `<p>Found ${sitesData.length} sites</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(sitesData, null, 2)}</pre>`;
+                } else {
+                    const errorText = await sitesResponse.text();
+                    console.error('[DEBUG] Sites API error:', errorText);
+                    resultDiv.innerHTML += `<p>✗ Admin Sites API failed: ${sitesResponse.status}</p>`;
+                    resultDiv.innerHTML += `<pre>${errorText}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('[DEBUG] Test error:', error);
+                resultDiv.innerHTML += `<p>✗ Test failed: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

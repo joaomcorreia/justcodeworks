@@ -118,6 +118,123 @@ class SiteTemplate(TimeStampedModel):
         return self.name
 
 
+# [TEMPLAB] Template Section model for reusable section definitions
+class TemplateSection(TimeStampedModel):
+    """
+    Represents a reusable section definition within a SiteTemplate.
+    Each TemplateSection defines a component that can be used across multiple tenant sites.
+    """
+    
+    site_template = models.ForeignKey(
+        SiteTemplate,
+        on_delete=models.CASCADE,
+        related_name="sections",
+        help_text="The site template this section belongs to"
+    )
+    
+    identifier = models.CharField(
+        max_length=100,
+        help_text="Short machine-readable key like 'hero-banner', 'about-us', 'menu-list'"
+    )
+    
+    internal_name = models.CharField(
+        max_length=200,
+        help_text="Human-readable label like 'Hero – Full-width image + CTA'"
+    )
+    
+    code = models.SlugField(
+        max_length=150,
+        help_text="Complete section code following naming scheme: e.g. 'jcw-restaurant-modern-01-hero-01'"
+    )
+    
+    group = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="Section group like 'hero', 'about', 'menu', 'contact'"
+    )
+    
+    variant_index = models.PositiveIntegerField(
+        default=1,
+        help_text="Which variation this is within the group (1, 2, 3, etc.)"
+    )
+    
+    default_order = models.PositiveIntegerField(
+        default=0,
+        help_text="Default position/order suggestion on a page"
+    )
+    
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this section is available for use"
+    )
+    
+    notes = models.TextField(
+        blank=True,
+        help_text="Internal notes, usage hints, etc."
+    )
+    
+    preview_image = models.URLField(
+        blank=True,
+        help_text="Optional image path for preview thumbnails"
+    )
+    
+    # [TEMPLAB] Enhanced classification fields for intelligent section management
+    SECTION_TYPE_CHOICES = [
+        ("hero", "Hero"),
+        ("about", "About"),
+        ("menu", "Menu"),
+        ("pricing", "Pricing"),
+        ("testimonials", "Testimonials"),
+        ("gallery", "Gallery"),
+        ("faq", "FAQ"),
+        ("cta", "Call to Action"),
+        ("form-contact", "Contact Form"),
+        ("form-booking", "Booking Form"), 
+        ("form-lead", "Lead Generation Form"),
+        ("form-quote", "Quote Request Form"),
+        ("features", "Features"),
+        ("services", "Services"),
+        ("team", "Team"),
+        ("portfolio", "Portfolio"),
+        ("blog", "Blog"),
+        ("footer", "Footer"),
+        ("other", "Other"),
+    ]
+    
+    MIN_PLAN_CHOICES = [
+        ("free", "Free"),
+        ("paid", "Paid"),
+        ("premium", "Premium"),
+    ]
+    
+    section_type = models.CharField(
+        max_length=50,
+        choices=SECTION_TYPE_CHOICES,
+        default="other",
+        help_text="Type of section content (hero, about, menu, form, etc.)"
+    )
+    
+    min_plan = models.CharField(
+        max_length=20,
+        choices=MIN_PLAN_CHOICES,
+        default="free",
+        help_text="Minimum subscription plan required to use this section"
+    )
+    
+    is_interactive = models.BooleanField(
+        default=False,
+        help_text="Whether this section requires user interaction (forms, galleries, sliders, etc.)"
+    )
+    
+    class Meta:
+        ordering = ["site_template", "group", "default_order", "id"]
+        unique_together = [["site_template", "code"]]
+    
+    def __str__(self) -> str:
+        return f"{self.site_template.key} – {self.internal_name} ({self.code})"
+
+
 class Template(TimeStampedModel):
     CATEGORY_CHOICES = [
         ("one-page", "One page"),
@@ -658,4 +775,61 @@ class DashboardBlock(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.template.key} — {self.key}"
+
+
+# [GARAGE-FORM] Quote Request Model for Garage/Auto Service Leads
+class QuoteRequest(TimeStampedModel):
+    """
+    Stores quote requests submitted through garage quote forms.
+    """
+    site_project = models.ForeignKey(
+        SiteProject, 
+        on_delete=models.CASCADE, 
+        related_name="quote_requests"
+    )
+    
+    # Contact Information
+    name = models.CharField(max_length=200, help_text="Customer name")
+    email = models.EmailField(blank=True, help_text="Customer email")
+    phone = models.CharField(max_length=50, blank=True, help_text="Customer phone number")
+    
+    # Vehicle Information
+    license_plate = models.CharField(max_length=20, blank=True, help_text="Vehicle license plate")
+    car_make_model = models.CharField(max_length=200, blank=True, help_text="Vehicle make and model")
+    
+    # Service Request Details
+    SERVICE_TYPE_CHOICES = (
+        ("troca_oleo", "Troca de óleo"),
+        ("revisao", "Revisão geral"), 
+        ("travoes", "Travões"),
+        ("diagnostico", "Diagnóstico"),
+        ("outro", "Outro"),
+    )
+    service_type = models.CharField(
+        max_length=100, 
+        choices=SERVICE_TYPE_CHOICES,
+        blank=True,
+        help_text="Type of automotive service requested"
+    )
+    message = models.TextField(blank=True, help_text="Additional message or problem description")
+    
+    # Metadata
+    source_page_slug = models.CharField(
+        max_length=100, 
+        blank=True, 
+        help_text="Page slug where form was submitted (e.g. 'orcamento')"
+    )
+    locale = models.CharField(max_length=10, default="pt", help_text="Form submission locale")
+    consent_marketing = models.BooleanField(
+        default=False, 
+        help_text="Customer consent for marketing communications"
+    )
+    
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Quote Request"
+        verbose_name_plural = "Quote Requests"
+    
+    def __str__(self) -> str:
+        return f"{self.site_project.name} — {self.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
 

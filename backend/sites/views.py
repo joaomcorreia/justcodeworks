@@ -7,7 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
 from django.db.models import Prefetch
 
-from .models import Template, SiteProject, Page, Section, Field, BugReport, NavigationItem, HeroSlide, DashboardTemplate, SiteTemplate
+from .models import Template, SiteProject, Page, Section, Field, BugReport, NavigationItem, HeroSlide, DashboardTemplate, SiteTemplate, TemplateSection, QuoteRequest
 from .serializers import (
     TemplateSerializer,
     SiteProjectSerializer,
@@ -24,11 +24,17 @@ from .serializers import (
     SiteProjectTemplateAssignSerializer,
     AdminSiteTemplateSerializer,
     AdminSiteTemplateDetailSerializer,
+    AdminTemplateSectionSerializer,
+    AdminSiteProjectSerializer,
     TemplateSectionSerializer,
     TemplateBrandingSerializer,
     SiteTemplateSummarySerializer,
     TemplateSummarySerializer,
+    PageSeoUpdateSerializer,
+    SectionContentUpdateSerializer,
     SiteProjectPublicSerializer,
+    QuoteRequestSerializer,
+    AdminSitesListSerializer,
 )
 
 
@@ -585,6 +591,28 @@ class TenantDashboardTemplateView(generics.RetrieveAPIView):
         return template
 
 
+# [ADMIN]
+class IsStaffUser(permissions.BasePermission):
+    """
+    Allows access only to staff users.
+    """
+
+    def has_permission(self, request, view):
+        print(f"[DEBUG IsStaffUser] User: {request.user}")
+        print(f"[DEBUG IsStaffUser] Is authenticated: {request.user.is_authenticated}")
+        print(f"[DEBUG IsStaffUser] Is staff: {getattr(request.user, 'is_staff', False)}")
+        print(f"[DEBUG IsStaffUser] Request origin: {request.META.get('HTTP_ORIGIN', 'None')}")
+        print(f"[DEBUG IsStaffUser] Cookies: {dict(request.COOKIES)}")
+        
+        result = bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.is_staff
+        )
+        print(f"[DEBUG IsStaffUser] Permission result: {result}")
+        return result
+
+
 class IsPlatformAdmin(permissions.BasePermission):
     """
     Simple permission: only allow staff/admin users.
@@ -715,66 +743,34 @@ class AdminSiteTemplateDetailView(generics.RetrieveAPIView):
     queryset = SiteTemplate.objects.all()
 
 
-# [TEMPLAB] template sections endpoint
-class AdminTemplateSectionsView(generics.ListAPIView):
+class AdminSiteTemplateDetailByKeyView(generics.RetrieveAPIView):
     """
-    List all sections for a specific template.
-    Currently returns mock data until we have proper template sections.
+    Retrieve a single site template by key for admin template explorer.
     """
-    serializer_class = TemplateSectionSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Temporarily relaxed
+    serializer_class = AdminSiteTemplateDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = SiteTemplate.objects.all()
+    lookup_field = 'key'
+
+
+# [TEMPLAB] Template sections endpoint for site templates
+class AdminSiteTemplateSectionsView(generics.ListAPIView):
+    """
+    List all TemplateSection instances for a specific SiteTemplate by key.
+    Staff-only endpoint for Template Lab management.
+    """
+    serializer_class = AdminTemplateSectionSerializer
+    permission_classes = [IsStaffUser]
     
     def get_queryset(self):
-        template_id = self.kwargs['template_id']
-        
-        # For now, return mock sections data
-        # In the future, this could be linked to a proper TemplateSection model
-        return []
-    
-    def list(self, request, *args, **kwargs):
-        template_id = self.kwargs['template_id']
-        
-        # Mock sections data for Template Lab v1
-        mock_sections = [
-            {
-                'id': 1,
-                'key': f'section-hero-{template_id}',
-                'name': f'Hero Section',
-                'type': 'hero',
-                'order': 1,
-                'is_active': True,
-                'screenshot_url': None,
-            },
-            {
-                'id': 2,
-                'key': f'section-services-{template_id}',
-                'name': f'Services Section',
-                'type': 'services',
-                'order': 2,
-                'is_active': True,
-                'screenshot_url': None,
-            },
-            {
-                'id': 3,
-                'key': f'section-testimonials-{template_id}',
-                'name': f'Testimonials Section',
-                'type': 'testimonials',
-                'order': 3,
-                'is_active': True,
-                'screenshot_url': None,
-            },
-            {
-                'id': 4,
-                'key': f'section-footer-{template_id}',
-                'name': f'Footer Section',
-                'type': 'footer',
-                'order': 4,
-                'is_active': True,
-                'screenshot_url': None,
-            },
-        ]
-        
-        return Response(mock_sections)
+        site_template_key = self.kwargs['key']
+        try:
+            site_template = SiteTemplate.objects.get(key=site_template_key)
+            return TemplateSection.objects.filter(
+                site_template=site_template
+            ).order_by('group', 'default_order', 'id')
+        except SiteTemplate.DoesNotExist:
+            return TemplateSection.objects.none()
 
 
 # [ASSETS] branding endpoint
@@ -1293,6 +1289,165 @@ class SiteProjectPublicView(generics.RetrieveAPIView):
         ).prefetch_related(
             'pages__sections__fields'
         ).select_related('site_template')
+
+
+# [SEO] Permission class for SEO operations
+class IsProjectOwnerOrStaff(permissions.BasePermission):
+    """
+    Custom permission to only allow project owners or staff to update page SEO.
+    """
+    def has_object_permission(self, request, view, obj):
+        # Staff users can access any page
+        if request.user.is_staff:
+            return True
+        # Project owners can access their pages
+        return obj.project.owner == request.user
+
+
+# [SEO] Page SEO Update View
+class PageSeoUpdateView(generics.UpdateAPIView):
+    """
+    Update SEO fields for a page.
+    Only project owner or staff can update.
+    """
+    queryset = Page.objects.all()
+    serializer_class = PageSeoUpdateSerializer
+    permission_classes = [IsAuthenticated, IsProjectOwnerOrStaff]
+    
+    def get_object(self):
+        """Get page and check permissions"""
+        page = super().get_object()
+        self.check_object_permissions(self.request, page)
+        return page
+
+
+# [CONTENT] Permission class for Section content operations
+class IsSectionProjectOwnerOrStaff(permissions.BasePermission):
+    """
+    Custom permission to only allow project owners or staff to update section content.
+    """
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.is_staff:
+            return True
+
+        page = getattr(obj, "page", None)
+        if not page:
+            return False
+
+        project = getattr(page, "project", None)
+        if not project:
+            return False
+
+        return project.owner_id == user.id
+
+
+# [CONTENT] Section Content Update View
+class SectionContentUpdateView(generics.UpdateAPIView):
+    """
+    Update the content fields of a Section (hero, about, menu, contact, etc.).
+    """
+    queryset = Section.objects.all()
+    serializer_class = SectionContentUpdateSerializer
+    permission_classes = [IsAuthenticated, IsSectionProjectOwnerOrStaff]
+    http_method_names = ["patch", "options", "head"]
+
+    def get_object(self):
+        section = super().get_object()
+        self.check_object_permissions(self.request, section)
+        return section
+
+
+# [ADMIN]
+class AdminSiteProjectListView(generics.ListAPIView):
+    """
+    Read-only list of all site projects for staff users.
+    """
+
+    queryset = SiteProject.objects.select_related("owner", "template", "site_template").all()
+    serializer_class = AdminSiteProjectSerializer
+    permission_classes = [IsStaffUser]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        search = self.request.query_params.get("search")
+        if search:
+            from django.db import models
+            qs = qs.filter(
+                models.Q(name__icontains=search)
+                | models.Q(slug__icontains=search)
+                | models.Q(owner__email__icontains=search)
+            )
+
+        return qs.order_by("-created_at")
+
+
+# [ADMIN]
+class AdminSiteProjectDetailView(generics.RetrieveAPIView):
+    """
+    Read-only detail view for a single site project.
+    """
+
+    queryset = SiteProject.objects.select_related("owner", "template", "site_template").all()
+    serializer_class = AdminSiteProjectSerializer
+    permission_classes = [IsStaffUser]
+
+
+# [GARAGE-FORM] Quote Request API View
+class QuoteRequestCreateView(generics.CreateAPIView):
+    """
+    Public API endpoint to create quote requests for garage services.
+    No authentication required - this is for public website forms.
+    """
+    serializer_class = QuoteRequestSerializer
+    permission_classes = [AllowAny]
+    
+    def perform_create(self, serializer):
+        """
+        Associate the quote request with the correct SiteProject based on slug.
+        """
+        site_slug = self.kwargs.get('site_slug')
+        try:
+            site_project = SiteProject.objects.get(slug=site_slug, is_active=True)
+        except SiteProject.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound(f"Site '{site_slug}' not found or inactive.")
+            
+        serializer.save(site_project=site_project)
+
+
+# [ADMIN] Sites Explorer Views
+class AdminSitesListView(generics.ListAPIView):
+    """
+    Staff-only endpoint to list all SiteProjects for the admin Sites Explorer.
+    Returns basic site info with owner and template details.
+    """
+    serializer_class = AdminSitesListSerializer
+    permission_classes = [IsStaffUser]
+    
+    def get_queryset(self):
+        return SiteProject.objects.select_related('owner', 'site_template').order_by('-created_at')
+
+
+class AdminSitePublicView(generics.RetrieveAPIView):
+    """
+    Staff-only endpoint to view a specific site's public data.
+    Returns the same JSON structure as the public site API for admin inspection.
+    """
+    serializer_class = SiteProjectPublicSerializer
+    permission_classes = [IsStaffUser]
+    lookup_field = 'slug'
+    
+    def get_queryset(self):
+        return SiteProject.objects.select_related('owner', 'site_template').prefetch_related(
+            Prefetch('pages', queryset=Page.objects.select_related().prefetch_related(
+                Prefetch('sections', queryset=Section.objects.select_related().prefetch_related('fields'))
+            ))
+        )
 
 
 # CSRF Token View

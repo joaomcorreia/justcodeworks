@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sites 403 Fix - Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Admin Sites 403 Error Fix - Test Page</h1>
+    
+    <div class="info test-result">
+        <strong>Test Status:</strong> This page tests the original 403 error on the admin sites endpoint.
+    </div>
+
+    <div>
+        <button onclick="testBackendConnectivity()">1. Test Backend Connectivity</button>
+        <button onclick="testAdminSitesAPI()">2. Test Admin Sites API (Anonymous)</button>
+        <button onclick="testCSRFToken()">3. Test CSRF Token</button>
+        <button onclick="loginAsStaff()">4. Login as Staff User</button>
+        <button onclick="testAdminSitesAuthenticated()">5. Test Admin Sites API (Authenticated)</button>
+        <button onclick="navigateToAdminPage()">6. Go to Admin Sites Page</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        let csrfToken = null;
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            resultsDiv.appendChild(div);
+            console.log(message);
+        }
+
+        async function testBackendConnectivity() {
+            try {
+                const response = await fetch('http://localhost:8000/api/admin/sites/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.status === 403) {
+                    addResult(`✓ Backend is running and properly rejecting anonymous requests (HTTP ${response.status})`, 'success');
+                } else {
+                    addResult(`⚠️ Unexpected response from backend: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`✗ Backend connectivity failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAdminSitesAPI() {
+            try {
+                const response = await fetch('http://localhost:8000/api/admin/sites/', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                addResult(`Anonymous API call result: HTTP ${response.status} (Expected: 403)`, 
+                    response.status === 403 ? 'success' : 'error');
+                
+            } catch (error) {
+                addResult(`✗ Admin Sites API test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCSRFToken() {
+            try {
+                const response = await fetch('http://localhost:8000/api/csrf/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    csrfToken = data.csrfToken;
+                    addResult(`✓ CSRF token obtained: ${csrfToken.substring(0, 20)}...`, 'success');
+                } else {
+                    addResult(`✗ Failed to get CSRF token: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`✗ CSRF token test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function loginAsStaff() {
+            if (!csrfToken) {
+                addResult('⚠️ Please get CSRF token first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/auth/login/', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        username: 'stafftest',
+                        password: 'staffpass123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✓ Logged in as staff user: ${data.user?.username} (staff: ${data.user?.isStaff})`, 'success');
+                } else {
+                    const errorData = await response.text();
+                    addResult(`✗ Login failed: HTTP ${response.status} - ${errorData}`, 'error');
+                }
+            } catch (error) {
+                addResult(`✗ Login test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAdminSitesAuthenticated() {
+            try {
+                const response = await fetch('http://localhost:8000/api/admin/sites/', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ SUCCESS! Admin Sites API returned ${data.length} sites (HTTP ${response.status})`, 'success');
+                    addResult(`<pre>Sample data: ${JSON.stringify(data.slice(0, 2), null, 2)}</pre>`, 'info');
+                } else {
+                    addResult(`✗ Authenticated API call failed: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`✗ Authenticated API test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function navigateToAdminPage() {
+            addResult('🚀 Navigating to the admin sites page...', 'info');
+            window.open('http://localhost:3001/en/admin/sites', '_blank');
+        }
+
+        // Auto-run initial tests
+        setTimeout(() => {
+            addResult('🔄 Starting automated tests...', 'info');
+            testBackendConnectivity();
+        }, 1000);
+    </script>
+</body>
+</html>

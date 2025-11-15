@@ -7,6 +7,7 @@ export type FieldJson = {
 };
 
 export type SectionJson = {
+  id: number | string;  // Database ID for API calls
   identifier: string;   // e.g. "hero-banner", "about-us", "contact-info"
   internal_name: string;
   order: number;
@@ -31,6 +32,24 @@ export type PageJson = {
   locale: string;
   sections: SectionJson[];
   seo: SeoJson;
+};
+
+// [SEO]
+export type PageSeoUpdatePayload = {
+  meta_title?: string;
+  meta_description?: string;
+  meta_slug?: string;
+  indexable?: boolean;
+};
+
+// [CONTENT]
+export type FieldUpdatePayload = {
+  key: string;
+  value: string;
+};
+
+export type SectionContentUpdatePayload = {
+  fields: FieldUpdatePayload[];
 };
 
 export type SiteProjectPublic = {

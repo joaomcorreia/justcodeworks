@@ -34,9 +34,10 @@ const baseEn = {
     templates: "Templates",
   },
   websites: {
-    title: "Websites that work as hard as you do.",
+    title: "Websites that work as hard as you do",
     subtitle:
       "Choose the type of website that fits your business today – and upgrade later as you grow.",
+    badge: "Website Builder",
     onePage: {
       badge: "One-page websites",
       title: "Perfect for simple local businesses",

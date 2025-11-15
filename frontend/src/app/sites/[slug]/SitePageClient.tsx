@@ -3,8 +3,51 @@
 import { useEffect, useState } from 'react';
 import type { SiteProjectPublic } from '@/lib/types/sitePublic';
 import { RestaurantModernPage } from '@/components/templates/restaurant-modern/Page';
+import JcwMainSite from '@/components/sites/templates/JcwMainSite';
+import AutoGarageModernSite from '@/components/sites/templates/AutoGarageModernSite'; // [TEMPLAB]
+import JsonDebugView from '@/components/sites/JsonDebugView';
+import TemplateRenderer from '@/templates/core/TemplateRenderer'; // [TEMPLATE-LAB]
 
 const API_BASE = "http://127.0.0.1:8000/api";
+
+// [TEMPLATE-LAB] Enhanced template registry function
+function renderSiteTemplate(project: SiteProjectPublic) {
+  const key = project.site_template_key ?? "";
+  
+  // Check if site has sections data for new Template Lab system
+  const hasValidSections = project.pages?.some(page => 
+    page.sections && page.sections.length > 0
+  );
+  
+  // If site has sections, use new TemplateRenderer system
+  if (hasValidSections) {
+    // Get all sections from all pages, sorted by page order then section order
+    const allSections = project.pages
+      ?.flatMap(page => page.sections || [])
+      .sort((a, b) => a.order - b.order) || [];
+    
+    return (
+      <div className="min-h-screen">
+        <TemplateRenderer 
+          sections={allSections} 
+          mode="public"
+        />
+      </div>
+    );
+  }
+  
+  // Fallback to legacy template system
+  switch (key) {
+    case "restaurant-modern":
+      return <RestaurantModernPage project={project} mode="public" />;
+    case "jcw-main":
+      return <JcwMainSite project={project} />;
+    case "auto-garage-modern": // [TEMPLAB] Auto Garage Template
+      return <AutoGarageModernSite project={project} />;
+    default:
+      return <JsonDebugView project={project} />;
+  }
+}
 
 // Custom hook to fetch public site data
 function useSitePublic(slug: string) {
@@ -88,23 +131,10 @@ export default function SitePageClient({ slug }: { slug: string }) {
     return <ErrorDisplay message={error || 'Site not found'} slug={slug} />;
   }
 
-  // Route to appropriate template renderer
-  if (siteData.site_template_key === 'restaurant-modern') {
-    return <RestaurantModernPage project={siteData} mode="public" />;
-  }
-
-  // Template not supported yet - show JSON for debugging
+  // Use template registry to render appropriate component
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-slate-900 mb-4">{siteData.name}</h1>
-          <p className="text-slate-600 mb-4">Template: {siteData.site_template_key}</p>
-          <pre className="bg-slate-900 text-green-400 p-4 rounded text-sm overflow-auto">
-            {JSON.stringify(siteData, null, 2)}
-          </pre>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      {renderSiteTemplate(siteData)}
     </div>
   );
 }

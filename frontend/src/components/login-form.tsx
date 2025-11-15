@@ -34,12 +34,12 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       // [AUTH] login handler - calls backend session login
       const userData = await login(email, password);
       
-      // [AUTH] staff/user redirect logic
+      // [ADMIN] staff/user redirect logic
       const isStaff = userData?.isStaff || userData?.isSuperuser;
       
       if (isStaff) {
-        // [AUTH] staff redirect - go to Django admin on backend
-        window.location.href = "http://127.0.0.1:8000/admin/";
+        // [ADMIN] staff redirect - go to Next.js admin dashboard with locale
+        router.push(`/${currentLocale}/admin`);
       } else {
         // [AUTH] user redirect - dashboard needs locale
         router.push(`/${currentLocale}/dashboard`);

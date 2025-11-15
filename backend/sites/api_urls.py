@@ -15,7 +15,10 @@ from .views import (
     SiteProjectSetTemplateView,
     AdminSiteTemplateListView,
     AdminSiteTemplateDetailView,
-    AdminTemplateSectionsView,
+    AdminSiteTemplateDetailByKeyView,
+    AdminSiteProjectListView,
+    AdminSiteProjectDetailView,
+    AdminSiteTemplateSectionsView,
     AdminTemplateBrandingView,
     AdminTemplateLabSiteTemplateListView,
     AdminTemplateLabInternalTemplateListView,
@@ -25,6 +28,8 @@ from .views import (
     TenantShowcaseView,
     tenant_showcase_html_view,
     SiteProjectPublicView,
+    PageSeoUpdateView,
+    SectionContentUpdateView,
     generate_template_skeleton,
     clone_project,
     switch_current_project,
@@ -32,6 +37,9 @@ from .views import (
     logout_view,
     auth_me_view,
     csrf_token_view,
+    QuoteRequestCreateView,
+    AdminSitesListView,
+    AdminSitePublicView,
 )
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
@@ -47,6 +55,10 @@ router.register(r"navigation", NavigationItemViewSet, basename="navigation")
 
 urlpatterns = [
     path("pages/my/", PageListForUserView.as_view(), name="page-list-for-user"),
+    # [SEO] Page SEO update endpoint
+    path("pages/<int:pk>/seo/", PageSeoUpdateView.as_view(), name="page-seo-update"),
+    # [CONTENT] Section content update endpoint
+    path("sections/<int:pk>/content/", SectionContentUpdateView.as_view(), name="section-content-update"),
     path("dashboard/template/", TenantDashboardTemplateView.as_view(), name="tenant-dashboard-template"),
     # CSRF token endpoint
     path("csrf/", csrf_token_view, name="csrf-token"),
@@ -60,10 +72,17 @@ urlpatterns = [
     path("admin/templates/", AdminSiteTemplateListView.as_view(), name="admin-site-template-list"),
     # [TEMPLAB] template detail endpoint
     path("admin/templates/<int:pk>/", AdminSiteTemplateDetailView.as_view(), name="admin-site-template-detail"),
-    # [TEMPLAB] template sections endpoint  
-    path("admin/templates/<int:template_id>/sections/", AdminTemplateSectionsView.as_view(), name="admin-template-sections"),
+    path("admin/templates/key/<str:key>/", AdminSiteTemplateDetailByKeyView.as_view(), name="admin-site-template-detail-by-key"),
+    # [TEMPLAB] site template sections endpoint  
+    path("admin/site-templates/<str:key>/sections/", AdminSiteTemplateSectionsView.as_view(), name="admin-site-template-sections"),
     # [ASSETS] branding endpoint
     path("admin/templates/<int:pk>/branding/", AdminTemplateBrandingView.as_view(), name="admin-template-branding"),
+    # [ADMIN] Site Projects admin endpoints
+    path("admin/site-projects/", AdminSiteProjectListView.as_view(), name="admin-site-projects-list"),
+    path("admin/site-projects/<uuid:pk>/", AdminSiteProjectDetailView.as_view(), name="admin-site-projects-detail"),
+    # [ADMIN-SITES] Sites Explorer admin endpoints
+    path("admin/sites/", AdminSitesListView.as_view(), name="admin-sites-list"),
+    path("admin/sites/<slug:slug>/public/", AdminSitePublicView.as_view(), name="admin-site-public"),
     path("onboarding/one-page-website/", OnePageWebsiteOnboardingView.as_view(), name="onepage-onboarding"),
     
     # Template Builder Admin APIs
@@ -88,6 +107,9 @@ urlpatterns = [
     
     # [RMOD] Public API for tenant sites
     path("sites/<slug>/public/", SiteProjectPublicView.as_view(), name="site-public-api"),
+    
+    # [GARAGE-FORM] Quote request submission endpoint
+    path("sites/<slug:site_slug>/quote-requests/", QuoteRequestCreateView.as_view(), name="quote-request-create"),
     
     path("", include(router.urls)),
 ]

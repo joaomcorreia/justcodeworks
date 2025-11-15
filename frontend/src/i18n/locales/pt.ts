@@ -37,9 +37,10 @@ const ptTranslation = {
     templates: "Modelos",
   },
   websites: {
-    title: "Websites que trabalham tanto quanto si.",
+    title: "Websites que trabalham tanto quanto você",
     subtitle:
       "Escolha o tipo de website que combina com o seu negócio hoje – e faça upgrade depois conforme cresce.",
+    badge: "Construtor de Websites",
     onePage: {
       badge: "Websites de página única",
       title: "Perfeito para negócios locais simples",

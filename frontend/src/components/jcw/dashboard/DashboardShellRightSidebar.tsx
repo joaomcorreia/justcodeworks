@@ -31,9 +31,9 @@ export function DashboardShellRightSidebar({ user, children }: DashboardShellRig
     { href: `/${locale}/dashboard/bug-report`, label: "Bug report" },
   ];
 
-  // Add Django Preview for staff users only
+  // [ADMIN] Add Admin Dashboard for staff users only
   const NAV_ITEMS = user?.isStaff 
-    ? [...baseNavItems, { href: `/${locale}/dashboard/django-preview`, label: "Django Preview" }]
+    ? [...baseNavItems, { href: `/${locale}/admin`, label: "Admin Dashboard" }]
     : baseNavItems;
 
   const initials =

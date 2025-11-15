@@ -1,12 +1,18 @@
 import { getCurrentUser } from "@/lib/server-auth";
+import Link from "next/link";
 
-export default async function AdminOverviewPage() {
+export default async function AdminOverviewPage({
+  params,
+}: {
+  params: { locale: string };
+}) {
   const user = await getCurrentUser();
+  const { locale } = params;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Page Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           📊 Admin Dashboard
         </h1>
@@ -16,7 +22,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Quick Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -64,6 +70,74 @@ export default async function AdminOverviewPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* [ADMIN] Navigation Links */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Sections</h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Link
+            href={`/${locale}/admin/users`}
+            className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+          >
+            <div className="flex items-center mb-2">
+              <span className="text-lg mr-2">👥</span>
+              <span className="font-medium">Users</span>
+            </div>
+            <p className="text-sm text-gray-600">Manage user accounts and permissions</p>
+          </Link>
+
+          <Link
+            href={`/${locale}/admin/templates`}
+            className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+          >
+            <div className="flex items-center mb-2">
+              <span className="text-lg mr-2">🎨</span>
+              <span className="font-medium">Templates</span>
+            </div>
+            <p className="text-sm text-gray-600">Website and email template library</p>
+          </Link>
+
+          <Link
+            href={`/${locale}/admin/email-templates`}
+            className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+          >
+            <div className="flex items-center mb-2">
+              <span className="text-lg mr-2">📧</span>
+              <span className="font-medium">Email Templates</span>
+            </div>
+            <p className="text-sm text-gray-600">Email designs and layouts</p>
+          </Link>
+
+          <Link
+            href={`/${locale}/admin/settings`}
+            className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+          >
+            <div className="flex items-center mb-2">
+              <span className="text-lg mr-2">⚙️</span>
+              <span className="font-medium">Settings</span>
+            </div>
+            <p className="text-sm text-gray-600">System configuration and preferences</p>
+          </Link>
+        </div>
+      </div>
+
+      {/* [ADMIN] Django Admin Link */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Advanced Administration</h3>
+        <p className="text-gray-600 mb-4">
+          For low-level data management and advanced configuration, access the Django admin interface.
+        </p>
+        <a
+          href="http://127.0.0.1:8000/admin/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <span className="mr-2">🔧</span>
+          Open Django Admin
+          <span className="ml-2">↗</span>
+        </a>
       </div>
 
       {/* Recent Activity */}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Sites API Test</title>
+</head>
+<body>
+    <h1>Admin Sites API Test</h1>
+    <button id="testApi">Test API</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testApi').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                console.log('[DEBUG] Starting API test');
+                
+                // Test auth endpoint first
+                const authResponse = await fetch("http://localhost:8000/api/auth/me/", {
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                
+                console.log('[DEBUG] Auth response status:', authResponse.status);
+                if (authResponse.ok) {
+                    const authData = await authResponse.json();
+                    console.log('[DEBUG] Auth data:', authData);
+                }
+                
+                // Test admin sites endpoint
+                const sitesResponse = await fetch("http://localhost:8000/api/admin/sites/", {
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                
+                console.log('[DEBUG] Sites response status:', sitesResponse.status);
+                
+                if (sitesResponse.ok) {
+                    const sitesData = await sitesResponse.json();
+                    console.log('[DEBUG] Sites data:', sitesData);
+                    resultDiv.innerHTML = `<h3>Success!</h3><pre>${JSON.stringify(sitesData, null, 2)}</pre>`;
+                } else {
+                    const errorText = await sitesResponse.text();
+                    console.error('[DEBUG] Sites error:', errorText);
+                    resultDiv.innerHTML = `<h3>Error: ${sitesResponse.status}</h3><pre>${errorText}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('[DEBUG] Fetch error:', error);
+                resultDiv.innerHTML = `<h3>Network Error</h3><pre>${error.message}</pre>`;
+            }
+        });
+    </script>
+</body>
+</html>

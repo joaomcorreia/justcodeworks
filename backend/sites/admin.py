@@ -7,6 +7,7 @@ from django.utils.html import format_html
 from .models import (
     Template,
     SiteTemplate,
+    TemplateSection,
     SiteProject,
     Page,
     Section,
@@ -18,6 +19,7 @@ from .models import (
     HeroSlide,
     DashboardTemplate,
     DashboardBlock,
+    QuoteRequest,
 )
 
 
@@ -143,6 +145,27 @@ class TemplateAdmin(admin.ModelAdmin):
     list_filter = ("category", "complexity", "has_store", "has_blog", "has_booking")
     search_fields = ("name", "slug", "short_description", "recommended_for")
     prepopulated_fields = {"slug": ("name",)}
+
+
+# [TEMPLAB] Template Section admin for managing reusable section definitions
+@admin.register(TemplateSection)
+class TemplateSectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "site_template",
+        "internal_name",
+        "code",
+        "section_type",
+        "group",
+        "variant_index", 
+        "default_order",
+        "min_plan",
+        "is_interactive",
+        "is_active",
+    )
+    list_filter = ("site_template", "section_type", "min_plan", "group", "is_interactive", "is_active")
+    search_fields = ("internal_name", "code", "group", "site_template__key")
+    list_editable = ("default_order", "is_active", "min_plan")
+    ordering = ["site_template", "section_type", "group", "default_order", "id"]
 
 
 class PageInline(admin.TabularInline):
@@ -700,6 +723,57 @@ class DashboardBlockAdmin(admin.ModelAdmin):
     search_fields = ("title", "key", "template__name")
     list_editable = ("order", "is_active")
     ordering = ("template", "region", "order")
+
+
+# [GARAGE-FORM] Quote Request Admin
+@admin.register(QuoteRequest)
+class QuoteRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        'site_project', 
+        'name', 
+        'service_type', 
+        'email',
+        'phone',
+        'car_make_model',
+        'created_at', 
+        'locale'
+    )
+    list_filter = (
+        'site_project', 
+        'service_type', 
+        'locale', 
+        'consent_marketing',
+        'created_at'
+    )
+    search_fields = (
+        'name', 
+        'email', 
+        'phone', 
+        'license_plate',
+        'car_make_model',
+        'message'
+    )
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Customer Information', {
+            'fields': ('name', 'email', 'phone')
+        }),
+        ('Vehicle Information', {
+            'fields': ('license_plate', 'car_make_model')
+        }),
+        ('Service Request', {
+            'fields': ('service_type', 'message')
+        }),
+        ('Metadata', {
+            'fields': ('site_project', 'source_page_slug', 'locale', 'consent_marketing')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
 
 
 # Custom admin menu configuration
