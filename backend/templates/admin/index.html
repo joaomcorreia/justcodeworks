@@ -1,0 +1,61 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block content %}
+{{ block.super }}
+
+{% if custom_nav_items %}
+<div class="module" style="margin-top: 20px;">
+    <table>
+        <caption>
+            <a href="#" class="section" title="Custom Admin Tools">🛠️ Custom Admin Tools</a>
+        </caption>
+        
+        {% for item in custom_nav_items %}
+        <tr class="model-item">
+            <th scope="row">
+                <a href="{{ item.url }}" style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">{{ item.icon }}</span>
+                    {{ item.title }}
+                </a>
+            </th>
+            <td style="padding-left: 15px; color: #666; font-style: italic;">
+                {{ item.description }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+
+<style>
+.module {
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #ddd;
+}
+
+.module caption {
+    background: #0066cc;
+    color: white;
+    padding: 10px 15px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.module caption a {
+    color: white !important;
+    text-decoration: none;
+}
+
+.model-item th a {
+    color: #0066cc !important;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.model-item th a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}

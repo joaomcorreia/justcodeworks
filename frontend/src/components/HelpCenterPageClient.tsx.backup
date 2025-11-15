@@ -1,0 +1,85 @@
+'use client';
+
+import LanguageSelector from '@/components/LanguageSelector';
+import Footer from '@/components/Footer';
+import { useProjectInfo } from '@/hooks/use-project-info';
+
+export default function HelpCenterPageClient({ dict }: { dict: any }) {
+  const { projectInfo, loading } = useProjectInfo();
+  
+  return (
+    <div className="p-8">
+      <h1 className="text-4xl font-bold mb-4">{dict.pages.helpCenter.title}</h1>
+      <p className="text-lg mb-8">{dict.pages.helpCenter.subtitle}</p>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-lg border">
+          <h3 className="text-lg font-semibold mb-4">📄 {dict.pages.home.pageInfo}</h3>
+          <div className="space-y-2 text-sm">
+            <p><strong>{dict.pages.common.title}:</strong> {dict.pages.helpCenter.title}</p>
+            <p><strong>{dict.pages.common.slug}:</strong> help-center</p>
+            <p><strong>{dict.pages.common.path}:</strong> /help-center</p>
+            <p><strong>{dict.pages.common.language}:</strong> 🇺🇸 English</p>
+            <p><strong>{dict.pages.common.order}:</strong> 4</p>
+            <p><strong>{dict.pages.common.project}:</strong> {loading ? dict.pages.common.loading : projectInfo?.name}</p>
+            <p><strong>{dict.pages.common.template}:</strong> {loading ? dict.pages.common.loading : projectInfo?.template}</p>
+            <p className="text-green-600 font-medium">✅ {dict.pages.home.published}</p>
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-lg border">
+          <h3 className="text-lg font-semibold mb-4">🌍 {dict.pages.home.languageTesting}</h3>
+          <LanguageSelector />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-blue-50 dark:bg-blue-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">📚</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.helpCenter.features.documentation}</h3>
+          <p>{dict.pages.helpCenter.features.documentationDesc}</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>• {dict.pages.helpCenter.features.categories.getting}</li>
+            <li>• {dict.pages.helpCenter.features.categories.api}</li>
+            <li>• {dict.pages.helpCenter.features.categories.practices}</li>
+          </ul>
+        </div>
+
+        <div className="bg-green-50 dark:bg-green-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">💬</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.helpCenter.features.support}</h3>
+          <p>{dict.pages.helpCenter.features.supportDesc}</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>• {dict.pages.helpCenter.features.categories.live}</li>
+            <li>• {dict.pages.helpCenter.features.categories.email}</li>
+            <li>• {dict.pages.helpCenter.features.categories.phone}</li>
+          </ul>
+        </div>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">❓</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.helpCenter.features.faq}</h3>
+          <p>{dict.pages.helpCenter.features.faqDesc}</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>• {dict.pages.helpCenter.features.categories.billing}</li>
+            <li>• {dict.pages.helpCenter.features.categories.technical}</li>
+            <li>• {dict.pages.helpCenter.features.categories.account}</li>
+          </ul>
+        </div>
+
+        <div className="bg-purple-50 dark:bg-purple-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">🎓</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.helpCenter.features.tutorials}</h3>
+          <p>{dict.pages.helpCenter.features.tutorialsDesc}</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>• {dict.pages.helpCenter.features.categories.video}</li>
+            <li>• {dict.pages.helpCenter.features.categories.written}</li>
+            <li>• {dict.pages.helpCenter.features.categories.interactive}</li>
+          </ul>
+        </div>
+      </div>
+      
+      <Footer dict={dict} />
+    </div>
+  );
+}

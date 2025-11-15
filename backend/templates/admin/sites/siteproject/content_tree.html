@@ -1,0 +1,95 @@
+{% extends "admin/change_form.html" %}
+{% load admin_urls %}
+
+{% block content %}
+<div class="module aligned">
+    <h1>Content Tree: {{ project.name }}</h1>
+    
+    <div class="form-row">
+        <p><strong>Project:</strong> {{ project.name }} ({{ project.slug }})</p>
+        <p><strong>Owner:</strong> {{ project.owner|default:"No owner (Master Template)" }}</p>
+        <p><strong>Master Template:</strong> {{ project.is_master_template|yesno:"Yes,No" }}</p>
+    </div>
+
+    <div class="form-row">
+        <a href="{% url 'admin:sites_siteproject_change' project.id %}" class="button">« Back to Project</a>
+    </div>
+
+    <br>
+
+    {% for page in pages %}
+    <fieldset class="module aligned">
+        <h2>📄 {{ page.title }} ({{ page.locale|upper }}) 
+            <small>- Order: {{ page.order }}</small>
+            <a href="{% url 'admin:sites_page_change' page.id %}" class="button" style="font-size: 11px; margin-left: 10px;">Edit Page</a>
+        </h2>
+        
+        <div class="form-row">
+            <strong>Slug:</strong> {{ page.slug }} | 
+            <strong>Path:</strong> {{ page.path }} | 
+            <strong>Published:</strong> {{ page.is_published|yesno:"Yes,No" }}
+        </div>
+
+        {% for section in page.sections.all %}
+        <div style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 15px; margin-top: 10px;">
+            <h3>📦 {{ section.identifier }}
+                {% if section.internal_name %}({{ section.internal_name }}){% endif %}
+                <small>- Order: {{ section.order }}</small>
+                <a href="{% url 'admin:sites_section_change' section.id %}" class="button" style="font-size: 10px; margin-left: 5px;">Edit</a>
+            </h3>
+            
+            {% if section.fields.all %}
+            <table style="margin-left: 10px; border-collapse: collapse; width: 100%;">
+                <thead>
+                    <tr style="background-color: #f0f0f0;">
+                        <th style="padding: 5px; border: 1px solid #ddd; width: 120px;">Field Key</th>
+                        <th style="padding: 5px; border: 1px solid #ddd; width: 100px;">Label</th>
+                        <th style="padding: 5px; border: 1px solid #ddd;">Value</th>
+                        <th style="padding: 5px; border: 1px solid #ddd; width: 60px;">Order</th>
+                        <th style="padding: 5px; border: 1px solid #ddd; width: 60px;">Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for field in section.fields.all %}
+                    <tr>
+                        <td style="padding: 5px; border: 1px solid #ddd; font-family: monospace;">{{ field.key }}</td>
+                        <td style="padding: 5px; border: 1px solid #ddd;">{{ field.label|default:"-" }}</td>
+                        <td style="padding: 5px; border: 1px solid #ddd; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                            {% if field.value|length > 100 %}
+                                {{ field.value|truncatechars:100 }}
+                            {% else %}
+                                {{ field.value|default:"-" }}
+                            {% endif %}
+                        </td>
+                        <td style="padding: 5px; border: 1px solid #ddd; text-align: center;">{{ field.order }}</td>
+                        <td style="padding: 5px; border: 1px solid #ddd; text-align: center;">
+                            <a href="{% url 'admin:sites_field_change' field.id %}" class="button" style="font-size: 9px;">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="margin-left: 10px; color: #666; font-style: italic;">No fields in this section</p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p style="margin-left: 20px; color: #666; font-style: italic;">No sections in this page</p>
+        {% endfor %}
+
+        <div style="margin-top: 10px; margin-left: 20px;">
+            <a href="{% url 'admin:sites_section_add' %}?page={{ page.id }}" class="button">+ Add Section</a>
+        </div>
+    </fieldset>
+    {% empty %}
+    <p><em>No pages found for this project.</em></p>
+    <a href="{% url 'admin:sites_page_add' %}?project={{ project.id }}" class="button">+ Add First Page</a>
+    {% endfor %}
+
+    <br>
+    <div class="form-row">
+        <a href="{% url 'admin:sites_siteproject_change' project.id %}" class="button default">« Back to Project</a>
+        <a href="{% url 'admin:sites_page_add' %}?project={{ project.id }}" class="button">+ Add New Page</a>
+    </div>
+</div>
+{% endblock %}

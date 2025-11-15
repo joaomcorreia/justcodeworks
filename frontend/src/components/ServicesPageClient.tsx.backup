@@ -1,0 +1,65 @@
+'use client';
+
+import LanguageSelector from '@/components/LanguageSelector';
+import Footer from '@/components/Footer';
+import { useProjectInfo } from '@/hooks/use-project-info';
+
+export default function ServicesPageClient({ dict }: { dict: any }) {
+  const { projectInfo, loading } = useProjectInfo();
+  
+  return (
+    <div className="p-8">
+      <h1 className="text-4xl font-bold mb-4">{dict.pages.services.title}</h1>
+      <p className="text-lg mb-8">{dict.pages.services.subtitle}</p>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-lg border">
+          <h3 className="text-lg font-semibold mb-4">📄 {dict.pages.home.pageInfo}</h3>
+          <div className="space-y-2 text-sm">
+            <p><strong>{dict.pages.common.title}:</strong> {dict.pages.services.title}</p>
+            <p><strong>{dict.pages.common.slug}:</strong> services</p>
+            <p><strong>{dict.pages.common.path}:</strong> /services</p>
+            <p><strong>{dict.pages.common.language}:</strong> 🇺🇸 English</p>
+            <p><strong>{dict.pages.common.order}:</strong> 3</p>
+            <p><strong>{dict.pages.common.project}:</strong> {loading ? dict.pages.common.loading : projectInfo?.name}</p>
+            <p><strong>{dict.pages.common.template}:</strong> {loading ? dict.pages.common.loading : projectInfo?.template}</p>
+            <p className="text-green-600 font-medium">✅ {dict.pages.home.published}</p>
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-lg border">
+          <h3 className="text-lg font-semibold mb-4">🌍 {dict.pages.home.languageTesting}</h3>
+          <LanguageSelector />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-orange-50 dark:bg-orange-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">💻</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.services.features.webDev}</h3>
+          <p>{dict.pages.services.features.webDevDesc}</p>
+        </div>
+
+        <div className="bg-indigo-50 dark:bg-indigo-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">📱</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.services.features.mobileApps}</h3>
+          <p>{dict.pages.services.features.mobileAppsDesc}</p>
+        </div>
+
+        <div className="bg-cyan-50 dark:bg-cyan-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">☁️</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.services.features.cloud}</h3>
+          <p>{dict.pages.services.features.cloudDesc}</p>
+        </div>
+
+        <div className="bg-rose-50 dark:bg-rose-900 rounded-xl p-6">
+          <div className="text-3xl mb-4">🔧</div>
+          <h3 className="text-xl font-semibold mb-2">{dict.pages.services.features.maintenance}</h3>
+          <p>{dict.pages.services.features.maintenanceDesc}</p>
+        </div>
+      </div>
+      
+      <Footer dict={dict} />
+    </div>
+  );
+}
