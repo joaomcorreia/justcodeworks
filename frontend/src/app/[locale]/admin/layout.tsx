@@ -17,6 +17,7 @@ const navItems = [
   { label: "Templates", href: "/admin/templates", icon: "🎨" },
   { label: "Email Templates", href: "/admin/email-templates", icon: "📧" },
   { label: "Users", href: "/admin/users", icon: "👥" },
+  { label: "Finance", href: "/admin/finance", icon: "💰" },
   { label: "Settings", href: "/admin/settings", icon: "⚙️" },
 ];
 
