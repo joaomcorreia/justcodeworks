@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import type { SiteProjectPublic } from '@/lib/types/sitePublic';
-import { RestaurantModernPage } from '@/components/templates/restaurant-modern/Page';
-import JcwMainSite from '@/components/sites/templates/JcwMainSite';
-import AutoGarageModernSite from '@/components/sites/templates/AutoGarageModernSite'; // [TEMPLAB]
+import RestaurantModernRenderer from './render-restaurant-modern'; // [TEMPLAB] Template-specific renderers
+import AutoGarageModernRenderer from './render-auto-garage-modern';
+import TireCenterPremiumRenderer from './render-tire-center-premium';
+import DefaultRenderer from './render-default';
 import JsonDebugView from '@/components/sites/JsonDebugView';
-import TemplateRenderer from '@/templates/core/TemplateRenderer'; // [TEMPLATE-LAB]
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
-// [TEMPLATE-LAB] Enhanced template registry function
+// NOTE: Tenant sites must use theme CSS variables via .site-theme-root and jcw-* classes.
+// Do not hard-code hex colors here. Do not change admin/dashboard styling from this file.
+
+// [TEMPLAB] Template-specific renderer routing function
 function renderSiteTemplate(project: SiteProjectPublic) {
   const key = project.site_template_key ?? "";
   
@@ -19,34 +22,42 @@ function renderSiteTemplate(project: SiteProjectPublic) {
     page.sections && page.sections.length > 0
   );
   
-  // If site has sections, use new TemplateRenderer system
-  if (hasValidSections) {
-    // Get all sections from all pages, sorted by page order then section order
-    const allSections = project.pages
-      ?.flatMap(page => page.sections || [])
-      .sort((a, b) => a.order - b.order) || [];
+  // Wrap all tenant site content with theme CSS variables
+  const content = (() => {
+    // If site has sections, use template-specific renderers
+    if (hasValidSections) {
+      switch (key) {
+        case "restaurant-modern":
+          return <RestaurantModernRenderer site={project} />;
+        case "auto-garage-modern":
+          return <AutoGarageModernRenderer site={project} />;
+        case "tire-center-premium":
+          return <TireCenterPremiumRenderer site={project} />;
+        default:
+          return <DefaultRenderer site={project} />;
+      }
+    }
     
-    return (
-      <div className="min-h-screen">
-        <TemplateRenderer 
-          sections={allSections} 
-          mode="public"
-        />
-      </div>
-    );
-  }
-  
-  // Fallback to legacy template system
-  switch (key) {
-    case "restaurant-modern":
-      return <RestaurantModernPage project={project} mode="public" />;
-    case "jcw-main":
-      return <JcwMainSite project={project} />;
-    case "auto-garage-modern": // [TEMPLAB] Auto Garage Template
-      return <AutoGarageModernSite project={project} />;
-    default:
-      return <JsonDebugView project={project} />;
-  }
+    // Fallback for sites without sections data
+    return <JsonDebugView project={project} />;
+  })();
+
+  // Wrap with theme variables container
+  return (
+    <div
+      className="site-theme-root"
+      style={{
+        // Theme CSS variables driven by backend SiteProject.theme
+        '--jcw-primary': project.theme?.primary_color || '#1D4ED8',
+        '--jcw-secondary': project.theme?.secondary_color || '#6366F1', 
+        '--jcw-accent': project.theme?.accent_color || '#F97316',
+        '--jcw-bg': project.theme?.background_color || '#0B1120',
+        '--jcw-text': project.theme?.text_color || '#F9FAFB',
+      } as React.CSSProperties}
+    >
+      {content}
+    </div>
+  );
 }
 
 // Custom hook to fetch public site data

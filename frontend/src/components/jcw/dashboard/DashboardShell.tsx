@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context"; // [AUTH]
 import { getLocaleFromPathname } from "@/lib/locale"; // [LOCALE]
@@ -18,6 +18,7 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
   const locale = getLocaleFromPathname(pathname, "en"); // [LOCALE]
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout } = useAuth(); // [AUTH]
+  const router = useRouter();
   const { projectInfo } = useProjectInfo();
   
   // Use business name from project info, fallback to default
@@ -72,7 +73,10 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
           <div className="font-medium truncate mb-3">{user.email}</div>
           {/* [AUTH] logout button */}
           <button
-            onClick={logout}
+            onClick={async () => {
+              await logout();
+              router.push('/');
+            }}
             className="w-full text-left text-xs px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors"
             style={{ color: '#dc2626 !important' }}
           >
@@ -161,9 +165,10 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
               <div className="font-medium truncate mb-3">{user.email}</div>
               {/* [AUTH] logout button */}
               <button
-                onClick={() => {
+                onClick={async () => {
                   setMobileMenuOpen(false);
-                  logout();
+                  await logout();
+                  router.push('/');
                 }}
                 className="w-full text-left text-xs px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors"
                 style={{ color: '#dc2626 !important' }}

@@ -18,7 +18,7 @@ export type SectionJson = {
 export type SeoJson = {
   meta_title: string;
   meta_description: string;
-  slug: string;
+  meta_slug: string;
   indexable: boolean;
 };
 
@@ -52,10 +52,21 @@ export type SectionContentUpdatePayload = {
   fields: FieldUpdatePayload[];
 };
 
+// [THEME] Theme system v1 - colors and settings from backend
+export interface ThemeJson {
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  background_color: string;
+  text_color: string;
+  is_dark_theme: boolean;
+}
+
 export type SiteProjectPublic = {
   id: string;
   name: string;
   slug: string;
   site_template_key: string; // e.g. "restaurant-modern"
+  theme: ThemeJson;
   pages: PageJson[];
 };

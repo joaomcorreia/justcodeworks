@@ -9,9 +9,12 @@ interface PosSystemsPageProps {
 }
 
 export default async function PosSystemsPage({ params: { locale } }: PosSystemsPageProps) {
-  // Redirect Portuguese users to the proper Portuguese URL
+  // Redirect users to the proper localized URL
   if (locale === 'pt') {
     redirect('/pt/sistemas-tpv');
+  }
+  if (locale === 'nl') {
+    redirect('/nl/kassasystemen');
   }
   
   const dict = await getDictionary(locale);

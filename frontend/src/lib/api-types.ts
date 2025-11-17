@@ -44,6 +44,9 @@ export interface AdminSiteTemplate {
   usage_count: number;
   is_active: boolean;
   updated_at: string;
+  created_at: string;  // [TEMPLAB] needed for template card date display
+  site_count: number;  // [TEMPLAB] needed for template card usage count
+  preview_image?: string;  // [TEMPLAB] template card preview scroll
 }
 
 export interface AdminSiteTemplateDetail extends AdminSiteTemplate {
@@ -69,4 +72,30 @@ export interface TemplateSectionData {
   order: number;
   is_active: boolean;
   screenshot_url?: string;
+}
+
+// [GARAGE-FORM] Quote Request types for admin interface
+export interface AdminQuoteRequest {
+  id: number;
+  site_project_name: string;
+  site_project_slug: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  email: string;
+  phone: string;
+  license_plate: string;
+  car_make_model: string;
+  service_type: string;
+  service_type_display: string;
+  message: string;
+  source_page_slug: string;
+  locale: string;
+  consent_marketing: boolean;
+}
+
+export interface SiteProject {
+  id: string;
+  name: string;
+  slug: string;
 }

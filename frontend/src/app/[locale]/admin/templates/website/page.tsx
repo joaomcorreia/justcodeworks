@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchAdminSiteTemplates, fetchAdminSiteTemplateDetail } from "@/lib/api";
 import type { AdminSiteTemplate, AdminSiteTemplateDetail } from "@/lib/api-types";
+import TemplatePreviewScroller from "@/components/admin/TemplatePreviewScroller";  // [TEMPLAB]
 
 export default function AdminWebsiteTemplatesPage() {
   const router = useRouter();
@@ -203,20 +204,22 @@ function TemplateCard({
     <div className={`flex flex-col rounded-2xl border bg-white transition-all ${
       isSelected ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:shadow-md'
     }`}>
-      {/* Card top (screenshot placeholder) */}
+      {/* Card top (template preview with auto-scroll) */}
       <div 
-        className="relative flex h-40 items-center justify-center rounded-t-2xl bg-slate-50 cursor-pointer"
+        className="relative cursor-pointer"
         onClick={() => onPreview(template.id)}
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-[20px] text-slate-400">
-          🖼
-        </div>
-        <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+        <TemplatePreviewScroller 
+          previewImageUrl={template.preview_image || `/template-previews/${template.key}-01.jpg`}  // [TEMPLAB] template card preview with local fallback
+          templateName={template.name || template.key}
+          className="h-40"
+        />
+        <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-600 z-10">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
           Website
         </div>
-        <div className="absolute right-3 top-3 text-[11px] font-medium capitalize">
-          <span className={statusColor}>{statusLabel}</span>
+        <div className="absolute right-3 top-3 text-[11px] font-medium capitalize z-10">
+          <span className={`px-2 py-0.5 rounded-full bg-white/90 ${statusColor}`}>{statusLabel}</span>
         </div>
       </div>
 
@@ -329,20 +332,31 @@ function TemplatePreviewPanel({
         {/* Preview Image */}
         <div className="lg:w-80">
           <div className="aspect-video rounded-xl border border-slate-200 bg-slate-100 object-cover overflow-hidden">
-            {selectedTemplate.preview_image ? (
-              <img 
-                src={selectedTemplate.preview_image} 
-                alt={selectedTemplate.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl text-slate-400 mb-2">🖼</div>
-                  <p className="text-xs text-slate-500">No preview available</p>
-                </div>
+            <img 
+              src={`/template-previews/${selectedTemplate.key}-01.jpg`} 
+              alt={selectedTemplate.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Try backend preview_image as fallback
+                const target = e.target as HTMLImageElement;
+                if (selectedTemplate.preview_image && target.src !== selectedTemplate.preview_image) {
+                  target.src = selectedTemplate.preview_image;
+                } else {
+                  target.style.display = 'none';
+                  const fallbackDiv = target.parentElement?.querySelector('.fallback-preview');
+                  if (fallbackDiv) {
+                    (fallbackDiv as HTMLElement).style.display = 'flex';
+                  }
+                }
+              }}
+            />
+            ) : null}
+            <div className="w-full h-full flex items-center justify-center fallback-preview" style={{display: 'none'}}>
+              <div className="text-center">
+                <div className="text-4xl text-slate-400 mb-2">🖼</div>
+                <p className="text-xs text-slate-500">No preview available</p>
               </div>
-            )}
+            </div>
           </div>
         </div>
 

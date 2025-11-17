@@ -10,9 +10,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // [LOCALE] ensure login has locale - redirect bare paths to default locale
-  if (pathname === "/login") {
-    return NextResponse.redirect(new URL("/en/login", request.url));
+  // [MODAL LOGIN] redirect login attempts to homepage since we use modal
+  if (pathname === "/login" || pathname.startsWith("/en/login") || pathname.match(/^\/[a-z]{2}\/login/)) {
+    const locale = pathname.match(/^\/([a-z]{2})\//)?.[1] || "en";
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
   
   // [LOCALE] ensure dashboard has locale - redirect bare paths to default locale  

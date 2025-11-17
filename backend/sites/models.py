@@ -88,6 +88,12 @@ class SiteTemplate(TimeStampedModel):
         help_text="Preview image for this template."
     )
     
+    # [TEMPLAB] External preview image URL for demo/external hosting
+    preview_image_url = models.URLField(
+        blank=True,
+        help_text="External URL for template preview image (for auto-scroll demo)."
+    )
+    
     version = models.CharField(
         max_length=20,
         blank=True,
@@ -227,12 +233,60 @@ class TemplateSection(TimeStampedModel):
         help_text="Whether this section requires user interaction (forms, galleries, sliders, etc.)"
     )
     
+    # [TEMPLAB] Reference to original section this template was cloned from
+    source_section = models.ForeignKey(
+        "Section",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="template_variants",
+        help_text="Original section this template section was cloned from"
+    )
+    
     class Meta:
         ordering = ["site_template", "group", "default_order", "id"]
         unique_together = [["site_template", "code"]]
     
     def __str__(self) -> str:
         return f"{self.site_template.key} – {self.internal_name} ({self.code})"
+
+
+# [TEMPLAB] Fields for template sections (cloned from regular Fields)
+class TemplateSectionField(TimeStampedModel):
+    """
+    Fields belonging to TemplateSection - stores the field definitions
+    that get cloned when creating a TemplateSection from a Section.
+    """
+    template_section = models.ForeignKey(
+        TemplateSection,
+        on_delete=models.CASCADE,
+        related_name="fields"
+    )
+    
+    key = models.CharField(
+        max_length=80,
+        help_text="Field key used in the frontend config, e.g. 'title', 'subtitle'."
+    )
+    
+    label = models.CharField(
+        max_length=120,
+        blank=True,
+        help_text="Human label shown in the editor UI."
+    )
+    
+    value = models.TextField(
+        blank=True,
+        help_text="Default/example value for this field"
+    )
+    
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ["order", "id"]
+        unique_together = [["template_section", "key"]]
+    
+    def __str__(self) -> str:
+        return f"{self.template_section.code} · {self.key}"
 
 
 class Template(TimeStampedModel):
@@ -341,8 +395,14 @@ class SiteProject(TimeStampedModel):
     # Style and theming fields
     default_theme = models.CharField(max_length=16, default="dark")
     allow_theme_toggle = models.BooleanField(default=True)
-    primary_color = models.CharField(max_length=9, blank=True)
-    accent_color = models.CharField(max_length=9, blank=True)
+    
+    # Theme v1 fields - standardized color system
+    primary_color = models.CharField(max_length=7, default="#1D4ED8", help_text="Primary brand/action color in hex, e.g. #1D4ED8")
+    secondary_color = models.CharField(max_length=7, default="#6366F1", help_text="Secondary accent color in hex")
+    accent_color = models.CharField(max_length=7, default="#F97316", help_text="Accent / CTA color in hex")
+    background_color = models.CharField(max_length=7, default="#0B1120", help_text="Default background color in hex")
+    text_color = models.CharField(max_length=7, default="#F9FAFB", help_text="Default body text color in hex")
+    is_dark_theme = models.BooleanField(default=True, help_text="If true, template can assume dark background by default")
     
     # Hero particles configuration
     hero_particles_enabled = models.BooleanField(default=True)
@@ -366,6 +426,82 @@ class SiteProject(TimeStampedModel):
     is_master_template = models.BooleanField(
         default=False,
         help_text="If true, this project serves as a master template for cloning."
+    )
+    
+    # Step 0 Multi-Intent Onboarding fields
+    ENTRY_INTENT_CHOICES = [
+        ("website", "Website"),
+        ("prints", "Prints"),
+        ("pos", "Point of Sale"),
+    ]
+    
+    entry_intent = models.CharField(
+        max_length=20,
+        choices=ENTRY_INTENT_CHOICES,
+        blank=True,
+        help_text="The primary intent when user entered onboarding (website, prints, pos)."
+    )
+    
+    business_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Official business name for branding and legal purposes."
+    )
+    
+    primary_country = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Primary country of business operation."
+    )
+    
+    primary_language = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Primary language for content (ISO language code)."
+    )
+    
+    brand_primary_color = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="User-preferred brand primary color in hex format."
+    )
+    
+    brand_secondary_color = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="User-preferred brand secondary color in hex format."
+    )
+    
+    PREFERRED_THEME_MODE_CHOICES = [
+        ("light", "Light"),
+        ("dark", "Dark"),
+        ("auto", "Auto (system preference)"),
+    ]
+    
+    preferred_theme_mode = models.CharField(
+        max_length=10,
+        choices=PREFERRED_THEME_MODE_CHOICES,
+        blank=True,
+        help_text="User preference for light/dark theme mode."
+    )
+    
+    onboarding_notes = models.TextField(
+        blank=True,
+        help_text="Internal notes from onboarding process."
+    )
+    
+    # Builder Step 0 entry product field
+    ENTRY_PRODUCT_CHOICES = [
+        ("website", "Website"),
+        ("printing", "Printing"),
+        ("pos", "POS"),
+    ]
+    
+    entry_product = models.CharField(
+        max_length=20,
+        choices=ENTRY_PRODUCT_CHOICES,
+        default="website",
+        help_text="The product/service selected during Step 0 onboarding."
     )
 
     class Meta:
@@ -549,6 +685,75 @@ class Field(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.section.identifier} · {self.key}"
+
+
+def section_draft_upload_to(instance, filename):
+    """Upload function for SectionDraft screenshots."""
+    # Generate unique filename with UUID
+    file_extension = filename.split('.')[-1].lower()
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    return f"screenshot_uploads/{unique_filename}"
+
+
+class SectionDraft(TimeStampedModel):
+    """
+    Stores uploaded screenshots that will be processed to generate website sections.
+    Step 1: Upload screenshot and store
+    Step 2: AI processing to generate section HTML/JSON
+    Step 3: Convert to actual Page sections
+    """
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    image = models.FileField(
+        upload_to=section_draft_upload_to,
+        help_text="Screenshot image (PNG/JPG/SVG) to generate section from."
+    )
+    
+    project = models.ForeignKey(
+        'SiteProject',
+        on_delete=models.CASCADE,
+        related_name='section_drafts',
+        help_text="Project this section draft belongs to."
+    )
+    
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('ready', 'Ready'),
+        ('error', 'Error'),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        help_text="Processing status of the section draft."
+    )
+    
+    section_name = models.CharField(
+        max_length=120,
+        blank=True,
+        help_text="Optional name for the section being generated."
+    )
+    
+    ai_output_json = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="AI-generated section data (HTML, fields, etc.)."
+    )
+    
+    locale = models.CharField(
+        max_length=10,
+        blank=True,
+        help_text="Locale for generated content (en, pt, etc.)."
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self) -> str:
+        name_part = f" - {self.section_name}" if self.section_name else ""
+        return f"Section Draft ({self.status}){name_part}"
 
 
 def bug_screenshot_upload_to(instance, filename):
@@ -832,4 +1037,162 @@ class QuoteRequest(TimeStampedModel):
     
     def __str__(self) -> str:
         return f"{self.site_project.name} — {self.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
+
+
+# [SLIDERS] Slider system for homepage and other pages
+class HomepageSlider(TimeStampedModel):
+    """
+    Homepage sliders with particle effects and customizable settings
+    """
+    name = models.CharField(max_length=200, help_text="Slider name for admin reference")
+    slug = models.SlugField(unique=True, help_text="Unique identifier for the slider")
+    site_project = models.ForeignKey(SiteProject, on_delete=models.CASCADE, related_name='homepage_sliders', null=True, blank=True)
+    
+    # Slider Settings
+    is_active = models.BooleanField(default=True)
+    auto_play = models.BooleanField(default=True, help_text="Auto-advance slides")
+    auto_play_interval = models.PositiveIntegerField(default=5000, help_text="Interval in milliseconds")
+    show_navigation = models.BooleanField(default=True, help_text="Show navigation arrows")
+    show_pagination = models.BooleanField(default=True, help_text="Show pagination dots")
+    
+    # Particle Effect Settings
+    particles_enabled = models.BooleanField(default=True, help_text="Enable particle effects")
+    particles_density = models.PositiveIntegerField(default=100, help_text="Number of particles (50-300)")
+    particles_speed = models.FloatField(default=1.0, help_text="Particle movement speed (0.5-3.0)")
+    particles_size_min = models.PositiveIntegerField(default=1, help_text="Minimum particle size")
+    particles_size_max = models.PositiveIntegerField(default=3, help_text="Maximum particle size")
+    particles_color = models.CharField(max_length=7, default="#ffffff", help_text="Primary particle color (hex)")
+    particles_colors = models.TextField(blank=True, help_text="JSON array of additional particle colors")
+    particles_opacity = models.FloatField(default=0.6, help_text="Particle opacity (0.1-1.0)")
+    particles_multi_color = models.BooleanField(default=False, help_text="Use multiple particle colors")
+    
+    # Background Settings
+    background_type = models.CharField(max_length=20, choices=[
+        ('gradient', 'Gradient'),
+        ('image', 'Background Image'),
+        ('video', 'Background Video'),
+    ], default='gradient')
+    
+    # Gradient Settings
+    gradient_from = models.CharField(max_length=7, default="#1e40af", help_text="Gradient start color (hex)")
+    gradient_to = models.CharField(max_length=7, default="#3b82f6", help_text="Gradient end color (hex)")
+    gradient_direction = models.CharField(max_length=10, choices=[
+        ('to-r', 'To Right'),
+        ('to-l', 'To Left'),
+        ('to-b', 'To Bottom'),
+        ('to-t', 'To Top'),
+        ('to-br', 'To Bottom Right'),
+        ('to-bl', 'To Bottom Left'),
+        ('to-tr', 'To Top Right'),
+        ('to-tl', 'To Top Left'),
+    ], default='to-br')
+    
+    # Image/Video Settings
+    background_image = models.URLField(blank=True, null=True)
+    background_video = models.URLField(blank=True, null=True)
+    background_overlay_opacity = models.FloatField(default=0.3, help_text="Overlay opacity over image/video")
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Homepage Slider'
+        verbose_name_plural = 'Homepage Sliders'
+    
+    def __str__(self):
+        return self.name
+
+
+class HomepageSlide(TimeStampedModel):
+    """
+    Individual slides within a homepage slider
+    """
+    slider = models.ForeignKey(HomepageSlider, on_delete=models.CASCADE, related_name='slides')
+    title = models.CharField(max_length=300)
+    subtitle = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True, help_text="Main slide content/description")
+    
+    # CTA Buttons
+    primary_cta_text = models.CharField(max_length=100, blank=True, null=True)
+    primary_cta_url = models.CharField(max_length=500, blank=True, null=True)
+    secondary_cta_text = models.CharField(max_length=100, blank=True, null=True)
+    secondary_cta_url = models.CharField(max_length=500, blank=True, null=True)
+    
+    # Slide-specific styling
+    text_color = models.CharField(max_length=7, default="#ffffff", help_text="Text color (hex)")
+    text_alignment = models.CharField(max_length=10, choices=[
+        ('left', 'Left'),
+        ('center', 'Center'),
+        ('right', 'Right'),
+    ], default='center')
+    
+    # Slide image/media
+    slide_image = models.URLField(blank=True, null=True)
+    slide_video = models.URLField(blank=True, null=True)
+    
+    # Display settings
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    # Animation settings
+    animation_type = models.CharField(max_length=20, choices=[
+        ('fade', 'Fade'),
+        ('slide', 'Slide'),
+        ('zoom', 'Zoom'),
+        ('none', 'No Animation'),
+    ], default='fade')
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Homepage Slide'
+        verbose_name_plural = 'Homepage Slides'
+    
+    def __str__(self):
+        return f"{self.slider.name} - {self.title}"
+
+
+class TestimonialCarousel(TimeStampedModel):
+    """
+    Testimonial carousel sliders
+    """
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    site_project = models.ForeignKey(SiteProject, on_delete=models.CASCADE, related_name='testimonial_carousels', null=True, blank=True)
+    
+    # Carousel Settings
+    is_active = models.BooleanField(default=True)
+    auto_play = models.BooleanField(default=True)
+    auto_play_interval = models.PositiveIntegerField(default=4000)
+    slides_per_view = models.PositiveIntegerField(default=3, help_text="Number of testimonials visible at once")
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Testimonial Carousel'
+        verbose_name_plural = 'Testimonial Carousels'
+    
+    def __str__(self):
+        return self.name
+
+
+class TestimonialSlide(TimeStampedModel):
+    """
+    Individual testimonials in carousel
+    """
+    carousel = models.ForeignKey(TestimonialCarousel, on_delete=models.CASCADE, related_name='testimonials')
+    customer_name = models.CharField(max_length=200)
+    customer_title = models.CharField(max_length=200, blank=True, null=True)
+    customer_company = models.CharField(max_length=200, blank=True, null=True)
+    customer_image = models.URLField(blank=True, null=True)
+    
+    testimonial_text = models.TextField()
+    rating = models.PositiveIntegerField(default=5, help_text="Rating out of 5")
+    
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Testimonial'
+        verbose_name_plural = 'Testimonials'
+    
+    def __str__(self):
+        return f"{self.carousel.name} - {self.customer_name}"
 

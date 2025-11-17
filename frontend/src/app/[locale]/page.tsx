@@ -13,7 +13,7 @@ export default async function HomePage({ params: { locale } }: HomePageProps) {
   return (
     <>
       <HeroNavigation locale={locale} />
-      <HeroSection locale={locale} />
+      <HeroSection locale={locale} dict={dict} />
       <HomePageClient dict={dict} />
     </>
   );

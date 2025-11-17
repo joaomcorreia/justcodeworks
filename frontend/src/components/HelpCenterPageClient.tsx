@@ -1,13 +1,12 @@
 'use client';
 
-import { useAuth } from '@/contexts/auth-context'; // [AUTH]
+import React from 'react';
 
 interface HelpCenterPageClientProps {
   dict: any;
 }
 
 export default function HelpCenterPageClient({ dict }: HelpCenterPageClientProps) {
-  const { isAuthenticated } = useAuth(); // [AUTH]
   
   const helpCategories = [
     {
@@ -45,30 +44,62 @@ export default function HelpCenterPageClient({ dict }: HelpCenterPageClientProps
   ];
 
   return (
-    <div>
-      {/* [JCW] Help Center hero section */}
-      <div className="bg-gray-50 dark:bg-gray-900 p-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4 text-blue-900">
-            Help Center
-          </h1>
-          <p className="text-lg mb-6 text-blue-700">
-            Find answers, get support, and learn how to make the most of our platform.
-          </p>
-          
-          {/* [AUTH] Edit mode info - only show when authenticated */}
-          {isAuthenticated && (
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-lg border mb-8">
-              <h3 className="text-lg font-semibold mb-4">📚 Help Center Page Info</h3>
-              <div className="space-y-2 text-sm">
-                <p><strong>Page:</strong> Help Center</p>
-                <p><strong>Slug:</strong> help-center</p>
-                <p><strong>Template:</strong> jcw-main (no slider)</p>
-                <p><strong>Features:</strong> Getting started, Website help, Technical support, Billing</p>
-                <p className="text-blue-600 font-medium">✅ Published</p> {/* [UI] Blue accent */}
-              </div>
+    <div className="min-h-screen">
+      {/* Hero Section with Animated Background */}
+      <div className="relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 left-0 w-2 h-2 bg-white rounded-full animate-ping"></div>
+            <div className="absolute top-10 left-20 w-1 h-1 bg-blue-300 rounded-full animate-pulse"></div>
+            <div className="absolute top-20 right-10 w-1 h-1 bg-purple-300 rounded-full animate-ping"></div>
+            <div className="absolute bottom-20 left-10 w-2 h-2 bg-pink-300 rounded-full animate-pulse"></div>
+          </div>
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-20 w-32 h-32 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+            <div className="absolute top-40 right-20 w-32 h-32 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-40 w-32 h-32 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+          </div>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 sm:py-32">
+          <div className="text-center text-white">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium mb-8">
+              <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+              Help & Support
             </div>
-          )}
+            
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent leading-tight">
+              Help & Support
+            </h1>
+            
+            <p className="text-xl md:text-2xl mb-12 text-blue-100 max-w-4xl mx-auto leading-relaxed">
+              Get the help you need with our comprehensive support resources and expert assistance.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="px-8 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-xl">
+                Browse Help Articles →
+              </button>
+              <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                Contact Support
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Help Categories Section */}
+      <div className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              How can we help?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Find answers, get support, and learn how to make the most of our platform.
+            </p>
+          </div>
 
           {/* [JCW] Help categories grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">

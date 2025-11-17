@@ -412,6 +412,388 @@ Do not delete [locale]/sites folder aggressively (to avoid more breakage).
 
 ---
 
+## 8. Leads & Quotes ✅ **IMPLEMENTED**
+
+### 8.1 Overview
+
+The Leads & Quotes system manages quote requests submitted through tenant garage/automotive service websites. It provides a complete workflow from public form submission to admin management.
+
+### 8.2 Data Model
+
+**QuoteRequest Model** (`sites/models.py`):
+
+```python
+class QuoteRequest(TimeStampedModel):
+    site_project = models.ForeignKey(SiteProject, related_name="quote_requests", on_delete=models.CASCADE)
+    
+    # Contact Information
+    name = models.CharField(max_length=200)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=50, blank=True)
+    
+    # Vehicle Information
+    license_plate = models.CharField(max_length=20, blank=True)
+    car_make_model = models.CharField(max_length=200, blank=True)
+    
+    # Service Request Details
+    SERVICE_TYPE_CHOICES = (
+        ("troca_oleo", "Troca de óleo"),
+        ("revisao", "Revisão geral"), 
+        ("travoes", "Travões"),
+        ("diagnostico", "Diagnóstico"),
+        ("outro", "Outro"),
+    )
+    service_type = models.CharField(max_length=100, choices=SERVICE_TYPE_CHOICES, blank=True)
+    message = models.TextField(blank=True)
+    
+    # Metadata
+    source_page_slug = models.CharField(max_length=100, blank=True)
+    locale = models.CharField(max_length=10, default="pt")
+    consent_marketing = models.BooleanField(default=False)
+```
+
+### 8.3 API Endpoints
+
+#### 8.3.1 Public Endpoints (Tenant Forms)
+
+**Submit Quote Request**:
+- **URL**: `POST /api/sites/{site_slug}/quote-requests/`
+- **Purpose**: Used by tenant websites to submit quote requests
+- **Authentication**: None (public)
+- **Payload**: Customer name, contact info, vehicle details, service type, message
+
+#### 8.3.2 Admin Endpoints (Staff Only)
+
+**List Quote Requests**:
+- **URL**: `GET /api/admin/quote-requests/`
+- **Purpose**: List all quote requests from all tenants
+- **Authentication**: JWT (staff required)
+- **Filters**: 
+  - `?site_slug=garage-slug` - Filter by specific site
+  - `?locale=pt` - Filter by form locale
+- **Response**: Array of AdminQuoteRequest objects with site info
+
+**Quote Request Detail**:
+- **URL**: `GET /api/admin/quote-requests/{id}/`
+- **Purpose**: Get detailed view of a single quote request
+- **Authentication**: JWT (staff required)
+
+### 8.4 Admin Interface
+
+#### 8.4.1 Navigation
+
+**Admin Sidebar**: "Leads & Quotes" link (`/[locale]/admin/leads`) between "Sites" and "Templates"
+
+#### 8.4.2 Leads List Page
+
+**Location**: `frontend/src/app/[locale]/admin/leads/page.tsx`
+
+**Features**:
+- Table view with columns: Date/Time, Site, Name, Service Type, Contact, Locale, Source Page
+- Filter dropdown for site selection (All Sites + individual sites)
+- Filter dropdown for locale (All Languages, PT, EN)
+- Click row to open detail modal
+- Results count display
+- Responsive design
+
+#### 8.4.3 Detail Modal
+
+**Features**:
+- Complete quote information display
+- Site project name and slug
+- Customer contact details (email, phone)
+- Vehicle information (license plate, make/model)
+- Service type (human-readable display)
+- Full message text
+- Metadata (source page, locale, marketing consent)
+- Formatted timestamps
+- Close button
+
+### 8.5 Usage Flow
+
+1. **Customer Submission**: Customer fills out quote form on garage website (e.g., Oficina Paulo Calibra)
+2. **API Processing**: Form submits to `POST /api/sites/{slug}/quote-requests/` endpoint
+3. **Database Storage**: QuoteRequest record created with site association
+4. **Admin Notification**: Quote appears in JCW Admin "Leads & Quotes" page
+5. **Admin Review**: Staff can view, filter, and analyze quote requests
+6. **Future**: Reply workflow, status tracking, export functionality (planned)
+
+### 8.6 Testing & Verification
+
+**Backend API Test**: `backend/test_admin_quote_requests_api.py`
+- Verifies admin endpoints work correctly
+- Tests filtering functionality
+- Confirms authentication requirements
+
+**Public Form Test**: `backend/test_public_quote_form.py`
+- Verifies public form submission works
+- Tests data validation
+- Confirms database persistence
+
+### 8.7 Django Admin Integration
+
+**QuoteRequestAdmin** (`sites/admin.py`):
+- List display: site_project, name, service_type, email, phone, car_make_model, created_at, locale
+- Filters: site_project, service_type, locale, consent_marketing, created_at
+- Search fields: name, email, phone, license_plate, car_make_model, message
+- Fieldsets organized by: Customer Information, Vehicle Information, Service Request, Metadata
+
+### 8.8 Future Enhancements
+
+- **Status Tracking**: New/In Progress/Closed workflow
+- **Reply System**: Email responses directly from admin interface
+- **Export Functionality**: CSV/Excel export of filtered results
+- **Analytics Dashboard**: Quote volume trends, conversion rates
+- **Automated Notifications**: Email alerts for new quotes
+- **Integration**: Connect with CRM/booking systems
+
+---
+
+## 9. Step 0 Builder - Multi-Intent Onboarding System
+
+### 9.1 Overview
+
+**Purpose**: Complete site creation flow that transforms Step 0 onboarding data into functional websites with appropriate templates and real content.
+
+**Architecture**: 
+- **Backend**: Django Builder API endpoint with JWT authentication
+- **Frontend**: Modal system combining authentication + onboarding
+- **Integration**: Creates actual SiteProject with content, redirects to editor
+
+**Key Features**:
+- Smart template selection based on industry and entry product
+- Real content generation from onboarding data (not placeholders)
+- Combined auth + onboarding flow for new users
+- Immediate redirect to website editor after creation
+
+### 9.2 Backend Implementation
+
+#### 9.2.1 Builder API Endpoint
+
+**URL**: `POST /api/builder/step0/`
+**Authentication**: JWT Token required
+**Purpose**: Create complete website from Step 0 onboarding data
+
+**Request Format**:
+```json
+{
+  "website_name": "Mary's Italian Restaurant",
+  "website_topic": "authentic Italian dining experience", 
+  "entry_product": "website",
+  "primary_audience": "food lovers and families",
+  "tagline": "Authentic Italian flavors in the heart of the city",
+  "industry": "restaurant", 
+  "description": "Family-owned restaurant serving traditional Italian cuisine"
+}
+```
+
+**Response Format** (Success - 201):
+```json
+{
+  "success": true,
+  "message": "Website \"Mary's Italian Restaurant\" created successfully!",
+  "project": {
+    "id": "60d49ea1-19e5-4237-8bc6-b82c76447515",
+    "name": "Mary's Italian Restaurant",
+    "template_key": "restaurant-modern",
+    "template_name": "Restaurant Modern", 
+    "business_name": "Mary's Italian Restaurant",
+    "entry_product": "website",
+    "created_at": "2025-11-16T20:11:01.416233+00:00"
+  },
+  "redirect_to": "/websites/60d49ea1-19e5-4237-8bc6-b82c76447515/edit",
+  "status": "created"
+}
+```
+
+**Error Response** (400):
+```json
+{
+  "error": "Missing required fields: website_topic, primary_audience",
+  "status": "validation_error"
+}
+```
+
+#### 9.2.2 Template Selection Logic
+
+**Smart Template Mapping**:
+- **Restaurant/Food Industry** → `restaurant-modern`
+- **Auto/Garage Industry** → `auto-garage-modern` 
+- **E-commerce Keywords** → `ecommerce-basic`
+- **Landing Page Keywords** → `landing-conversion`
+- **POS Entry Product** → `auto-garage-modern` (business-focused)
+- **Printing Entry Product** → `tire-center-premium` (service-based)
+- **Default Fallback** → `one-page-basic`
+
+**Implementation**: `BuilderStep0View._select_template()` method analyzes:
+1. `entry_product` (website/printing/pos)
+2. `industry` field keywords
+3. `website_topic` content patterns
+
+#### 9.2.3 Content Generation System
+
+**Real Content Creation**:
+- Creates `SiteProject` with proper slug generation
+- Generates homepage with `hero-section`
+- Adds title field: Uses `tagline` or generates "Welcome to {website_name}"
+- Adds subtitle field: Uses `description` if provided
+- Stores additional data in `onboarding_notes` field
+
+**Database Structure**:
+- **SiteProject**: Main project record with `business_name`, `entry_product`
+- **Page**: Homepage with `slug='home'`, `title=website_name`
+- **Section**: Hero section with `identifier='hero-section'`
+- **Field**: Title and subtitle fields with `key='title'/'subtitle'`
+
+#### 9.2.4 Implementation Details
+
+**Location**: `backend/sites/views.py` - `BuilderStep0View` class
+**URL Configuration**: `backend/sites/api_urls.py`
+**Authentication**: Uses `JWTAuthentication` and `permissions.IsAuthenticated`
+**Error Handling**: Comprehensive validation and rollback on failure
+
+### 9.3 Frontend Implementation
+
+#### 9.3.1 Modal Component
+
+**File**: `frontend/src/components/Step0OnboardingModal.tsx`
+**Type**: Combined authentication + onboarding modal
+**Integration**: Used in `HeroSection.tsx` and `WebsitesPageClient.tsx`
+
+**Props Interface**:
+```typescript
+interface Step0OnboardingModalProps {
+  isOpen: boolean
+  onClose: () => void
+  intent: 'website' | 'prints' | 'pos'
+  locale: string
+  onSuccess?: () => void
+}
+```
+
+#### 9.3.2 Form Structure
+
+**Authentication Section** (new users only):
+- First Name, Last Name (required)
+- Email Address (required)  
+- Password with visibility toggle (required)
+
+**Step 0 Information Section**:
+- Website Name* (maps to `website_name`)
+- Website Topic* (maps to `website_topic`) 
+- Primary Audience* (maps to `primary_audience`)
+- Industry (maps to `industry`)
+- Tagline (maps to `tagline`)
+- Description (maps to `description`)
+
+**Entry Product**: Auto-set based on `intent` prop (`prints` → `printing`)
+
+#### 9.3.3 Authentication Flow
+
+**New User Flow**:
+1. User fills auth fields + Step 0 data
+2. Submit triggers registration: `POST /api/auth/register/`
+3. If successful, get JWT token: `POST /api/jwt/login/`
+4. Use JWT for builder call: `POST /api/builder/step0/`
+5. Redirect to editor on success
+
+**Existing User Flow**:
+1. User fills Step 0 data only (auth section hidden)
+2. Direct builder call with existing `accessToken`
+3. Redirect to editor on success
+
+#### 9.3.4 Success Handling
+
+**Success State**: Shows checkmark animation with "Website Created Successfully!"
+**Redirect**: Automatic redirect to `result.redirect_to` after 2 second delay
+**Error Handling**: Displays validation errors and network errors inline
+
+### 9.4 Integration Points
+
+#### 9.4.1 CTA Button Integration
+
+**HeroSection Component**:
+- "Get Started" buttons trigger modal with appropriate `intent`
+- Buttons for different entry products: Website, Prints, POS
+
+**WebsitesPage Component**:
+- "Create New Website" button triggers modal with `intent='website'`
+
+#### 9.4.2 Authentication Context
+
+**Auth Integration**: Uses `useAuth()` hook to:
+- Check if user is logged in (`user` state)
+- Access current JWT token (`accessToken` state)
+- Conditionally show/hide auth form section
+
+### 9.5 Testing & Verification
+
+#### 9.5.1 Backend Tests
+
+**File**: `backend/test_step0_builder.py`
+**Coverage**:
+- ✅ User registration + JWT authentication
+- ✅ Builder endpoint with Step 0 data
+- ✅ Template selection logic (restaurant → restaurant-modern)
+- ✅ Content creation and database verification
+- ✅ Validation error handling
+- ✅ Response structure validation
+
+**Test Results**:
+```
+🧪 Testing Step 0 Builder Endpoint
+==================================================
+✅ User registered: test_builder_12f59a9a@example.com
+✅ JWT token received (length: 232)  
+✅ Builder succeeded!
+✅ Project exists in database
+   Created site: Mary's Italian Restaurant
+   Project ID: 60d49ea1-19e5-4237-8bc6-b82c76447515
+   Template: Restaurant Modern (restaurant-modern)
+🎉 All tests passed! Step 0 Builder is working correctly.
+```
+
+#### 9.5.2 Frontend Tests
+
+**Manual Testing**: Modal functionality, form validation, success flow
+**Integration Testing**: End-to-end user journey from CTA to editor
+**Error Scenarios**: Network errors, validation failures, authentication issues
+
+### 9.6 Template Availability
+
+**Available Templates** (from database):
+- ✅ `restaurant-modern` - Restaurant Modern  
+- ✅ `auto-garage-modern` - Oficina Auto – Moderno
+- ✅ `ecommerce-basic` - E-commerce Basic
+- ✅ `landing-conversion` - High-Conversion Landing
+- ✅ `one-page-basic` - One Page Basic
+- ✅ `tire-center-premium` - Tire Center Premium
+- ❌ `jcw-main` - Available but not user-selectable
+
+### 9.7 Future Enhancements
+
+**Template Expansion**:
+- Add more industry-specific templates (professional services, portfolio, etc.)
+- Template preview system in modal
+- User template selection override
+
+**Content Intelligence**:
+- AI-powered content generation from Step 0 data
+- Industry-specific section recommendations
+- Automatic image suggestions
+
+**Analytics & Optimization**:
+- Track template selection effectiveness
+- A/B test onboarding form variations  
+- Conversion funnel analysis
+
+**Advanced Features**:
+- Multi-step wizard for complex projects
+- Template customization during onboarding
+- Bulk site creation for agencies
+
+---
+
 ## 9.5 Current Development Setup (Windows) ✅
 
 ### 9.5.1 Quick Start Commands
@@ -1381,4 +1763,775 @@ frontend/src/templates/
 
 ---
 
-**End of Documentation v0.3** - Template Lab Step 2 Complete, Full Section Libraries Operational
+## 17. Template Lab – Template Preview & Sections Explorer ✅ **IMPLEMENTED**
+
+### 17.1 Overview
+
+The Template Preview & Sections Explorer provides JCW staff with detailed template inspection capabilities, allowing them to preview templates using real sample sites and explore the section composition of each template.
+
+### 17.2 Backend Components
+
+#### 17.2.1 Sample Site Mapping API
+
+**Endpoint**: `GET /api/admin/templates/{template_key}/sample-site/`
+
+**Purpose**: Maps template keys to sample SiteProject slugs for live preview
+
+**Authentication**: Staff-only (JWT required)
+
+**Hard-coded Mappings**:
+- `restaurant-modern` → `marys-restaurant`
+- `auto-garage-modern` → `oficina-paulo-calibra`
+
+**Response Format**:
+```json
+{
+  "template_key": "restaurant-modern",
+  "sample_site_slug": "marys-restaurant"
+}
+```
+
+**Error Handling**:
+- 404 if no mapping exists for template key
+- 404 if sample site doesn't exist in database
+
+### 17.3 Frontend Components
+
+#### 17.3.1 Template Preview Page
+
+**Route**: `/[locale]/admin/templates/{templateKey}`
+
+**Features**:
+- **Breadcrumb Navigation**: Templates > Template Name
+- **2-Column Layout**: Preview + metadata (left) | Info + sections (right)
+- **Template Metadata Display**: Name, category, status, usage count
+- **Screenshot Preview**: Uses `/template-previews/${templateKey}-01.jpg`
+- **Sample Site Link**: "Open Sample Site in new tab" button
+
+#### 17.3.2 Sections Explorer
+
+**Purpose**: Read-only exploration of template section composition
+
+**Data Source**: Sample site's `/api/sites/{slug}/public/` JSON (home page)
+
+**Section Information Displayed**:
+- **Order**: Numerical sequence (1, 2, 3...)
+- **Identifier**: Section identifier (e.g., "hero-banner", "garage-quote-form")
+- **Internal Name**: Human-readable section name (if available)
+- **Type Tag**: Auto-derived category with color coding:
+  - `hero` (purple) - Hero sections, banners, headers
+  - `form` (green) - Interactive forms, quote requests
+  - `services` (blue) - Service grids, product cards
+  - `testimonials` (yellow) - Reviews, customer feedback
+  - `contact` (red) - Contact info, address details
+  - `generic` (gray) - Other content sections
+
+**Section Description**: Auto-generated from identifier (e.g., "hero-banner" → "main top hero with headline & CTA")
+
+### 17.4 Navigation Integration
+
+#### 17.4.1 Template Library Integration
+
+**Template Library Page**: `/[locale]/admin/templates`
+
+**Preview Button**: Now navigates to template preview page instead of generic preview
+- Clicking "Preview" on any template card → `/{locale}/admin/templates/{template.key}`
+- "Edit Template" button maintains existing behavior
+
+### 17.5 Graceful Fallbacks
+
+#### 17.5.1 No Sample Site Mapping
+**Message**: "No sample site is linked to this template yet. Once a demo site is created for this template, its sections will appear here."
+
+#### 17.5.2 Sample Site Data Loading Error
+**Message**: "Could not load sample site data (slug: X). Please verify the site exists and is published."
+
+#### 17.5.3 Missing Preview Image
+**Fallback**: Standard placeholder with template name and "Preview image coming soon"
+
+### 17.6 Technical Implementation
+
+#### 17.6.1 API Functions Added
+
+**Frontend (`lib/api.ts`)**:
+- `fetchTemplateSampleSite(templateKey)` - Get sample site mapping
+- `fetchAdminSiteTemplateDetailByKey(templateKey)` - Get template by key
+- `fetchSitePublic(siteSlug, locale)` - Get public site data
+
+#### 17.6.2 Component Architecture
+
+**Template Preview Page** (`/[locale]/admin/templates/[templateKey]/page.tsx`):
+- Loads template metadata via admin API
+- Fetches sample site mapping
+- Loads public site JSON for sections analysis
+- Renders responsive 2-column layout with sections explorer
+
+### 17.7 Section Type Detection Algorithm
+
+**Type Detection Logic**:
+```typescript
+function getSectionType(identifier: string): string {
+  const id = identifier.toLowerCase();
+  
+  if (id.includes('hero') || id.includes('header') || id.includes('banner')) return 'hero';
+  if (id.includes('form') || id.includes('quote') || id.includes('contact-form')) return 'form';
+  if (id.includes('service') || id.includes('card') || id.includes('grid')) return 'services';
+  if (id.includes('testimonial') || id.includes('review')) return 'testimonials';
+  if (id.includes('contact') || id.includes('address') || id.includes('info')) return 'contact';
+  
+  return 'generic';
+}
+```
+
+### 17.8 Usage Examples
+
+#### 17.8.1 Restaurant Template Preview
+- **URL**: `/en/admin/templates/restaurant-modern`
+- **Sample Site**: Mary's Restaurant (`marys-restaurant`)
+- **Sections Shown**: hero-banner, menu-showcase, testimonials-grid, contact-info
+- **Sample Site Link**: Opens `/sites/marys-restaurant` in new tab
+
+#### 17.8.2 Garage Template Preview
+- **URL**: `/en/admin/templates/auto-garage-modern`
+- **Sample Site**: Oficina Paulo Calibra (`oficina-paulo-calibra`)
+- **Sections Shown**: hero-banner, garage-quote-form, services-cards, contact-info
+- **Sample Site Link**: Opens `/sites/oficina-paulo-calibra` in new tab
+
+### 17.9 Benefits
+
+1. **Template Understanding**: Staff can see exactly how templates are structured
+2. **Section Inventory**: Clear visibility into section types and order
+3. **Live Preview**: Direct access to sample sites for full template experience
+4. **Template Analysis**: Understand section composition for template planning
+5. **Quality Assurance**: Verify template implementation matches expectations
+
+### 17.10 Future Enhancements
+
+- **Section Editing**: Click sections to edit directly from explorer
+- **Template Comparison**: Side-by-side section comparison between templates
+- **Section Performance**: Analytics on section engagement and conversion
+- **Template Variants**: Support for multiple sample sites per template
+- **Visual Section Map**: Graphical representation of section flow
+
+---
+
+## 18. Website Builder v2 – Section Field Editing
+
+### 18.1 Overview
+
+Website Builder v2 extends the read-only Builder v1 structure panel with full content editing capabilities. Users can now select sections and edit their field content directly in the dashboard, with changes immediately saved to the backend and reflected in the live preview.
+
+### 18.2 Route & Access
+
+**Route:**
+- User dashboard: `/[locale]/dashboard/website`
+
+**Access Requirements:**
+- JWT authentication required
+- User must own the SiteProject being edited
+- Active project with published pages
+
+### 18.3 Three-Column Layout
+
+Builder v2 features a comprehensive three-panel interface:
+
+**Left Panel (Structure):**
+- Lists all pages and sections for the current SiteProject
+- Expandable hierarchy with selection states
+- Visual indicators for selected pages/sections
+- Statistics footer showing page/section counts
+
+**Middle Panel (Field Editor):**
+- Form interface for editing selected section fields
+- Dynamic input types (text/textarea) based on content length
+- Save/Reset buttons with loading states
+- Success/error messaging system
+
+**Right Panel (Preview):**
+- Live website preview with device simulation
+- Real-time updates after successful saves
+- Preview refresh system using key-based re-rendering
+- Device mode switching (desktop/tablet/mobile)
+
+### 18.4 Field Editing Behavior
+
+**Section Selection:**
+- Click any section in the structure panel
+- Field editor populates with section's current field values
+- Header updates to show: "Editing: [Site] • [Page] • [Section]"
+
+**Field Types:**
+- **Short text** (≤80 chars): `<input type="text">`
+- **Long text** (>80 chars or contains "content"/"description"): `<textarea>`
+- Character count display for longer fields
+- Automatic field ordering by `field.order`
+
+**Save Process:**
+1. User modifies field values in editor
+2. Click "Save Changes" button
+3. API call to `PATCH /api/sections/{section_id}/content/`
+4. Success: Green message + preview refresh
+5. Error: Red message with error details
+
+### 18.5 API Integration
+
+**Endpoint:**
+```
+PATCH /api/sections/{section_id}/content/
+```
+
+**Authentication:**
+- JWT Bearer token required
+- Uses existing `IsAuthenticated` + `IsSectionProjectOwnerOrStaff` permissions
+
+**Request Payload:**
+```json
+{
+  "fields": [
+    { "key": "headline", "value": "Updated headline text" },
+    { "key": "subheadline", "value": "Updated subheadline content" },
+    { "key": "cta_text", "value": "New button text" }
+  ]
+}
+```
+
+**Response:**
+- `200 OK`: Successful update
+- `401 Unauthorized`: Missing/invalid JWT token
+- `403 Forbidden`: User doesn't own the SiteProject
+- `404 Not Found`: Section doesn't exist
+
+**Backend Logic:**
+- Uses existing `SectionContentUpdateView` and `SectionContentUpdateSerializer`
+- Finds each field by `key` within the section
+- Updates `Field.value` for matching fields
+- Automatically saves all changes in single transaction
+
+### 18.6 Preview Refresh System
+
+**Refresh Mechanism:**
+- `previewRefreshKey` state triggers React key-based re-rendering
+- Increments after successful field saves
+- Forces `RestaurantModernPage` component to reload with new data
+
+**Data Synchronization:**
+- Preview uses existing `/api/sites/{slug}/public/` endpoint
+- Template component (`RestaurantModernPage`) renders updated field values
+- No additional API calls needed for preview updates
+
+### 18.7 Error Handling
+
+**Authentication Errors:**
+- Missing token: "Authentication required"
+- Invalid token: Automatic redirect to login
+- Permission denied: "You don't have permission to edit this section"
+
+**API Errors:**
+- Network failures: "Failed to save changes"
+- Server errors: Error message from API response
+- Validation errors: Field-specific error display
+
+**User Experience:**
+- Save button disabled during API calls
+- Loading spinner during save operations
+- Auto-clear success messages after 3 seconds
+- Reset button to restore original field values
+
+### 18.8 State Management
+
+**Core States:**
+```typescript
+const [currentPageSlug, setCurrentPageSlug] = useState("home");
+const [selectedSectionId, setSelectedSectionId] = useState<string | undefined>();
+const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
+const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+const [saving, setSaving] = useState(false);
+const [saveError, setSaveError] = useState<string | null>(null);
+const [saveSuccess, setSaveSuccess] = useState(false);
+```
+
+**Data Flow:**
+1. Site data loaded via `/api/sites/{slug}/public/`
+2. Structure panel populated with pages/sections
+3. Section selection triggers field editor population
+4. Field changes update local state
+5. Save action sends changes to API
+6. Success triggers preview refresh and data refetch
+
+### 18.9 Component Architecture
+
+**Main Components:**
+- `WebsiteStructurePanel`: Left sidebar with page/section hierarchy
+- `SectionFieldEditor`: Middle panel field editing form
+- `RestaurantModernPage`: Right panel website preview
+
+**Integration Pattern:**
+```tsx
+<WebsiteStructurePanel
+  project={siteData}
+  currentPageSlug={currentPageSlug}
+  selectedSectionId={selectedSectionId}
+  onPageSelect={setCurrentPageSlug}
+  onSectionSelect={setSelectedSectionId}
+/>
+
+<SectionFieldEditor 
+  section={selectedSection} 
+  onSave={handleFieldSave}
+/>
+
+<RestaurantModernPage
+  key={previewRefreshKey}
+  project={siteData}
+  mode="dashboard"
+  currentPageSlug={currentPageSlug}
+  onNavigatePage={handleNavigatePage}
+/>
+```
+
+### 18.10 Testing & Validation
+
+**Test Coverage:**
+- Section selection and field population
+- Field editing and local state management
+- API integration with proper authentication
+- Error handling for various failure scenarios
+- Preview refresh after successful saves
+- Cross-browser compatibility and responsive design
+
+**Success Criteria:**
+- ✅ Three-column layout renders correctly
+- ✅ Section selection populates field editor
+- ✅ Field editing saves to backend database
+- ✅ Preview updates reflect changes immediately
+- ✅ Error handling provides clear feedback
+- ✅ Authentication enforces proper permissions
+
+### 18.11 Future Enhancements
+
+**Planned Improvements:**
+- **Drag & Drop Reordering**: Rearrange sections within pages
+- **Section Creation**: Add new sections to existing pages
+- **Bulk Field Operations**: Edit multiple sections simultaneously
+- **Field Validation**: Client-side validation for field formats
+- **Auto-save**: Periodic background saves while editing
+- **Version History**: Track and restore previous field values
+- **Media Management**: Upload and manage images directly in editor
+- **Advanced Fields**: Support for rich text, color pickers, etc.
+
+### 18.12 Builder Save Endpoints - Current Status
+
+**FIXED:** Authentication and CSRF issues resolved for section content and SEO updates.
+
+#### Section Content Editor:
+- **Frontend API:** `updateSectionContent()` in `lib/api/sections.ts`
+- **Endpoint:** `PATCH /api/sections/{section_id}/content/`
+- **Authentication:** Session-based (Django sessions with CSRF)
+- **Payload Format:**
+  ```json
+  {
+    "fields": [
+      { "key": "headline", "value": "New headline text" },
+      { "key": "subheadline", "value": "Updated content..." }
+    ]
+  }
+  ```
+- **CSRF Handling:** Auto-fetches fresh CSRF token before each request
+- **Headers:** `X-CSRFToken` header with `credentials: "include"`
+- **Permissions:** Only SiteProject owner or staff can update sections
+
+#### Page SEO Editor:
+- **Frontend API:** `updatePageSeo()` in `lib/api/pages.ts`  
+- **Endpoint:** `PATCH /api/pages/{page_id}/seo/`
+- **Authentication:** Session-based (same as content editor)
+- **Payload Format:**
+  ```json
+  {
+    "meta_title": "New page title",
+    "meta_description": "Updated description...",
+    "meta_slug": "new-slug",
+    "indexable": true
+  }
+  ```
+- **Same CSRF/session pattern as section updates**
+
+#### Technical Notes:
+- **Authentication System:** Uses Django sessions (not JWT) for builder operations
+- **CSRF Token Management:** Fresh token fetched via `GET /api/csrf/` before each write request
+- **API Base URLs:** Updated to use `127.0.0.1:8000` for consistency
+- **Error Handling:** Proper error messages displayed in UI for auth/permission failures
+- **Import Fixes:** Removed non-existent `authFetch` dependency, uses direct fetch with session cookies
+
+#### Validation Status:
+- ✅ Section field saves work without authentication errors
+- ✅ CSRF token properly included in request headers
+- ✅ Session-based auth correctly validated by backend
+- ✅ Permission checks enforce owner-only access
+- ✅ API responses return proper JSON (not HTML error pages)
+- ✅ Frontend error handling shows clear messages to users
+
+---
+
+## 19. Printing Builder v1 – Dashboard Route & Skeleton
+
+### 19.1 Overview
+
+Printing Builder v1 establishes the foundation for print material creation within the JCW dashboard. It provides a structured interface for users to create business cards, flyers, and other marketing materials using their existing website data and branding.
+
+### 19.2 Route & Access
+
+**Route:**
+- User dashboard: `/[locale]/dashboard/printing`
+
+**Access Requirements:**
+- Session authentication required (same as Website Builder)
+- User must have a valid SiteProject
+- Navigation available from main dashboard sidebar
+
+### 19.3 Data Integration
+
+**Site Data Reuse:**
+- Uses identical data fetching pattern as Website Builder
+- Fetches from `/api/sites/{projectSlug}/public/` endpoint
+- Reuses existing `SiteProjectPublic` and `ThemeJson` types
+- Currently hardcoded to "marys-restaurant" slug (matches Website Builder)
+
+**Theme Integration:**
+- Automatically extracts brand colors from site theme
+- Displays theme preview with primary, secondary, and accent colors
+- Uses site name and template information for consistency
+
+### 19.4 User Interface
+
+**Top Summary Card:**
+- Business name and website link display
+- Direct link to live site at `/sites/{slug}`
+- Visual theme color palette preview
+- Template key identification
+
+**Product Categories Grid:**
+- Responsive 3-column layout (1 col mobile, 2 col tablet, 3 col desktop)
+- Six product categories with different statuses:
+  - **Business Cards** (Available) - Full preview and functionality
+  - **Flyers & Brochures** (Coming Soon) - Bizay integration planned
+  - **Posters & Banners** (Coming Soon) - Bizay integration planned  
+  - **Stickers & Labels** (Coming Soon) - Bizay integration planned
+  - **Clothing & Merch** (Future) - Printful integration planned
+  - **POS Materials** (Future) - Custom integration planned
+
+### 19.5 Business Card Preview System
+
+**Live Preview Features:**
+- Front card mockup using site's primary color as background
+- Site name prominently displayed with theme-appropriate styling
+- Back card mockup with contact information placeholders
+- Responsive aspect ratio (1.7:1 business card proportions)
+- Gradient overlay effects for visual appeal
+
+**Data Sources:**
+- Site name from `siteData.name`
+- Colors from `siteData.theme.primary_color`, `secondary_color`, etc.
+- Contact information placeholders (TODO: extract from site data when available)
+
+### 19.6 Status System
+
+**Product Availability:**
+- **Available**: Green badge, functional buttons, preview enabled
+- **Coming Soon**: Amber badge, disabled buttons, future integration notes
+- **Future**: Gray badge, placeholder text, long-term planning
+
+**Button Behavior:**
+- Available products: "Open [Product] Builder (coming next)"
+- Coming soon: "Not available yet" (disabled)
+- Future: "Planned for later" (disabled)
+
+### 19.7 Navigation Flow
+
+**Entry Points:**
+- Main dashboard sidebar "Printing" tab
+- Website Builder "Continue to Print Studio" button (after preview)
+
+**Website Builder Integration:**
+- Added CTA button below website preview
+- Uses existing router and locale handling
+- Smooth transition: Builder → Preview → Printing Builder
+
+### 19.8 Technical Architecture
+
+**Component Structure:**
+```typescript
+PrintingPage (main page component)
+├── BusinessCardPreview (live card mockup)
+├── ProductCategoryCard (reusable product display)
+└── PRINT_PRODUCTS (product configuration array)
+```
+
+**State Management:**
+- `siteData`: Site project information and theme
+- `siteLoading`: Loading state for data fetching  
+- `siteError`: Error handling for API failures
+
+**API Integration:**
+- Reuses existing public site API endpoint
+- No new backend endpoints required
+- Session-based authentication (consistent with platform)
+
+### 19.9 Future Integration Points
+
+**Bizay Integration (Coming Soon):**
+- Business Cards (priority 1)
+- Flyers & Brochures
+- Posters & Banners  
+- Stickers & Labels
+
+**Printful Integration (Future):**
+- Clothing & Merch category
+- T-shirts, hoodies, mugs, promotional items
+
+**POS Materials (Future):**
+- Table tents, receipts, point-of-sale items
+- Custom integration for restaurant/retail specific needs
+
+### 19.10 Code Locations
+
+**Frontend Files:**
+- `src/app/[locale]/dashboard/printing/page.tsx` - Main printing dashboard
+- `src/app/[locale]/dashboard/website/page.tsx` - Updated with CTA button
+- `src/components/jcw/dashboard/DashboardShellRightSidebar.tsx` - Navigation already included
+
+**Key Dependencies:**
+- `@/lib/types/sitePublic` - Site and theme type definitions
+- `@/contexts/auth-context` - Authentication handling
+- Existing site data API endpoints
+
+### 19.11 Testing Status
+
+**Verified Functionality:**
+- ✅ Route accessible via dashboard navigation
+- ✅ Site data fetching and display
+- ✅ Theme color extraction and preview
+- ✅ Business card mockup rendering
+- ✅ Product status system working
+- ✅ Navigation flow from Website Builder
+- ✅ Responsive design across device sizes
+
+### 19.12 Next Steps
+
+**Immediate (v2):**
+- Business Card Builder implementation
+- Contact information extraction from site data
+- Custom card template system
+
+**Medium Term (v3):**
+- Bizay API integration for actual ordering
+- Advanced design customization tools
+- Order management and tracking
+
+**Long Term (v4+):**
+- Printful API integration for merchandise
+- POS materials custom builder
+- Advanced branding tools and asset management
+
+---
+
+## 20. Website Builder – AI Section Suggestions (v1)
+
+### 20.1 Overview
+
+The AI Section Suggestions feature provides intelligent content generation for website sections within the builder. Users can click a "Smart suggestion" button to automatically populate section fields with AI-generated content based on their business context.
+
+### 20.2 Route & Access
+
+**Route:**
+- Website builder: `/[locale]/dashboard/website`
+- Available in section field editor when editing any section
+
+**Access Requirements:**
+- Session authentication required (same as other builder features)
+- User must own the SiteProject containing the section
+- OpenAI API key must be configured in backend environment
+
+### 20.3 Backend Implementation
+
+**API Endpoint:**
+- `POST /api/builder/sections/<section_id>/ai-suggest/`
+- Authentication: Session + CSRF token (consistent with other builder APIs)
+- Permissions: `IsAuthenticated` with section ownership validation
+
+**Request Payload:**
+```json
+{
+  "locale": "en",
+  "tone": "friendly and professional",
+  "extra_instructions": "Highlight family atmosphere and home-made food."
+}
+```
+
+**Response Format:**
+```json
+{
+  "suggested": {
+    "headline": "Welcome to Mary's Restaurant",
+    "subheadline": "Authentic Italian cuisine in the heart of the city",
+    "content": "Mary's Restaurant has been serving delicious..."
+  }
+}
+```
+
+**Context Generation:**
+- Business name from `SiteProject.name`
+- Industry from `SiteProject.business_type` 
+- Section type from `Section.identifier`
+- Available field keys from related `Field` objects
+- User-provided tone and locale preferences
+
+### 20.4 OpenAI Integration
+
+**Model Used:** `gpt-4o-mini` (cost-effective for content generation)
+**Response Format:** Structured JSON matching section field keys
+**Configuration:** Environment variable `OPENAI_API_KEY` in `.env`
+
+**Prompt Strategy:**
+- System prompt enforces JSON-only responses with no extra keys
+- User prompt provides business context, section type, and field requirements
+- Response filtering ensures only valid field keys are returned
+- Graceful error handling for API failures or missing configuration
+
+### 20.5 Frontend Implementation
+
+**Component:** `SectionFieldEditor.tsx`
+**Location:** `/src/components/jcw/builder/SectionFieldEditor.tsx`
+
+**New UI Elements:**
+- "Smart suggestion" button (subtle gray styling, no "AI" branding)
+- Loading state with spinner during generation
+- Error display for suggestion failures
+- Success integration into existing form fields
+
+**State Management:**
+```typescript
+const [suggesting, setSuggesting] = useState(false);
+const [suggestError, setSuggestError] = useState<string | null>(null);
+```
+
+**API Integration:**
+- Uses same CSRF token pattern as other builder APIs
+- Session-based authentication for consistency
+- Merges suggestions into existing `fieldValues` state
+- No auto-save - user maintains control over final content
+
+### 20.6 User Experience
+
+**Button Placement:**
+- Located before the "Save Changes" button in section editor
+- Disabled during suggestion generation or saving operations
+- Small, secondary styling to keep focus on main actions
+
+**Content Flow:**
+1. User selects a section to edit
+2. Clicks "Smart suggestion" button
+3. AI generates content based on business context
+4. Fields populate with suggested text
+5. User can edit suggestions before saving
+6. Standard save process applies
+
+**Error Handling:**
+- Missing OpenAI key: "AI suggestion service is not configured"
+- API failures: "Failed to get suggestion" with retry option
+- Network issues: Standard error messaging
+- No automatic fallbacks - clear error states
+
+### 20.7 Security & Privacy
+
+**Data Protection:**
+- Only section owner can request suggestions for their content
+- No persistent storage of AI-generated content until user saves
+- API key stored securely in environment variables
+- Standard Django CSRF and session protection
+
+**Rate Limiting:**
+- Inherits from Django's standard rate limiting
+- Frontend prevents multiple concurrent requests
+- Backend validates section ownership on every request
+
+### 20.8 Configuration
+
+**Backend Environment:**
+```env
+OPENAI_API_KEY=your_openai_key_here
+```
+
+**Backend Dependencies:**
+- `openai==2.8.0` (official Python client)
+- `python-dotenv==1.2.1` (environment loading)
+
+**Frontend Dependencies:**
+- No additional packages required
+- Uses existing fetch API and error handling patterns
+
+### 20.9 Testing Status
+
+**Backend Verification:**
+- ✅ Endpoint created and routed correctly
+- ✅ Authentication and ownership validation
+- ✅ OpenAI integration with error handling
+- ✅ Response filtering and JSON validation
+
+**Frontend Verification:**
+- ✅ Smart suggestion button added to section editor
+- ✅ Loading states and error handling implemented
+- ✅ Field population and state management working
+- ✅ No UI disruption to existing save workflow
+
+**Integration Testing:**
+- ✅ API endpoint accessible from frontend
+- ✅ CSRF token handling consistent with other APIs
+- ⚠️  Requires valid OpenAI API key for full functionality testing
+
+### 20.10 Future Enhancements
+
+**Immediate Improvements:**
+- Context enhancement with location data and specific business details
+- Tone customization options in UI (professional, casual, fun)
+- Content length preferences (short, medium, detailed)
+
+**Medium Term:**
+- Section-specific prompting for better hero vs about vs services content
+- Industry-specific templates and suggestions
+- Multi-language support with locale-aware generation
+
+**Long Term:**
+- Integration with existing site content for consistency
+- A/B testing of different AI-generated variations  
+- Brand voice learning from existing content
+- Custom instruction templates per business type
+
+### 20.11 Code Locations
+
+**Backend Files:**
+- `sites/views.py` - `SectionAISuggestView` class
+- `sites/api_urls.py` - URL routing for AI endpoint
+- `jcw_backend/settings.py` - OpenAI configuration
+- `requirements.txt` - OpenAI dependencies
+
+**Frontend Files:**  
+- `src/components/jcw/builder/SectionFieldEditor.tsx` - Main implementation
+- Uses existing `lib/api/sections.ts` patterns for API calls
+
+### 20.12 Dependencies
+
+**Production Requirements:**
+- Valid OpenAI API account and key
+- Existing session authentication system
+- Django CSRF middleware enabled
+- Frontend build with no additional packages
+
+**Development Setup:**
+- `.env` file with `OPENAI_API_KEY`
+- Local Django server on port 8000
+- Next.js frontend on port 3000+ 
+- Existing test data with sections and fields
+
+---
+
+**End of Documentation v0.3** - AI Section Suggestions v1 Complete

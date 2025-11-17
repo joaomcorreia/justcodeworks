@@ -1,4 +1,8 @@
+import json
+from django.conf import settings
+from django.db import models
 from rest_framework import viewsets, mixins, status, generics, permissions, authentication
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -7,7 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
 from django.db.models import Prefetch
 
-from .models import Template, SiteProject, Page, Section, Field, BugReport, NavigationItem, HeroSlide, DashboardTemplate, SiteTemplate, TemplateSection, QuoteRequest
+from .models import Template, SiteProject, Page, Section, Field, BugReport, NavigationItem, HeroSlide, DashboardTemplate, SiteTemplate, TemplateSection, QuoteRequest, SectionDraft, HomepageSlider, HomepageSlide, TestimonialCarousel, TestimonialSlide
 from .serializers import (
     TemplateSerializer,
     SiteProjectSerializer,
@@ -34,7 +38,15 @@ from .serializers import (
     SectionContentUpdateSerializer,
     SiteProjectPublicSerializer,
     QuoteRequestSerializer,
+    AdminQuoteRequestSerializer,
     AdminSitesListSerializer,
+    SectionDraftSerializer,
+    SectionDraftCreateSerializer,
+    HomepageSliderSerializer,
+    HomepageSliderListSerializer,
+    HomepageSlideSerializer,
+    TestimonialCarouselSerializer,
+    TestimonialSlideSerializer,
 )
 
 
@@ -496,6 +508,61 @@ def login_view(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def register_view(request):
+    """
+    Registration endpoint for creating new user accounts
+    """
+    from django.contrib.auth import authenticate, login
+    from django.contrib.auth.models import User
+    from django.contrib.auth.hashers import make_password
+    
+    email = request.data.get('email')
+    password = request.data.get('password')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    
+    if not email or not password:
+        return Response({'error': 'Email and password required'}, status=400)
+    
+    # Check if user already exists
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'User with this email already exists'}, status=400)
+    
+    try:
+        # Create the user
+        user = User.objects.create(
+            username=email,  # Use email as username
+            email=email,
+            password=make_password(password),
+            first_name=first_name,
+            last_name=last_name,
+            is_active=True
+        )
+        
+        # Authenticate and login the new user
+        user = authenticate(request, username=email, password=password)
+        if user:
+            login(request, user)
+            return Response({
+                'success': True,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'is_staff': user.is_staff,
+                    'is_superuser': user.is_superuser,
+                }
+            })
+        else:
+            return Response({'error': 'Failed to authenticate new user'}, status=500)
+    
+    except Exception as e:
+        return Response({'error': f'Failed to create user: {str(e)}'}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def logout_view(request):
     """
     Logout endpoint for Django session authentication
@@ -708,6 +775,248 @@ class SiteProjectSetTemplateView(generics.UpdateAPIView):
         })
 
 
+# [JCW] Step 0 Builder - Complete site creation from onboarding data
+class BuilderStep0View(APIView):
+    """
+    🧱 Step 0 Builder Endpoint - Create a complete site from onboarding data
+    
+    This is the main builder endpoint that transforms Step 0 onboarding form data
+    into a real, functional website with appropriate template, content, and structure.
+    
+    POST /api/builder/step0/
+    
+    Input: Combined auth + onboarding data
+    Output: Complete site with real content, not placeholders
+    """
+    authentication_classes = [JWTAuthentication, authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        """Create a complete site from Step 0 onboarding data."""
+        from .utils import clone_project_structure, ensure_template_skeleton
+        from django.core.exceptions import ValidationError
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # Extract and validate input data
+            data = request.data
+            
+            # Step 0 required fields
+            required_fields = ['website_name', 'website_topic', 'entry_product', 'primary_audience']
+            missing_fields = [field for field in required_fields if not data.get(field)]
+            
+            if missing_fields:
+                return Response({
+                    'error': f'Missing required fields: {", ".join(missing_fields)}',
+                    'status': 'validation_error'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Extract Step 0 data
+            website_name = data['website_name'].strip()
+            website_topic = data['website_topic'].strip()
+            entry_product = data['entry_product']  # website/printing/pos
+            primary_audience = data['primary_audience'].strip()
+            
+            # Optional fields
+            tagline = data.get('tagline', '').strip()
+            industry = data.get('industry', '').strip()
+            description = data.get('description', '').strip()
+            
+            # Validate entry_product
+            valid_products = ['website', 'printing', 'pos']
+            if entry_product not in valid_products:
+                return Response({
+                    'error': f'Invalid entry_product. Must be one of: {", ".join(valid_products)}',
+                    'status': 'validation_error'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 🎯 Template Selection Logic
+            template_key = self._select_template(entry_product, industry, website_topic)
+            
+            try:
+                template = SiteTemplate.objects.get(
+                    key=template_key,
+                    is_active=True,
+                    is_user_selectable=True,
+                    status="published"
+                )
+            except SiteTemplate.DoesNotExist:
+                # Fallback to any available user-selectable template
+                template = SiteTemplate.objects.filter(
+                    is_active=True,
+                    is_user_selectable=True,
+                    status="published"
+                ).first()
+                
+                if not template:
+                    return Response({
+                        'error': 'No suitable template found',
+                        'status': 'template_error'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # Generate unique slug for the project
+            from django.utils.text import slugify
+            import time
+            base_slug = slugify(website_name)
+            unique_slug = f"{base_slug}-{int(time.time())}"
+            
+            # Create the SiteProject with available fields
+            project = SiteProject.objects.create(
+                name=website_name,
+                slug=unique_slug,
+                owner=request.user,
+                site_template=template,
+                entry_product=entry_product,
+                business_name=website_name,  # Store website name in business_name field
+                onboarding_notes=f"Step 0 Data - Topic: {website_topic}, Audience: {primary_audience}, Industry: {industry}, Description: {description}"
+            )
+            
+            # 📝 Content Generation - Create basic content structure
+            try:
+                # Create a simple homepage
+                homepage = project.pages.create(
+                    title=website_name,
+                    slug='home',
+                    order=0
+                )
+                
+                # Create a basic hero section using correct field names
+                hero_section = homepage.sections.create(
+                    identifier='hero-section',
+                    internal_name='Hero Section',
+                    order=0
+                )
+                
+                # Add hero title field
+                hero_section.fields.create(
+                    key='title',
+                    label='Hero Title',
+                    value=tagline or f"Welcome to {website_name}",
+                    order=0
+                )
+                
+                # Add hero description field if description provided
+                if description:
+                    hero_section.fields.create(
+                        key='subtitle',
+                        label='Hero Subtitle',
+                        value=description,
+                        order=1
+                    )
+                
+                logger.info(f"✅ Step 0 Builder: Created project '{website_name}' for user {request.user.id}")
+                
+            except Exception as e:
+                # Clean up project if content creation fails
+                project.delete()
+                error_msg = str(e)
+                import traceback
+                traceback_msg = traceback.format_exc()
+                
+                # Print to console for debugging
+                print(f"❌ Step 0 Builder: Content creation failed: {error_msg}")
+                print(f"Traceback: {traceback_msg}")
+                
+                logger.error(f"❌ Step 0 Builder: Content creation failed: {error_msg}")
+                logger.error(f"Traceback: {traceback_msg}")
+                return Response({
+                    'error': f'Failed to create site content: {error_msg}',
+                    'status': 'content_creation_error'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # 🎉 Success Response - Ready to redirect to editor
+            return Response({
+                'success': True,
+                'message': f'Website "{website_name}" created successfully!',
+                'project': {
+                    'id': str(project.id),
+                    'name': project.name,
+                    'template_key': template.key,
+                    'template_name': template.name,
+                    'business_name': project.business_name,
+                    'entry_product': project.entry_product,
+                    'created_at': project.created_at.isoformat()
+                },
+                'redirect_to': f'/websites/{project.id}/edit',
+                'status': 'created'
+            }, status=status.HTTP_201_CREATED)
+            
+        except ValidationError as e:
+            logger.warning(f"⚠️  Step 0 Builder: Validation error: {str(e)}")
+            return Response({
+                'error': str(e),
+                'status': 'validation_error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            error_msg = str(e)
+            import traceback
+            traceback_msg = traceback.format_exc()
+            
+            # Print to console for debugging
+            print(f"❌ Step 0 Builder: Unexpected error: {error_msg}")
+            print(f"Traceback: {traceback_msg}")
+            
+            logger.error(f"❌ Step 0 Builder: Unexpected error: {error_msg}")
+            logger.error(f"Traceback: {traceback_msg}")
+            return Response({
+                'error': f'Unexpected error: {error_msg}',
+                'status': 'server_error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def _select_template(self, entry_product, industry, website_topic):
+        """
+        🎯 Template Selection Logic
+        
+        Selects the most appropriate template based on:
+        1. Entry product (website/printing/pos)
+        2. Industry context
+        3. Website topic/purpose
+        
+        Uses only templates that are available and user-selectable.
+        """
+        
+        # Default template for most cases - use one-page-basic as fallback
+        default_template = "one-page-basic"
+        
+        # POS systems get auto garage template (closest to business)
+        if entry_product == "pos":
+            return "auto-garage-modern"  # Available business-focused template
+        
+        # Printing services get tire center template (service-based)
+        if entry_product == "printing":
+            return "tire-center-premium"  # Available service template
+        
+        # Website product - select based on industry/topic
+        if entry_product == "website":
+            
+            # Restaurant/Food industry - exact match available
+            if industry and any(keyword in industry.lower() for keyword in ['restaurant', 'food', 'cafe', 'bar', 'dining']):
+                return "restaurant-modern"
+            
+            # Auto/garage industry - exact match available  
+            if industry and any(keyword in industry.lower() for keyword in ['auto', 'garage', 'car', 'automotive', 'repair']):
+                return "auto-garage-modern"
+            
+            # Tire/automotive services
+            if industry and any(keyword in industry.lower() for keyword in ['tire', 'tires', 'automotive']):
+                return "tire-center-premium"
+            
+            # E-commerce indicators - use ecommerce-basic
+            if website_topic and any(keyword in website_topic.lower() for keyword in ['shop', 'store', 'sell', 'product', 'ecommerce']):
+                return "ecommerce-basic"
+            
+            # Landing page indicators - use landing-conversion
+            if website_topic and any(keyword in website_topic.lower() for keyword in ['landing', 'conversion', 'marketing', 'campaign']):
+                return "landing-conversion"
+        
+        return default_template
+
+
+
+
 class AdminSiteTemplateListView(generics.ListAPIView):
     """
     List site templates for the admin panel.
@@ -782,6 +1091,62 @@ class AdminTemplateBrandingView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]  # Temporarily relaxed
     queryset = SiteTemplate.objects.all()
     lookup_field = 'pk'
+
+
+# [TEMPLAB] API to create a template section from an existing section
+class TemplateSectionFromSectionView(APIView):
+    """
+    POST endpoint to create a reusable TemplateSection from an existing Section.
+    Clones the section and all its fields into a new TemplateSection.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def post(self, request, *args, **kwargs):
+        from .services import create_template_section_from_section
+        
+        section_id = request.data.get("section_id")
+        name = request.data.get("name")
+        key = request.data.get("key")
+        
+        if not section_id:
+            return Response(
+                {"detail": "section_id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            section = Section.objects.select_related(
+                "page__site__site_template"
+            ).get(id=section_id)
+        except Section.DoesNotExist:
+            return Response(
+                {"detail": "Section not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Staff/superuser check
+        if not (request.user.is_staff or request.user.is_superuser):
+            return Response(
+                {"detail": "Forbidden - staff access required"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            template_section = create_template_section_from_section(
+                section,
+                key=key,
+                name=name
+            )
+            
+            data = AdminTemplateSectionSerializer(template_section).data
+            return Response(data, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response(
+                {"detail": f"Failed to create template section: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class OnePageWebsiteOnboardingView(generics.CreateAPIView):
@@ -1120,6 +1485,42 @@ class AdminDashboardTemplateListView(APIView):
         qs = DashboardTemplate.objects.all().prefetch_related("blocks").order_by("name")
         serializer = DashboardTemplateSerializer(qs, many=True)
         return Response(serializer.data)
+
+
+# [USER] User's Sites for Editing
+class UserSitesForEditingView(generics.ListAPIView):
+    """
+    Returns list of authenticated user's sites with full editing data.
+    Used in admin edit-website interface.
+    
+    - Regular users: Only their own sites
+    - Admin/Staff users: All sites in the system
+    """
+    
+    serializer_class = SiteProjectPublicSerializer
+    authentication_classes = [
+        authentication.SessionAuthentication,
+        JWTAuthentication,
+    ]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Admin/staff users can see all sites
+        if user.is_staff or user.is_superuser:
+            return SiteProject.objects.filter(
+                is_active=True
+            ).select_related('site_template').prefetch_related(
+                'pages__sections__fields'
+            ).order_by('-updated_at')
+        
+        # Regular users see only their own sites
+        return SiteProject.objects.filter(
+            owner=user
+        ).select_related('site_template').prefetch_related(
+            'pages__sections__fields'
+        ).order_by('-updated_at')
 
 
 class UserWebsitePreviewView(APIView):
@@ -1465,3 +1866,842 @@ def csrf_token_view(request):
         'success': True,
         'csrfToken': get_token(request)
     })
+
+
+# [GARAGE-FORM] Admin Quote Request Views for JCW Admin
+class AdminQuoteRequestListView(generics.ListAPIView):
+    """
+    List all quote requests for admin interface.
+    Supports filtering by site_slug and locale.
+    """
+    serializer_class = AdminQuoteRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        queryset = QuoteRequest.objects.select_related('site_project').order_by('-created_at')
+        
+        # Filter by site slug if provided
+        site_slug = self.request.query_params.get('site_slug')
+        if site_slug:
+            queryset = queryset.filter(site_project__slug=site_slug)
+            
+        # Filter by locale if provided
+        locale = self.request.query_params.get('locale')
+        if locale and locale != 'all':
+            queryset = queryset.filter(locale=locale)
+            
+        return queryset
+
+
+class AdminQuoteRequestDetailView(generics.RetrieveAPIView):
+    """
+    Get detailed view of a single quote request for admin interface.
+    """
+    serializer_class = AdminQuoteRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return QuoteRequest.objects.select_related('site_project')
+
+
+# [TEMPLAB] Template Preview - Sample Site Mapping
+class AdminTemplateSampleSiteView(APIView):
+    """
+    Get sample site mapping for template preview.
+    Returns the sample SiteProject slug to use for live template preview.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    # Hard-coded template key to sample site slug mappings
+    TEMPLATE_SAMPLE_MAPPINGS = {
+        'restaurant-modern': 'marys-restaurant',
+        'auto-garage-modern': 'oficina-paulo-calibra',
+    }
+    
+    def get(self, request, template_key):
+        sample_site_slug = self.TEMPLATE_SAMPLE_MAPPINGS.get(template_key)
+        
+        if not sample_site_slug:
+            return Response(
+                {"error": f"No sample site mapping found for template key: {template_key}"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Verify the sample site actually exists
+        try:
+            SiteProject.objects.get(slug=sample_site_slug)
+        except SiteProject.DoesNotExist:
+            return Response(
+                {"error": f"Sample site not found: {sample_site_slug}"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        return Response({
+            "template_key": template_key,
+            "sample_site_slug": sample_site_slug
+        })
+
+
+# [ONBOARDING] Step 0 Multi-Intent Onboarding API
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def step0_onboarding_view(request):
+    """
+    Step 0 Multi-Intent Onboarding endpoint.
+    Creates or updates SiteProject with user's onboarding data.
+    
+    POST /api/onboarding/step-0/
+    Body: {
+        "entry_intent": "website|prints|pos",
+        "business_name": "My Business Name",
+        "business_type": "Restaurant", 
+        "primary_country": "United States",
+        "primary_language": "en",
+        "brand_primary_color": "#1D4ED8",
+        "brand_secondary_color": "#6366F1", 
+        "preferred_theme_mode": "dark",
+        "primary_goal": "get-leads",
+        "onboarding_notes": "Internal notes"
+    }
+    
+    Returns: {
+        "success": true,
+        "project": { ... project data ... },
+        "redirect_url": "/dashboard?active_section=website"
+    }
+    """
+    from .serializers import Step0OnboardingSerializer
+    
+    # Validate onboarding data
+    serializer = Step0OnboardingSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(
+            {
+                "success": false, 
+                "errors": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Create or update project
+        project = serializer.create_or_update_project(
+            serializer.validated_data,
+            request.user
+        )
+        
+        # Generate redirect URL based on intent
+        entry_intent = serializer.validated_data.get('entry_intent')
+        redirect_url = f"/dashboard?active_section={entry_intent}"
+        
+        # Return project data using existing serializer
+        from .serializers import SiteProjectSerializer
+        project_serializer = SiteProjectSerializer(project)
+        
+        return Response({
+            "success": True,
+            "project": project_serializer.data,
+            "redirect_url": redirect_url
+        })
+        
+    except Exception as e:
+        return Response(
+            {
+                "success": False,
+                "error": str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# [AI] Section AI Suggestion View
+class SectionAISuggestView(APIView):
+    """
+    AI suggestion endpoint for section content.
+    POST /api/builder/sections/<section_id>/ai-suggest/
+    Provides smart content suggestions based on business context.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [
+        authentication.SessionAuthentication,
+        JWTAuthentication,
+    ]
+
+    def post(self, request, section_id):
+        from django.conf import settings
+        import json
+        
+        try:
+            # Get section and verify ownership
+            section = Section.objects.select_related(
+                'page__project__owner'
+            ).get(id=section_id)
+            
+            # Verify user owns this section's project
+            if section.page.project.owner != request.user:
+                return Response(
+                    {"error": "You don't have permission to access this section"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Extract request data
+            locale = request.data.get('locale', 'en')
+            tone = request.data.get('tone', 'friendly and professional')
+            extra_instructions = request.data.get('extra_instructions', '')
+            
+            # Gather business context
+            project = section.page.project
+            business_name = project.name
+            industry = getattr(project, 'business_type', None) or 'local business'
+            
+            # Get existing field keys for this section
+            fields = section.fields.all().values_list('key', 'label')
+            field_list = []
+            for key, label in fields:
+                field_list.append(f'"{key}": {label or key}')
+            field_context = ', '.join(field_list)
+            
+            # Check OpenAI API key
+            if not settings.OPENAI_API_KEY:
+                return Response(
+                    {"error": "AI suggestion service is not configured"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            # Call OpenAI
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=settings.OPENAI_API_KEY)
+                
+                system_prompt = """You are an assistant that writes website copy for small businesses.
+You must return a JSON object with keys that match the section field keys.
+Do not include any extra keys or explanations – only the JSON.
+Keep content concise and professional."""
+
+                user_prompt = f"""Business name: {business_name}
+Industry: {industry}
+Language: {locale}
+Section type: {section.identifier}
+
+Fields needed: {field_context}
+Tone: {tone}
+{f"Special instructions: {extra_instructions}" if extra_instructions else ""}
+
+Write short, clear copy for this section. 
+Keep it realistic for a small business website.
+Return JSON with only the field keys that exist in this section."""
+
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    response_format={"type": "json_object"},
+                )
+                
+                # Parse AI response
+                ai_content = response.choices[0].message.content
+                suggested_data = json.loads(ai_content)
+                
+                # Filter to only include valid field keys
+                valid_keys = set(key for key, _ in fields)
+                filtered_suggestions = {
+                    k: v for k, v in suggested_data.items() 
+                    if k in valid_keys
+                }
+                
+                return Response({
+                    "suggested": filtered_suggestions
+                })
+                
+            except Exception as ai_error:
+                return Response(
+                    {"error": f"AI service error: {str(ai_error)}"},
+                    status=status.HTTP_502_BAD_GATEWAY
+                )
+            
+        except Section.DoesNotExist:
+            return Response(
+                {"error": "Section not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Server error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class SectionDraftUploadView(APIView):
+    """
+    POST /api/sections/upload-screenshot/
+    
+    Upload a screenshot image to generate website sections from.
+    Step 1: Just store the image and create a draft - no AI processing yet.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = SectionDraftCreateSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Check if user has access to the project
+            project_id = serializer.validated_data.get('project')
+            if project_id and not request.user.is_staff:
+                try:
+                    project = SiteProject.objects.get(id=project_id, owner=request.user)
+                except SiteProject.DoesNotExist:
+                    return Response(
+                        {"error": "Project not found or access denied."},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            
+            # Create the section draft
+            section_draft = serializer.save()
+            
+            # Return the created draft with image URL
+            response_serializer = SectionDraftSerializer(section_draft, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SectionDraftProcessView(APIView):
+    """
+    POST /api/sections/{draft_id}/process/
+    
+    Process an uploaded screenshot with AI to extract sections and generate content.
+    Step 2: AI analysis to convert screenshot → structured section data.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, draft_id):
+        try:
+            # Get the section draft
+            section_draft = SectionDraft.objects.get(id=draft_id)
+            
+            # Check permissions
+            if not request.user.is_staff and section_draft.project.owner != request.user:
+                return Response(
+                    {"error": "Permission denied."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Check if already processing
+            if section_draft.status == 'processing':
+                return Response(
+                    {"message": "Draft is already being processed."},
+                    status=status.HTTP_202_ACCEPTED
+                )
+            
+            # Check OpenAI API key
+            if not settings.OPENAI_API_KEY:
+                return Response(
+                    {"error": "AI processing service is not configured."},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            # Update status to processing
+            section_draft.status = 'processing'
+            section_draft.save()
+            
+            try:
+                # Process with OpenAI Vision API
+                import base64
+                from openai import OpenAI
+                
+                client = OpenAI(api_key=settings.OPENAI_API_KEY)
+                
+                # Read and encode the image
+                with section_draft.image.open('rb') as image_file:
+                    image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                
+                # Create the AI prompt
+                system_prompt = """You are an expert web designer that analyzes website screenshots and extracts section information.
+
+                Analyze the provided screenshot and identify distinct website sections (header, hero, about, services, contact, etc.).
+                
+                Return a JSON object with this structure:
+                {
+                    "sections": [
+                        {
+                            "type": "hero",
+                            "title": "Main heading text",
+                            "content": "Body text content",
+                            "image_url": "URL if there's an image",
+                            "cta_text": "Call to action text if present",
+                            "cta_url": "Call to action URL if present"
+                        },
+                        {
+                            "type": "about",
+                            "title": "About section heading", 
+                            "content": "About section text content"
+                        }
+                    ],
+                    "overall_theme": "modern/classic/minimal/etc",
+                    "color_scheme": "blue/green/red/etc",
+                    "business_type": "restaurant/services/ecommerce/etc"
+                }
+
+                Extract all visible text accurately. Identify section types like: hero, about, services, menu, contact, footer, testimonials, gallery, etc."""
+
+                user_prompt = f"""Analyze this website screenshot and extract all visible sections with their content.
+                
+                Project context: {section_draft.project.name}
+                Locale: {section_draft.locale or 'en'}
+                
+                Please provide accurate extraction of all text, headings, and identify the section types clearly."""
+
+                response = client.chat.completions.create(
+                    model="gpt-4o",  # Use the vision model
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                        },
+                        {
+                            "role": "user", 
+                            "content": [
+                                {"type": "text", "text": user_prompt},
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{image_data}"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    response_format={"type": "json_object"},
+                )
+                
+                # Parse AI response
+                ai_content = response.choices[0].message.content
+                ai_data = json.loads(ai_content)
+                
+                # Store the AI output
+                section_draft.ai_output_json = ai_data
+                section_draft.status = 'ready'
+                section_draft.save()
+                
+                # Return the processed data
+                response_serializer = SectionDraftSerializer(section_draft, context={'request': request})
+                return Response(response_serializer.data, status=status.HTTP_200_OK)
+                
+            except Exception as e:
+                # Mark as error and return details
+                section_draft.status = 'error'
+                section_draft.save()
+                
+                return Response(
+                    {"error": f"AI processing failed: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+                
+        except SectionDraft.DoesNotExist:
+            return Response(
+                {"error": "Section draft not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class SectionDraftCreateSectionView(APIView):
+    """
+    POST /api/sections/drafts/{draft_id}/create-section/
+    
+    Convert AI-analyzed section data into actual Page sections.
+    Step 3: AI JSON → Section + Field models with page selection.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, draft_id):
+        try:
+            # Get the section draft
+            section_draft = SectionDraft.objects.get(id=draft_id)
+            
+            # Check permissions
+            if not request.user.is_staff and section_draft.project.owner != request.user:
+                return Response(
+                    {"error": "Permission denied."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Check if AI processing is complete
+            if section_draft.status != 'ready' or not section_draft.ai_output_json:
+                return Response(
+                    {"error": "Section draft is not ready. Please complete AI processing first."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get page_id from request body
+            page_id = request.data.get('page_id')
+            if not page_id:
+                return Response(
+                    {"error": "page_id is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get and validate the page
+            try:
+                page = Page.objects.get(id=page_id, project=section_draft.project)
+            except Page.DoesNotExist:
+                return Response(
+                    {"error": "Page not found or doesn't belong to this project."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Parse AI data
+            ai_data = section_draft.ai_output_json
+            sections_data = ai_data.get('sections', [])
+            
+            if not sections_data:
+                return Response(
+                    {"error": "No sections found in AI data."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            created_sections = []
+            
+            # Get the current max order for sections in this page
+            max_order = page.sections.aggregate(models.Max('order'))['order__max'] or 0
+            
+            # Create sections from AI data
+            for i, section_data in enumerate(sections_data):
+                section_type = section_data.get('type', 'content')
+                section_title = section_data.get('title', f'AI Section {i + 1}')
+                
+                # Generate unique identifier
+                base_identifier = f"ai-{section_type}-{i + 1}"
+                identifier = base_identifier
+                counter = 1
+                
+                # Ensure unique identifier within the page
+                while page.sections.filter(identifier=identifier).exists():
+                    identifier = f"{base_identifier}-{counter}"
+                    counter += 1
+                
+                # Create the section
+                section = Section.objects.create(
+                    page=page,
+                    identifier=identifier,
+                    internal_name=section_title,
+                    order=max_order + i + 1
+                )
+                
+                # Create fields from section data
+                field_order = 0
+                
+                # Title field (most sections have this)
+                if section_data.get('title'):
+                    Field.objects.create(
+                        section=section,
+                        key='title',
+                        label='Title',
+                        value=section_data['title'],
+                        order=field_order
+                    )
+                    field_order += 1
+                
+                # Content field
+                if section_data.get('content'):
+                    Field.objects.create(
+                        section=section,
+                        key='content',
+                        label='Content',
+                        value=section_data['content'],
+                        order=field_order
+                    )
+                    field_order += 1
+                
+                # Image URL field
+                if section_data.get('image_url'):
+                    Field.objects.create(
+                        section=section,
+                        key='image_url',
+                        label='Image URL',
+                        value=section_data['image_url'],
+                        order=field_order
+                    )
+                    field_order += 1
+                
+                # CTA text field
+                if section_data.get('cta_text'):
+                    Field.objects.create(
+                        section=section,
+                        key='cta_text',
+                        label='Call to Action Text',
+                        value=section_data['cta_text'],
+                        order=field_order
+                    )
+                    field_order += 1
+                
+                # CTA URL field
+                if section_data.get('cta_url'):
+                    Field.objects.create(
+                        section=section,
+                        key='cta_url',
+                        label='Call to Action URL',
+                        value=section_data['cta_url'],
+                        order=field_order
+                    )
+                    field_order += 1
+                
+                # Section type field for frontend rendering
+                Field.objects.create(
+                    section=section,
+                    key='section_type',
+                    label='Section Type',
+                    value=section_type,
+                    order=field_order
+                )
+                
+                created_sections.append({
+                    'id': section.id,
+                    'identifier': section.identifier,
+                    'internal_name': section.internal_name,
+                    'fields_count': section.fields.count()
+                })
+            
+            # Store business type and theme as page-level fields if available
+            if ai_data.get('business_type') or ai_data.get('overall_theme') or ai_data.get('color_scheme'):
+                # Find or create a metadata section for this page
+                metadata_section, created = Section.objects.get_or_create(
+                    page=page,
+                    identifier='ai-metadata',
+                    defaults={
+                        'internal_name': 'AI Metadata',
+                        'order': 0  # Put metadata at the top
+                    }
+                )
+                
+                if ai_data.get('business_type'):
+                    Field.objects.update_or_create(
+                        section=metadata_section,
+                        key='business_type',
+                        defaults={
+                            'label': 'Business Type',
+                            'value': ai_data['business_type'],
+                            'order': 0
+                        }
+                    )
+                
+                if ai_data.get('overall_theme'):
+                    Field.objects.update_or_create(
+                        section=metadata_section,
+                        key='overall_theme',
+                        defaults={
+                            'label': 'Overall Theme',
+                            'value': ai_data['overall_theme'],
+                            'order': 1
+                        }
+                    )
+                
+                if ai_data.get('color_scheme'):
+                    Field.objects.update_or_create(
+                        section=metadata_section,
+                        key='color_scheme',
+                        defaults={
+                            'label': 'Color Scheme',
+                            'value': ai_data['color_scheme'],
+                            'order': 2
+                        }
+                    )
+            
+            return Response({
+                'success': True,
+                'page_id': page.id,
+                'page_name': page.title,
+                'sections_created': len(created_sections),
+                'sections': created_sections
+            }, status=status.HTTP_201_CREATED)
+            
+        except SectionDraft.DoesNotExist:
+            return Response(
+                {"error": "Section draft not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to create sections: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# [SLIDERS] Homepage Slider API Views
+class HomepageSliderViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing homepage sliders.
+    GET: List/retrieve sliders (public)
+    POST/PUT/PATCH/DELETE: Admin only
+    """
+    serializer_class = HomepageSliderSerializer
+    lookup_field = 'slug'
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return HomepageSliderListSerializer
+        return HomepageSliderSerializer
+    
+    def get_queryset(self):
+        queryset = HomepageSlider.objects.prefetch_related('slides').order_by('-created_at')
+        
+        # Filter by project if specified
+        project_id = self.request.query_params.get('project_id')
+        if project_id:
+            try:
+                queryset = queryset.filter(site_project_id=project_id)
+            except ValueError:
+                pass  # Invalid project_id, ignore
+        
+        # Only show active sliders for non-admin users
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(is_active=True)
+        
+        return queryset
+    
+    def get_permissions(self):
+        """
+        Public read access for sliders, admin access for modifications
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
+    
+    def perform_create(self, serializer):
+        # Only staff can create sliders
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Only staff can create sliders.")
+        serializer.save()
+    
+    def perform_update(self, serializer):
+        # Only staff can update sliders
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Only staff can update sliders.")
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        # Only staff can delete sliders
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Only staff can delete sliders.")
+        instance.delete()
+
+
+class HomepageSlideViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing individual homepage slides.
+    Admin-only access for create/update/delete.
+    """
+    serializer_class = HomepageSlideSerializer
+    
+    def get_queryset(self):
+        queryset = HomepageSlide.objects.select_related('slider').order_by('order', 'id')
+        
+        # Filter by slider if specified
+        slider_id = self.request.query_params.get('slider_id')
+        if slider_id:
+            try:
+                queryset = queryset.filter(slider_id=slider_id)
+            except ValueError:
+                pass
+        
+        # Only show active slides for non-admin users
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(is_active=True, slider__is_active=True)
+        
+        return queryset
+    
+    def get_permissions(self):
+        """
+        Public read access for slides, admin access for modifications
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
+    
+    def perform_create(self, serializer):
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Only staff can create slides.")
+        serializer.save()
+    
+    def perform_update(self, serializer):
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Only staff can update slides.")
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Only staff can delete slides.")
+        instance.delete()
+
+
+# [TESTIMONIALS] Testimonial Carousel API Views
+class TestimonialCarouselViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing testimonial carousels.
+    """
+    serializer_class = TestimonialCarouselSerializer
+    lookup_field = 'slug'
+    
+    def get_queryset(self):
+        queryset = TestimonialCarousel.objects.prefetch_related('testimonials').order_by('-created_at')
+        
+        # Filter by project if specified
+        project_id = self.request.query_params.get('project_id')
+        if project_id:
+            try:
+                queryset = queryset.filter(site_project_id=project_id)
+            except ValueError:
+                pass
+        
+        # Only show active carousels for non-admin users
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(is_active=True)
+        
+        return queryset
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
+
+
+class TestimonialSlideViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing individual testimonials.
+    """
+    serializer_class = TestimonialSlideSerializer
+    
+    def get_queryset(self):
+        queryset = TestimonialSlide.objects.select_related('carousel').order_by('order', 'id')
+        
+        # Filter by carousel if specified  
+        carousel_id = self.request.query_params.get('carousel_id')
+        if carousel_id:
+            try:
+                queryset = queryset.filter(carousel_id=carousel_id)
+            except ValueError:
+                pass
+        
+        # Only show active testimonials for non-admin users
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(is_active=True, carousel__is_active=True)
+        
+        return queryset
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]

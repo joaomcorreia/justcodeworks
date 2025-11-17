@@ -94,7 +94,10 @@ export default function JcwAdminPage({
               Bug reports
             </Link>
             <button
-              onClick={logout}
+              onClick={async () => {
+                await logout();
+                router.push(`/${locale}`);
+              }}
               className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-300 hover:border-red-400 hover:text-red-300"
             >
               Logout

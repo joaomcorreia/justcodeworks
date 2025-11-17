@@ -1,4 +1,4 @@
-import type { DashboardPage, DashboardTemplate, AdminSiteTemplate, AdminSiteTemplateDetail, TemplateSectionData, TemplateBranding } from "./api-types";
+import type { DashboardPage, DashboardTemplate, AdminSiteTemplate, AdminSiteTemplateDetail, TemplateSectionData, TemplateBranding, AdminQuoteRequest, SiteProject } from "./api-types";
 
 const API_BASE = "http://localhost:8000/api";
 
@@ -143,6 +143,27 @@ export type CreateSiteProjectInput = {
   additionalLocales: string[];
   primaryColor: string;
   notes: string;
+};
+
+// [ONBOARDING] Step 0 Multi-Intent Onboarding Types
+export type Step0OnboardingInput = {
+  entry_intent: 'website' | 'prints' | 'pos';
+  business_name: string;
+  business_type?: string;
+  primary_country?: string;
+  primary_language?: string;
+  brand_primary_color?: string;
+  brand_secondary_color?: string;
+  preferred_theme_mode?: 'light' | 'dark' | 'auto';
+  primary_goal?: string;
+  onboarding_notes?: string;
+};
+
+export type Step0OnboardingResponse = {
+  success: boolean;
+  project?: ApiSiteProject;
+  redirect_url?: string;
+  errors?: Record<string, string[]>;
 };
 
 /**
@@ -840,6 +861,21 @@ export async function fetchAdminSiteTemplateDetail(
   return res.json();
 }
 
+export async function fetchAdminSiteTemplateDetailByKey(
+  templateKey: string
+): Promise<AdminSiteTemplateDetail> {
+  const res = await fetch(`${API_BASE}/admin/templates/key/${templateKey}/`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to load template detail for key: ${templateKey}`);
+  }
+
+  return res.json();
+}
+
 export async function fetchTemplateSections(
   templateId: number
 ): Promise<TemplateSectionData[]> {
@@ -958,3 +994,337 @@ export async function assignTemplateToProject(projectId: string, templateId: num
 
   return res.json();
 }
+
+
+// [GARAGE-FORM] Admin Quote Requests API Functions
+export async function fetchAdminQuoteRequests(params?: {
+  site_slug?: string;
+  locale?: string;
+}): Promise<AdminQuoteRequest[]> {
+  const query = new URLSearchParams();
+  if (params?.site_slug && params.site_slug !== 'all') {
+    query.set("site_slug", params.site_slug);
+  }
+  if (params?.locale && params.locale !== 'all') {
+    query.set("locale", params.locale);
+  }
+
+  const url = `${API_BASE}/admin/quote-requests/${query.toString() ? `?${query.toString()}` : ""}`;
+  console.log("🌐 Fetching quote requests:", url);
+  
+  // Get CSRF token
+  let csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+    
+  if (!csrfToken) {
+    console.log("🔄 Getting CSRF token...");
+    const newToken = await getCSRFToken();
+    if (newToken) {
+      csrfToken = newToken;
+    }
+  }
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (csrfToken) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+  
+  const res = await fetch(url, {
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+
+  console.log("📊 Quote requests response status:", res.status);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Quote requests API Error:", res.status, errorText);
+    throw new Error(`Failed to load quote requests (${res.status}): ${errorText}`);
+  }
+
+  const data = await res.json();
+  console.log("📦 Quote requests data:", data);
+  return data;
+}
+
+export async function fetchAdminQuoteRequestDetail(
+  quoteId: number
+): Promise<AdminQuoteRequest> {
+  const url = `${API_BASE}/admin/quote-requests/${quoteId}/`;
+  console.log("🌐 Fetching quote request detail:", url);
+  
+  // Get CSRF token
+  let csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+    
+  if (!csrfToken) {
+    const newToken = await getCSRFToken();
+    if (newToken) {
+      csrfToken = newToken;
+    }
+  }
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (csrfToken) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+  
+  const res = await fetch(url, {
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Quote request detail API Error:", res.status, errorText);
+    throw new Error(`Failed to load quote request detail (${res.status}): ${errorText}`);
+  }
+
+  return res.json();
+}
+
+// [TEMPLAB] Template Preview - Sample Site Mapping
+export async function fetchTemplateSampleSite(templateKey: string): Promise<{template_key: string, sample_site_slug: string}> {
+  const url = `${API_BASE}/admin/templates/${templateKey}/sample-site/`;
+  console.log("🌐 Fetching template sample site:", url);
+  
+  // Get CSRF token
+  let csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+    
+  if (!csrfToken) {
+    const newToken = await getCSRFToken();
+    if (newToken) {
+      csrfToken = newToken;
+    }
+  }
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (csrfToken) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+  
+  const res = await fetch(url, {
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Template sample site API Error:", res.status, errorText);
+    throw new Error(`Failed to load template sample site (${res.status}): ${errorText}`);
+  }
+
+  return res.json();
+}
+
+// Helper function to fetch site projects for filter dropdown
+export async function fetchSiteProjects(): Promise<SiteProject[]> {
+  const url = `${API_BASE}/admin/site-projects/`;
+  console.log("🌐 Fetching site projects:", url);
+  
+  // Get CSRF token
+  let csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+    
+  if (!csrfToken) {
+    const newToken = await getCSRFToken();
+    if (newToken) {
+      csrfToken = newToken;
+    }
+  }
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (csrfToken) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+  
+  const res = await fetch(url, {
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Site projects API Error:", res.status, errorText);
+    throw new Error(`Failed to load site projects (${res.status}): ${errorText}`);
+  }
+
+  const data = await res.json();
+  return data.map((project: any) => ({
+    id: project.id,
+    name: project.name,
+    slug: project.slug
+  }));
+}
+
+// [TEMPLAB] Fetch public site data for template preview
+export async function fetchSitePublic(siteSlug: string, locale: string = 'en'): Promise<any> {
+  const url = `${API_BASE}/sites/${siteSlug}/public/?locale=${locale}`;
+  console.log("🌐 Fetching site public data:", url);
+  
+  const res = await fetch(url, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Site public API Error:", res.status, errorText);
+    throw new Error(`Failed to load site public data (${res.status}): ${errorText}`);
+  }
+
+  return res.json();
+}
+
+// [ONBOARDING] Step 0 Multi-Intent Onboarding Submission
+export async function submitStep0Onboarding(
+  data: Step0OnboardingInput, 
+  useSessionAuth = true
+): Promise<Step0OnboardingResponse> {
+  const url = `${API_BASE}/onboarding/step-0/`;
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (useSessionAuth) {
+    headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+  }
+  
+  // Add CSRF token if available
+  const csrfToken = await getCSRFToken();
+  if (csrfToken) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+    credentials: 'include',
+  });
+  
+  if (!res.ok) {
+    const errorResponse = await res.json().catch(() => ({}));
+    console.error("❌ Step 0 Onboarding Error:", res.status, errorResponse);
+    
+    // Return error structure that matches our expected response type
+    return {
+      success: false,
+      errors: errorResponse.errors || { general: ['Failed to submit onboarding data'] }
+    };
+  }
+  
+  return res.json();
+}
+
+// [TEMPLAB] Create a reusable TemplateSection from an existing Section
+export async function createTemplateSectionFromSection(
+  sectionId: string | number, 
+  name?: string, 
+  key?: string
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/admin/template-sections/from-section/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      section_id: sectionId,
+      name: name,
+      key: key
+    })
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Failed to create template section (${res.status})`);
+  }
+
+  return res.json();
+}
+
+// [API] Simple API client object for convenience
+export const api = {
+  post: async (url: string, data: any) => {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+    const token = localStorage.getItem('access_token');
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Add CSRF token if available
+    const csrfToken = await getCSRFToken();
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
+    
+    const res = await fetch(fullUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Request failed (${res.status})`);
+    }
+    
+    return res;
+  },
+  
+  get: async (url: string) => {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+    const token = localStorage.getItem('access_token');
+    
+    const headers: Record<string, string> = {};
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const res = await fetch(fullUrl, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Request failed (${res.status})`);
+    }
+    
+    return res;
+  }
+};

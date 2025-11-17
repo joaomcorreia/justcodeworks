@@ -10,6 +10,7 @@
     "clean": "rimraf .next .turbo node_modules/.cache"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "axios": "^1.13.2",

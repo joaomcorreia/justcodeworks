@@ -24,9 +24,12 @@ const baseEn = {
     assistantCta: "Start wizard",
   },
   nav: {
+    home: "Home",
     websites: "Websites",
     printing: "Printing",
     pos: "POS Systems",
+    services: "Services",
+    helpCenter: "Help Center",
     aiTools: "MagicAI Tools",
     pricing: "Pricing",
     login: "Login",
@@ -419,6 +422,23 @@ const baseEn = {
       languageHelp: "Use the selector above to test different language versions of the site.",
       navigation: "Navigation",
       published: "Published",
+      // Admin panel sections
+      systemOverview: {
+        title: "📊 System Overview",
+        template: "Template",
+        templateName: "jcw-main",
+        sections: "Sections",
+        sectionsList: "Hero, Features, Services, Solutions, Contact",
+        status: "Status",
+        statusActive: "✅ Active & Ready",
+        description: "Just Code Works provides comprehensive business solutions that adapt to your needs."
+      },
+      multiLanguageSupport: {
+        title: "🌍 Multi-Language Support",
+        description: "Our platform supports 6 languages with automatic content translation and localized routing.",
+        languages: "Languages: English, Dutch, Portuguese, Spanish, French, German",
+        testInstructions: "Use the language selector to experience seamless multi-language navigation."
+      }
     },
     posystems: {
       title: "POS Systems",
@@ -497,6 +517,138 @@ const baseEn = {
       loading: "Loading...",
     },
   },
+  // [ONBOARDING] Step 0 Multi-Intent Onboarding
+  onboarding: {
+    step0: {
+      title: "Let's Get Started",
+      subtitle: "Tell us about your business and what you'd like to create",
+      
+      progress: {
+        intent: "Intent",
+        details: "Details", 
+        branding: "Branding"
+      },
+      
+      intents: {
+        website: {
+          title: "Build a Website",
+          description: "Create a professional website for your business"
+        },
+        prints: {
+          title: "Design Prints",
+          description: "Create business cards, flyers, and marketing materials"
+        },
+        pos: {
+          title: "Point of Sale",
+          description: "Set up payment processing and inventory management"
+        }
+      },
+      
+      form: {
+        businessName: {
+          label: "Business Name",
+          placeholder: "Enter your business name",
+          required: "Business name is required"
+        },
+        businessType: {
+          label: "Business Type",
+          placeholder: "e.g., Restaurant, Consulting, Retail Store"
+        },
+        primaryCountry: {
+          label: "Primary Country",
+          placeholder: "Select your country"
+        },
+        primaryLanguage: {
+          label: "Primary Language",
+          placeholder: "Select primary language"
+        },
+        primaryGoal: {
+          label: "Primary Goal",
+          placeholder: "What's your main goal?"
+        },
+        brandColors: {
+          primaryLabel: "Primary Brand Color",
+          secondaryLabel: "Secondary Brand Color",
+          primaryPlaceholder: "#1D4ED8",
+          secondaryPlaceholder: "#6366F1"
+        },
+        themeMode: {
+          label: "Preferred Theme",
+          light: "Light",
+          dark: "Dark",
+          auto: "Auto"
+        },
+        notes: {
+          label: "Additional Notes",
+          placeholder: "Any specific requirements or preferences..."
+        }
+      },
+      
+      actions: {
+        back: "Back",
+        continue: "Continue to Branding",
+        continueDetails: "Continue to Details",
+        complete: "Complete Setup",
+        creating: "Creating..."
+      },
+      
+      success: {
+        title: "Welcome to JustCodeWorks!",
+        subtitle: "Your onboarding is complete. Redirecting to your dashboard...",
+        redirecting: "Redirecting..."
+      },
+      
+      errors: {
+        general: "Something went wrong. Please try again.",
+        businessName: "Business name cannot be empty",
+        invalidColor: "Please enter a valid hex color (e.g. #1D4ED8)",
+        submitFailed: "Failed to save onboarding data. Please try again."
+      },
+      
+      countries: [
+        "United States",
+        "United Kingdom", 
+        "Canada",
+        "Australia",
+        "Germany",
+        "France",
+        "Spain",
+        "Portugal",
+        "Brazil",
+        "Mexico",
+        "Other"
+      ],
+      
+      languages: {
+        en: "English",
+        pt: "Português",
+        es: "Español", 
+        fr: "Français",
+        de: "Deutsch"
+      },
+      
+      goals: {
+        "get-leads": "Get leads / requests",
+        "show-info": "Show info / menu",
+        "sell-online": "Sell online",
+        "take-bookings": "Take bookings",
+        "other": "Other"
+      }
+    }
+  },
+
+  // Website promise section
+  websitePromise: {
+    items: [
+      "Free domain and hosting first year",
+      "Secure EU-based servers",
+      "SSL certificate and daily backups",
+      "Fast delivery time",
+      "Ongoing upgrade options",
+    ],
+    description: "All websites are built with our smart system that makes content creation simple and intuitive — so you can focus on your business, not the tools.",
+    exploreTitle: "Explore Our Website Types",
+  }
 };
 
 export type Dictionary = typeof baseEn;

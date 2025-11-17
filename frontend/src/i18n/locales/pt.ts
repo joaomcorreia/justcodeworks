@@ -432,6 +432,23 @@ const ptTranslation = {
       languageHelp: "Use o selector acima para testar diferentes versões linguísticas do website.",
       navigation: "Navegação",
       published: "Publicado",
+      // Admin panel sections
+      systemOverview: {
+        title: "📊 Visão Geral do Sistema",
+        template: "Modelo",
+        templateName: "jcw-main",
+        sections: "Seções",
+        sectionsList: "Hero, Características, Serviços, Soluções, Contato",
+        status: "Status",
+        statusActive: "✅ Ativo & Pronto",
+        description: "O Just Code Works fornece soluções empresariais abrangentes que se adaptam às suas necessidades."
+      },
+      multiLanguageSupport: {
+        title: "🌍 Suporte Multi-Idioma",
+        description: "Nossa plataforma suporta 6 idiomas com tradução automática de conteúdo e roteamento localizado.",
+        languages: "Idiomas: Inglês, Holandês, Português, Espanhol, Francês, Alemão",
+        testInstructions: "Use o seletor de idiomas para experimentar navegação multi-idioma perfeita."
+      }
     },
     posystems: {
       title: "Sistemas TPV",

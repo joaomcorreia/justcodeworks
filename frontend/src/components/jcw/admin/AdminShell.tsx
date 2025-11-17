@@ -18,6 +18,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Overview", href: "/admin", icon: "📊" },
+  { label: "Edit Website", href: "/admin/edit-website", icon: "✏️" },
+  { label: "Create Section", href: "/admin/sections/create-from-screenshot", icon: "📷" },
   { label: "Website Templates", href: "/admin/templates/website", icon: "🎨" },
   { label: "Email Templates", href: "/admin/templates/email", icon: "📧" },
 ];
@@ -25,12 +27,16 @@ const navItems: NavItem[] = [
 export function AdminShell({ children, user }: AdminShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  
+  // Extract locale from pathname (e.g., "/en/admin" -> "en")
+  const locale = pathname.split('/')[1] || 'en';
 
   const isActivePath = (href: string) => {
+    const fullHref = `/${locale}${href}`;
     if (href === "/admin") {
-      return pathname === "/admin";
+      return pathname === fullHref;
     }
-    return pathname.startsWith(href);
+    return pathname.startsWith(fullHref);
   };
 
   const handleLogout = () => {
@@ -72,7 +78,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={`/${locale}${item.href}`}
                 className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActivePath(item.href)
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"

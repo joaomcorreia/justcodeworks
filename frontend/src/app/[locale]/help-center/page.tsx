@@ -9,9 +9,12 @@ interface HelpCenterPageProps {
 }
 
 export default async function HelpCenterPage({ params: { locale } }: HelpCenterPageProps) {
-  // Redirect Portuguese users to the proper Portuguese URL
+  // Redirect users to the proper localized URL
   if (locale === 'pt') {
     redirect('/pt/centro-ajuda');
+  }
+  if (locale === 'nl') {
+    redirect('/nl/hulpcentrum');
   }
   
   const dict = await getDictionary(locale);

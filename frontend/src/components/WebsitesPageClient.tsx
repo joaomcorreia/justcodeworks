@@ -1,16 +1,26 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAuth } from '@/contexts/auth-context'; // [AUTH]
+import Step0OnboardingModal from './Step0OnboardingModal';
 
 interface WebsitesPageClientProps {
   dict: any;
 }
 
 export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
-  const { isAuthenticated } = useAuth(); // [AUTH]
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
+
+  const openOnboardingModal = () => {
+    setIsOnboardingModalOpen(true);
+  };
+
+  const handleOnboardingSuccess = () => {
+    // Redirect to dashboard with website section active
+    window.location.href = `/${dict.locale || 'en'}/dashboard?section=website`;
+  };
   
   const websiteTypes = [
     {
@@ -44,7 +54,7 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
         'Blog / news sections for updates',
         'Structured contact & quote forms'
       ],
-      demoUrl: '/sites/just-code-works',
+      demoUrl: null, // jcw-main has no demo site - it's the platform template
       gradient: 'from-purple-500 to-pink-400'
     },
     {
@@ -135,6 +145,7 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
   ];
 
   return (
+    <>
     <div className="min-h-screen">
       {/* Hero Section with Animated Background */}
       <div className="relative overflow-hidden">
@@ -154,20 +165,6 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 sm:py-32">
-          {/* [AUTH] Edit mode info - only show when authenticated */}
-          {isAuthenticated && (
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-12 text-white">
-              <h3 className="text-lg font-semibold mb-4">💻 Websites Page Info</h3>
-              <div className="space-y-2 text-sm opacity-90">
-                <p><strong>Page:</strong> Websites</p>
-                <p><strong>Slug:</strong> websites</p>
-                <p><strong>Template:</strong> jcw-main (redesigned)</p>
-                <p><strong>Features:</strong> One-page, Multi-page, Online stores, Custom sites</p>
-                <p className="text-blue-300 font-medium">✅ Published</p>
-              </div>
-            </div>
-          )}
-
           <div className="text-center text-white">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium mb-8">
               <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
@@ -272,7 +269,10 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
                           View Live Demo
                         </button>
                       </Link>
-                      <button className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors border border-gray-200">
+                      <button 
+                        onClick={openOnboardingModal}
+                        className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors border border-gray-200"
+                      >
                         Get Started
                       </button>
                     </div>
@@ -327,7 +327,10 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
             Join thousands of businesses that trust Just Code Works for their online presence
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-xl">
+            <button 
+              onClick={openOnboardingModal}
+              className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-xl"
+            >
               Start Building Now →
             </button>
             <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300">
@@ -337,5 +340,15 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
         </div>
       </div>
     </div>
+
+    {/* Step 0 Onboarding Modal */}
+    <Step0OnboardingModal
+      isOpen={isOnboardingModalOpen}
+      onClose={() => setIsOnboardingModalOpen(false)}
+      intent="website"
+      locale={dict.locale || 'en'}
+      onSuccess={handleOnboardingSuccess}
+    />
+    </>
   );
 }

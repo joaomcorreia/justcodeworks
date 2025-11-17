@@ -1,0 +1,145 @@
+/* Template Editor Styles */
+.template-editor {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Edit Mode Toggle */
+.toggle-checkbox {
+  transition: all 0.3s;
+  position: absolute;
+  right: 16px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #d1d5db;
+  cursor: pointer;
+}
+
+.toggle-checkbox:checked {
+  right: 2px;
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+}
+
+.toggle-label {
+  display: block;
+  overflow: hidden;
+  height: 24px;
+  border-radius: 12px;
+  background-color: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  width: 40px;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #3b82f6;
+}
+
+/* Section Overlays */
+.section-overlay {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.section-overlay:hover {
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.section-overlay.selected {
+  box-shadow: 0 0 0 3px #1d4ed8, 0 0 30px rgba(29, 78, 216, 0.4);
+}
+
+/* Section Labels */
+.section-label {
+  animation: fadeInUp 0.2s ease-out;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Preview Frame */
+.preview-frame {
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Edit Mode Indicator */
+.edit-mode-indicator {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-label {
+    font-size: 10px;
+    padding: 2px 4px;
+    max-width: 150px;
+  }
+  
+  .toggle-label {
+    width: 32px;
+    height: 20px;
+    border-radius: 10px;
+  }
+  
+  .toggle-checkbox {
+    width: 18px;
+    height: 18px;
+    top: 1px;
+  }
+  
+  .toggle-checkbox:checked {
+    right: 1px;
+  }
+}
+
+/* Loading states */
+.loading-overlay {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

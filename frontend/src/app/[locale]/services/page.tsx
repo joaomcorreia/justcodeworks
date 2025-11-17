@@ -9,9 +9,12 @@ interface ServicesPageProps {
 }
 
 export default async function ServicesPage({ params: { locale } }: ServicesPageProps) {
-  // Redirect Portuguese users to the proper Portuguese URL
+  // Redirect users to the proper localized URL
   if (locale === 'pt') {
     redirect('/pt/servicos');
+  }
+  if (locale === 'nl') {
+    redirect('/nl/diensten');
   }
   
   const dict = await getDictionary(locale);

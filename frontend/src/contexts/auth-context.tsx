@@ -44,57 +44,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Check Django session authentication on mount
-  useEffect(() => {
-    if (!isClient) return;
-    
-    const checkAuthStatus = async () => {
-      try {
-        // Check if user is authenticated with Django session
-        const response = await fetch(`${API_BASE}/auth/me/`, {
-          credentials: "include",
-        });
+  const checkAuthStatus = async () => {
+    try {
+      // Check if user is authenticated with Django session
+      const response = await fetch(`${API_BASE}/auth/me/`, {
+        credentials: "include",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
         
-        if (response.ok) {
-          const data = await response.json();
+        if (data.authenticated && data.user) {
+          const userData: User = {
+            id: data.user.id?.toString(),
+            email: data.user.email,
+            firstName: data.user.first_name,
+            lastName: data.user.last_name,
+            isStaff: data.user.is_staff,
+            isSuperuser: data.user.is_superuser,
+          };
           
-          if (data.authenticated && data.user) {
-            const userData: User = {
-              id: data.user.id?.toString(),
-              email: data.user.email,
-              firstName: data.user.first_name,
-              lastName: data.user.last_name,
-              isStaff: data.user.is_staff,
-              isSuperuser: data.user.is_superuser,
-            };
-            
-            setAccessToken("session");
-            setUser(userData);
-            
-            // Store user data in localStorage
-            localStorage.setItem("jcw_user", JSON.stringify(userData));
-          } else {
-            // Not authenticated, clear any stale data
-            setUser(null);
-            setAccessToken(null);
-            localStorage.removeItem("jcw_user");
-            localStorage.removeItem("jcw_access_token");
-          }
+          setAccessToken("session");
+          setUser(userData);
+          
+          // Store user data in localStorage
+          localStorage.setItem("jcw_user", JSON.stringify(userData));
         } else {
-          // Session expired or not authenticated
+          // Not authenticated, clear any stale data
           setUser(null);
           setAccessToken(null);
           localStorage.removeItem("jcw_user");
           localStorage.removeItem("jcw_access_token");
         }
-      } catch (error) {
-        console.warn("Auth check failed:", error);
+      } else {
+        // Session expired or not authenticated
         setUser(null);
         setAccessToken(null);
-      } finally {
-        setIsLoading(false);
+        localStorage.removeItem("jcw_user");
+        localStorage.removeItem("jcw_access_token");
       }
-    };
-    
+    } catch (error) {
+      console.warn("Auth check failed:", error);
+      setUser(null);
+      setAccessToken(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    if (!isClient) return;
     checkAuthStatus();
   }, [isClient]);
 
@@ -183,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn("Logout API call failed, clearing local state anyway:", error);
     }
     
-    // Clear all auth state
+    // Clear all auth state immediately
     setUser(null);
     setAccessToken(null);
     
@@ -193,8 +192,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("jcw_user");
       localStorage.removeItem("jcw_refresh_token");
       
-      // Redirect to homepage instead of reloading
-      window.location.href = "/";
+      // Clear all auth-related cookies
+      document.cookie = "sessionid=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; domain=localhost";
+      document.cookie = "csrftoken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; domain=localhost";
+      document.cookie = "jcw_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; domain=localhost";
+      document.cookie = "jcw_refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; domain=localhost";
+      
+      // Also clear without domain for broader compatibility
+      document.cookie = "sessionid=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      document.cookie = "csrftoken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      document.cookie = "jcw_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      document.cookie = "jcw_refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      
+
     }
   };
 

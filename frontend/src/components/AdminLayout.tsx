@@ -34,9 +34,19 @@ const adminNavItems = [
     icon: '🌐',
   },
   {
+    name: 'Leads & Quotes',
+    href: '/admin/leads',
+    icon: '📋',
+  },
+  {
     name: 'Templates',
     href: '/admin/templates',
     icon: '🎨',
+  },
+  {
+    name: 'Sections',
+    href: '/admin/sections',
+    icon: '📄',
   },
   {
     name: 'Email Templates',

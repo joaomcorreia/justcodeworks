@@ -24,6 +24,7 @@ from .views import (
     AdminTemplateLabInternalTemplateListView,
     AdminDashboardTemplateListView,
     UserWebsitePreviewView,
+    UserSitesForEditingView,
     OnePageWebsiteOnboardingView,
     TenantShowcaseView,
     tenant_showcase_html_view,
@@ -34,12 +35,27 @@ from .views import (
     clone_project,
     switch_current_project,
     login_view,
+    register_view,
     logout_view,
     auth_me_view,
     csrf_token_view,
     QuoteRequestCreateView,
+    AdminQuoteRequestListView,
+    AdminQuoteRequestDetailView,
+    AdminTemplateSampleSiteView,
     AdminSitesListView,
     AdminSitePublicView,
+    TemplateSectionFromSectionView,
+    step0_onboarding_view,
+    BuilderStep0View,
+    HomepageSliderViewSet,
+    HomepageSlideViewSet,
+    TestimonialCarouselViewSet,
+    TestimonialSlideViewSet,
+    SectionDraftUploadView,
+    SectionDraftProcessView,
+    SectionDraftCreateSectionView,
+    SectionAISuggestView,
 )
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
@@ -53,6 +69,12 @@ router.register(r"fields", FieldViewSet, basename="field")
 router.register(r"bug-reports", BugReportViewSet, basename="bug-report")
 router.register(r"navigation", NavigationItemViewSet, basename="navigation")
 
+# [SLIDERS] Homepage slider and testimonial carousel endpoints
+router.register(r"homepage-sliders", HomepageSliderViewSet, basename="homepage-slider")
+router.register(r"homepage-slides", HomepageSlideViewSet, basename="homepage-slide")
+router.register(r"testimonial-carousels", TestimonialCarouselViewSet, basename="testimonial-carousel")
+router.register(r"testimonial-slides", TestimonialSlideViewSet, basename="testimonial-slide")
+
 urlpatterns = [
     path("pages/my/", PageListForUserView.as_view(), name="page-list-for-user"),
     # [SEO] Page SEO update endpoint
@@ -64,6 +86,7 @@ urlpatterns = [
     path("csrf/", csrf_token_view, name="csrf-token"),
     # Auth endpoints
     path("auth/login/", login_view, name="auth-login"),
+    path("auth/register/", register_view, name="auth-register"),
     path("auth/logout/", logout_view, name="auth-logout"),
     path("auth/me/", auth_me_view, name="auth-me"),
     # [TEMPLAB] user template picker endpoints
@@ -80,10 +103,29 @@ urlpatterns = [
     # [ADMIN] Site Projects admin endpoints
     path("admin/site-projects/", AdminSiteProjectListView.as_view(), name="admin-site-projects-list"),
     path("admin/site-projects/<uuid:pk>/", AdminSiteProjectDetailView.as_view(), name="admin-site-projects-detail"),
+    # [USER] User's sites for editing
+    path("admin/user-sites/", UserSitesForEditingView.as_view(), name="user-sites-for-editing"),
     # [ADMIN-SITES] Sites Explorer admin endpoints
     path("admin/sites/", AdminSitesListView.as_view(), name="admin-sites-list"),
     path("admin/sites/<slug:slug>/public/", AdminSitePublicView.as_view(), name="admin-site-public"),
+    
+    # [GARAGE-FORM] Admin Quote Requests endpoints
+    path("admin/quote-requests/", AdminQuoteRequestListView.as_view(), name="admin-quote-requests-list"),
+    path("admin/quote-requests/<int:pk>/", AdminQuoteRequestDetailView.as_view(), name="admin-quote-requests-detail"),
+    
+    # [TEMPLAB] Template Preview - Sample Site Mapping
+    path("admin/templates/<str:template_key>/sample-site/", AdminTemplateSampleSiteView.as_view(), name="admin-template-sample-site"),
+    
+    # [TEMPLAB] Save Section as Reusable Template Section
+    path("admin/template-sections/from-section/", TemplateSectionFromSectionView.as_view(), name="template-section-from-section"),
+    
     path("onboarding/one-page-website/", OnePageWebsiteOnboardingView.as_view(), name="onepage-onboarding"),
+    
+    # [ONBOARDING] Step 0 Multi-Intent Onboarding
+    path("onboarding/step-0/", step0_onboarding_view, name="step0-onboarding"),
+    
+    # [JCW] Step 0 Builder - Complete site creation from onboarding data
+    path("builder/step0/", BuilderStep0View.as_view(), name="builder-step0"),
     
     # Template Builder Admin APIs
     path("admin/templates/<int:site_template_id>/generate-skeleton/", generate_template_skeleton, name="admin-generate-skeleton"),
@@ -104,6 +146,14 @@ urlpatterns = [
     
     # [ADMIN] Tenant showcase endpoints
     path("admin/tenant-showcase/", TenantShowcaseView.as_view(), name="admin-tenant-showcase"),
+    
+    # [AI] Section AI suggestion endpoint
+    path("builder/sections/<int:section_id>/ai-suggest/", SectionAISuggestView.as_view(), name="section-ai-suggest"),
+    
+    # [SECTIONS] Screenshot upload for section generation
+    path("sections/upload-screenshot/", SectionDraftUploadView.as_view(), name="section-upload-screenshot"),
+    path("sections/<uuid:draft_id>/process/", SectionDraftProcessView.as_view(), name="section-draft-process"),
+    path("sections/drafts/<uuid:draft_id>/create-section/", SectionDraftCreateSectionView.as_view(), name="section-draft-create-section"),
     
     # [RMOD] Public API for tenant sites
     path("sites/<slug>/public/", SiteProjectPublicView.as_view(), name="site-public-api"),

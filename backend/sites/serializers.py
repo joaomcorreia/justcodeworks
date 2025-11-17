@@ -2,7 +2,7 @@ import base64
 import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
-from .models import Template, SiteTemplate, TemplateSection, SiteProject, Page, Section, Field, BugReport, BugScreenshot, NavigationItem, HeroSlide, DashboardTemplate, DashboardBlock, QuoteRequest
+from .models import Template, SiteTemplate, TemplateSection, SiteProject, Page, Section, Field, BugReport, BugScreenshot, NavigationItem, HeroSlide, DashboardTemplate, DashboardBlock, QuoteRequest, SectionDraft, HomepageSlider, HomepageSlide, TestimonialCarousel, TestimonialSlide
 
 
 class TemplateSerializer(serializers.ModelSerializer):
@@ -350,6 +350,73 @@ class SectionSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+# Section Draft Serializer
+class SectionDraftSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SectionDraft
+        fields = [
+            "id",
+            "image",
+            "image_url",
+            "project",
+            "status",
+            "section_name",
+            "locale",
+            "ai_output_json",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at", "status", "ai_output_json"]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            # Return full URL for cross-origin requests
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class SectionDraftCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating SectionDraft with file upload validation."""
+    
+    class Meta:
+        model = SectionDraft
+        fields = [
+            "image",
+            "project",
+            "section_name",
+            "locale",
+        ]
+    
+    def validate_image(self, value):
+        """Validate uploaded image file type and size."""
+        if not value:
+            raise serializers.ValidationError("Image file is required.")
+        
+        # Check file extension
+        allowed_extensions = ['png', 'jpg', 'jpeg', 'svg']
+        file_extension = value.name.split('.')[-1].lower()
+        
+        if file_extension not in allowed_extensions:
+            raise serializers.ValidationError(
+                f"File type '.{file_extension}' not allowed. "
+                f"Allowed types: {', '.join(allowed_extensions)}"
+            )
+        
+        # Check file size (max 10MB)
+        max_size = 10 * 1024 * 1024  # 10MB
+        if value.size > max_size:
+            raise serializers.ValidationError(
+                f"File size too large. Maximum size is {max_size // (1024*1024)}MB."
+            )
+        
+        return value
 
 
 # Hero Slide Serializer
@@ -894,3 +961,320 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             raise serializers.ValidationError("O nome é obrigatório.")
         return value.strip()
+
+
+# [GARAGE-FORM] Admin Quote Request Serializer for JCW Admin
+class AdminQuoteRequestSerializer(serializers.ModelSerializer):
+    """
+    Admin serializer for QuoteRequest with additional fields for JCW admin interface.
+    """
+    site_project_name = serializers.CharField(source='site_project.name', read_only=True)
+    site_project_slug = serializers.CharField(source='site_project.slug', read_only=True)
+    service_type_display = serializers.CharField(source='get_service_type_display', read_only=True)
+    
+    class Meta:
+        model = QuoteRequest
+        fields = [
+            'id',
+            'site_project_name',
+            'site_project_slug', 
+            'created_at',
+            'updated_at',
+            'name',
+            'email',
+            'phone',
+            'license_plate',
+            'car_make_model',
+            'service_type',
+            'service_type_display',
+            'message',
+            'source_page_slug',
+            'locale',
+            'consent_marketing'
+        ]
+
+
+# [ONBOARDING] Step 0 Multi-Intent Onboarding Serializer
+class Step0OnboardingSerializer(serializers.Serializer):
+    """
+    Serializer for Step 0 Multi-Intent Onboarding flow.
+    Handles creation/update of SiteProject with onboarding data.
+    """
+    # Intent selection (required)
+    entry_intent = serializers.ChoiceField(
+        choices=SiteProject.ENTRY_INTENT_CHOICES,
+        required=True,
+        help_text="Primary intent: website, prints, or pos"
+    )
+    
+    # Common fields for all intents
+    business_name = serializers.CharField(
+        max_length=200,
+        required=True,
+        help_text="Official business name"
+    )
+    
+    business_type = serializers.CharField(
+        max_length=150,
+        required=False,
+        allow_blank=True,
+        help_text="Type/category of business"
+    )
+    
+    primary_country = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+        help_text="Primary country of operation"
+    )
+    
+    primary_language = serializers.CharField(
+        max_length=20,
+        required=False,
+        allow_blank=True,
+        help_text="Primary content language (ISO code)"
+    )
+    
+    # Brand preferences (optional)
+    brand_primary_color = serializers.RegexField(
+        regex=r'^#[0-9A-Fa-f]{6}$',
+        required=False,
+        allow_blank=True,
+        help_text="Brand primary color in hex format (#RRGGBB)"
+    )
+    
+    brand_secondary_color = serializers.RegexField(
+        regex=r'^#[0-9A-Fa-f]{6}$',
+        required=False,
+        allow_blank=True,
+        help_text="Brand secondary color in hex format (#RRGGBB)"
+    )
+    
+    preferred_theme_mode = serializers.ChoiceField(
+        choices=SiteProject.PREFERRED_THEME_MODE_CHOICES,
+        required=False,
+        allow_blank=True,
+        help_text="Preferred theme mode: light, dark, or auto"
+    )
+    
+    # Intent-specific fields (optional for flexibility)
+    primary_goal = serializers.ChoiceField(
+        choices=SiteProject.PRIMARY_GOAL_CHOICES,
+        required=False,
+        allow_blank=True,
+        help_text="Primary business goal (for website intent)"
+    )
+    
+    # Internal notes
+    onboarding_notes = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Internal onboarding notes"
+    )
+    
+    def validate_business_name(self, value):
+        """Validate business name is not empty when provided."""
+        if value and not value.strip():
+            raise serializers.ValidationError("Business name cannot be empty.")
+        return value.strip() if value else value
+    
+    def validate(self, data):
+        """Cross-field validation for Step 0 onboarding data."""
+        entry_intent = data.get('entry_intent')
+        
+        # For website intent, recommend setting primary_goal
+        if entry_intent == 'website' and not data.get('primary_goal'):
+            # Don't require it, but could add a warning in the frontend
+            pass
+            
+        # Validate brand colors are provided together or not at all
+        brand_primary = data.get('brand_primary_color')
+        brand_secondary = data.get('brand_secondary_color')
+        
+        if brand_primary and not brand_secondary:
+            # Allow single color, will use defaults for others
+            pass
+        
+        return data
+    
+    def create_or_update_project(self, validated_data, user):
+        """
+        Create or update SiteProject with onboarding data.
+        If user has no projects, create new one.
+        If user has one project, update it.
+        If user has multiple projects, create new one.
+        """
+        from django.utils.text import slugify
+        from .models import SiteTemplate
+        
+        user_projects = SiteProject.objects.filter(owner=user)
+        
+        # Determine if we should create new or update existing
+        if user_projects.count() == 1:
+            # Update existing single project
+            project = user_projects.first()
+            for field, value in validated_data.items():
+                if hasattr(project, field):
+                    setattr(project, field, value)
+        else:
+            # Create new project (no projects or multiple projects)
+            business_name = validated_data['business_name']
+            base_slug = slugify(business_name)
+            
+            # Ensure unique slug
+            slug = base_slug
+            counter = 1
+            while SiteProject.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            
+            # Set default values
+            project_data = {
+                'owner': user,
+                'name': business_name,
+                'slug': slug,
+                **validated_data
+            }
+            
+            # Assign default template based on intent
+            entry_intent = validated_data.get('entry_intent')
+            if entry_intent == 'website':
+                # Try to assign a suitable template
+                default_template = SiteTemplate.objects.filter(
+                    key__in=['jcw-main', 'restaurant-modern', 'auto-garage-modern'],
+                    is_active=True
+                ).first()
+                if default_template:
+                    project_data['site_template'] = default_template
+            
+            project = SiteProject.objects.create(**project_data)
+        
+        project.save()
+        return project
+
+
+# [SLIDERS] Homepage Slider Serializers
+class HomepageSlideSerializer(serializers.ModelSerializer):
+    """Serializer for individual homepage slides"""
+    
+    class Meta:
+        model = HomepageSlide
+        fields = [
+            'id',
+            'title',
+            'subtitle', 
+            'content',
+            'primary_cta_text',
+            'primary_cta_url',
+            'secondary_cta_text',
+            'secondary_cta_url',
+            'text_color',
+            'text_alignment',
+            'slide_image',
+            'slide_video',
+            'order',
+            'is_active',
+            'animation_type',
+        ]
+
+
+class HomepageSliderSerializer(serializers.ModelSerializer):
+    """Serializer for homepage sliders with all settings"""
+    slides = HomepageSlideSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = HomepageSlider
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'is_active',
+            'auto_play',
+            'auto_play_interval',
+            'show_navigation',
+            'show_pagination',
+            
+            # Particle Effects
+            'particles_enabled',
+            'particles_density',
+            'particles_speed',
+            'particles_size_min',
+            'particles_size_max',
+            'particles_color',
+            'particles_colors',
+            'particles_multi_color',
+            'particles_opacity',
+            
+            # Background
+            'background_type',
+            'gradient_from',
+            'gradient_to',
+            'gradient_direction',
+            'background_image',
+            'background_video',
+            'background_overlay_opacity',
+            
+            # Related data
+            'slides',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class HomepageSliderListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for listing sliders"""
+    slides_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomepageSlider
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'is_active',
+            'particles_enabled',
+            'slides_count',
+            'created_at',
+        ]
+    
+    def get_slides_count(self, obj):
+        return obj.slides.filter(is_active=True).count()
+
+
+# [TESTIMONIALS] Testimonial Carousel Serializers
+class TestimonialSlideSerializer(serializers.ModelSerializer):
+    """Serializer for individual testimonials"""
+    
+    class Meta:
+        model = TestimonialSlide
+        fields = [
+            'id',
+            'customer_name',
+            'customer_title',
+            'customer_company',
+            'customer_image',
+            'testimonial_text',
+            'rating',
+            'order',
+            'is_active',
+        ]
+
+
+class TestimonialCarouselSerializer(serializers.ModelSerializer):
+    """Serializer for testimonial carousels"""
+    testimonials = TestimonialSlideSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = TestimonialCarousel
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'is_active',
+            'auto_play',
+            'auto_play_interval',
+            'slides_per_view',
+            'testimonials',
+            'created_at',
+            'updated_at',
+        ]

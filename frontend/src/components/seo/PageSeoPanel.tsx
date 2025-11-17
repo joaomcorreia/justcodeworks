@@ -21,7 +21,7 @@ export function PageSeoPanel({ page, isAdmin, onSave }: PageSeoPanelProps) {
   const [seoData, setSeoData] = useState({
     meta_title: page.seo?.meta_title || "",
     meta_description: page.seo?.meta_description || "",
-    meta_slug: page.seo?.slug || page.slug,
+    meta_slug: page.seo?.meta_slug || page.slug,
     indexable: page.seo?.indexable ?? true,
   });
 

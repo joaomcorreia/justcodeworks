@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getDictionary, type Locale } from "@/i18n";
 import { getCurrentUser } from "@/lib/server-auth";
+import { TemplateLoginButton, BuilderLoginButton } from "@/components/TemplateLoginButtons";
 
 export default async function TemplatesPage({
   params,
@@ -87,12 +88,7 @@ export default async function TemplatesPage({
                       {t.templates.buttons.useTemplate}
                     </Link>
                   ) : (
-                    <Link
-                      href={`/${locale}/login`}
-                      className="rounded-full bg-slate-600 px-4 py-1.5 text-[11px] font-semibold text-slate-100 shadow hover:bg-slate-500"
-                    >
-                      Login to Use Template
-                    </Link>
+                    <TemplateLoginButton />
                   )}
                 </div>
               </div>
@@ -108,12 +104,7 @@ export default async function TemplatesPage({
                 {t.templates.buttons.goToBuilder} →
               </Link>
             ) : (
-              <Link
-                href={`/${locale}/login`}
-                className="text-xs font-medium text-slate-400 hover:text-slate-300"
-              >
-                Login to Access Builder →
-              </Link>
+              <BuilderLoginButton />
             )}
           </div>
         </div>

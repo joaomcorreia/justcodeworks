@@ -21,15 +21,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('🧩 Starting JCW Navigation Sync...')
         
-        # Find the JCW project
-        try:
-            jcw_project = SiteProject.objects.get(slug='just-code-works')
-            self.stdout.write(f'📋 Found JCW project: {jcw_project.name}')
-        except SiteProject.DoesNotExist:
-            self.stdout.write(
-                self.style.ERROR('❌ JCW project with slug "just-code-works" not found!')
-            )
-            return
+        # Note: jcw-main is now the platform template, not a tenant site
+        # This command is no longer needed since navigation is handled at the platform level
+        self.stdout.write(
+            self.style.WARNING('⚠️  JCW navigation sync is no longer needed - jcw-main is now the platform template, not a tenant site.')
+        )
+        return
 
         # Define navigation items that mirror MainNavigationClient.tsx
         # [I18N] EN menu items

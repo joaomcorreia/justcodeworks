@@ -20,6 +20,11 @@ from .models import (
     DashboardTemplate,
     DashboardBlock,
     QuoteRequest,
+    SectionDraft,
+    HomepageSlider,
+    HomepageSlide,
+    TestimonialCarousel,
+    TestimonialSlide,
 )
 
 
@@ -100,7 +105,7 @@ class SiteTemplateAdmin(admin.ModelAdmin):
     
     fields = (
         "key", "name", "description", "type", "category", 
-        "is_active", "status", "version", "preview_image",
+        "is_active", "status", "version", "preview_image", "preview_image_url",  # [TEMPLAB]
         "is_default_for_tenants"
     )
     
@@ -219,9 +224,17 @@ class SiteProjectAdmin(admin.ModelAdmin):
             "fields": (
                 "default_theme",
                 "allow_theme_toggle",
-                "primary_color",
-                "accent_color",
                 "header_background_mode",
+            ),
+        }),
+        ("Theme Colors", {
+            "fields": (
+                "primary_color",
+                "secondary_color", 
+                "accent_color",
+                "background_color",
+                "text_color",
+                "is_dark_theme",
             ),
         }),
         ("Hero Particles", {
@@ -812,6 +825,162 @@ class CustomAdminSite(AdminSite):
             }
         ]
         return super().index(request, extra_context)
+
+
+@admin.register(SectionDraft)
+class SectionDraftAdmin(admin.ModelAdmin):
+    """Admin interface for SectionDraft - Screenshot-to-Section Generator"""
+    list_display = ['id', 'project_name', 'section_name', 'status', 'locale', 'image_preview', 'created_at']
+    list_filter = ['status', 'locale', 'created_at', 'project__name']
+    search_fields = ['section_name', 'project__name', 'project__slug']
+    readonly_fields = ['id', 'created_at', 'updated_at', 'image_preview', 'ai_output_display']
+    raw_id_fields = ['project']
+    
+    fieldsets = (
+        ('Basic Info', {
+            'fields': ('id', 'project', 'section_name', 'locale', 'status')
+        }),
+        ('Image', {
+            'fields': ('image', 'image_preview')
+        }),
+        ('AI Output', {
+            'fields': ('ai_output_display',),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+    
+    def project_name(self, obj):
+        return obj.project.name if obj.project else '-'
+    project_name.short_description = 'Project'
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 200px; max-height: 150px;" />',
+                obj.image.url
+            )
+        return '-'
+    image_preview.short_description = 'Preview'
+    
+    def ai_output_display(self, obj):
+        if obj.ai_output_json:
+            import json
+            return format_html('<pre>{}</pre>', json.dumps(obj.ai_output_json, indent=2))
+        return 'No AI output yet'
+    ai_output_display.short_description = 'AI Generated Data'
+
+
+# [SLIDERS] Admin for Homepage Slider system
+class HomepageSlideInline(admin.TabularInline):
+    model = HomepageSlide
+    extra = 1
+    fields = ('order', 'title', 'subtitle', 'primary_cta_text', 'primary_cta_url', 'is_active')
+    ordering = ('order',)
+
+
+@admin.register(HomepageSlider)
+class HomepageSliderAdmin(admin.ModelAdmin):
+    list_display = ('name', 'site_project', 'is_active', 'particles_enabled', 'auto_play', 'created_at')
+    list_filter = ('is_active', 'particles_enabled', 'auto_play', 'background_type', 'site_project')
+    search_fields = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+    inlines = [HomepageSlideInline]
+    
+    fieldsets = (
+        ('Basic Settings', {
+            'fields': ('name', 'slug', 'site_project', 'is_active')
+        }),
+        ('Slider Controls', {
+            'fields': ('auto_play', 'auto_play_interval', 'show_navigation', 'show_pagination')
+        }),
+        ('Particle Effects', {
+            'fields': ('particles_enabled', 'particles_density', 'particles_speed', 
+                      'particles_size_min', 'particles_size_max', 'particles_color', 'particles_opacity'),
+            'classes': ('collapse',)
+        }),
+        ('Background', {
+            'fields': ('background_type', 'gradient_from', 'gradient_to', 'gradient_direction',
+                      'background_image', 'background_video', 'background_overlay_opacity'),
+            'classes': ('collapse',)
+        })
+    )
+
+
+@admin.register(HomepageSlide)  
+class HomepageSlideAdmin(admin.ModelAdmin):
+    list_display = ('slider', 'title', 'order', 'is_active', 'animation_type', 'created_at')
+    list_filter = ('is_active', 'animation_type', 'text_alignment', 'slider')
+    search_fields = ('title', 'subtitle', 'content')
+    list_editable = ('order', 'is_active')
+    ordering = ('slider', 'order')
+    
+    fieldsets = (
+        ('Basic Info', {
+            'fields': ('slider', 'order', 'is_active')
+        }),
+        ('Content', {
+            'fields': ('title', 'subtitle', 'content', 'slide_image', 'slide_video')
+        }),
+        ('Call to Action', {
+            'fields': ('primary_cta_text', 'primary_cta_url', 'secondary_cta_text', 'secondary_cta_url'),
+            'classes': ('collapse',)
+        }),
+        ('Styling', {
+            'fields': ('text_color', 'text_alignment', 'animation_type'),
+            'classes': ('collapse',)
+        })
+    )
+
+
+# [TESTIMONIALS] Admin for Testimonial Carousel system  
+class TestimonialSlideInline(admin.TabularInline):
+    model = TestimonialSlide
+    extra = 1
+    fields = ('order', 'customer_name', 'customer_company', 'rating', 'is_active')
+    ordering = ('order',)
+
+
+@admin.register(TestimonialCarousel)
+class TestimonialCarouselAdmin(admin.ModelAdmin):
+    list_display = ('name', 'site_project', 'is_active', 'auto_play', 'slides_per_view', 'created_at')
+    list_filter = ('is_active', 'auto_play', 'site_project')
+    search_fields = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+    inlines = [TestimonialSlideInline]
+    
+    fieldsets = (
+        ('Basic Settings', {
+            'fields': ('name', 'slug', 'site_project', 'is_active')
+        }),
+        ('Carousel Settings', {
+            'fields': ('auto_play', 'auto_play_interval', 'slides_per_view')
+        })
+    )
+
+
+@admin.register(TestimonialSlide)
+class TestimonialSlideAdmin(admin.ModelAdmin):
+    list_display = ('carousel', 'customer_name', 'customer_company', 'rating', 'order', 'is_active', 'created_at')
+    list_filter = ('is_active', 'rating', 'carousel')
+    search_fields = ('customer_name', 'customer_company', 'testimonial_text')
+    list_editable = ('order', 'is_active', 'rating')
+    ordering = ('carousel', 'order')
+    
+    fieldsets = (
+        ('Basic Info', {
+            'fields': ('carousel', 'order', 'is_active', 'rating')
+        }),
+        ('Customer Info', {
+            'fields': ('customer_name', 'customer_title', 'customer_company', 'customer_image')
+        }),
+        ('Testimonial', {
+            'fields': ('testimonial_text',)
+        })
+    )
 
 
 # Replace the default admin site

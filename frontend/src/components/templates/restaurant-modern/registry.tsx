@@ -5,6 +5,7 @@ import { RestaurantAbout01 } from "./About01";
 import { RestaurantMenu01 } from "./Menu01";
 import { RestaurantGallery01 } from "./Gallery01";
 import { RestaurantContact01 } from "./Contact01";
+import RestaurantFooterSection from "@/templates/sections/RestaurantFooterSection";
 
 type RendererProps = {
   section: SectionJson;
@@ -31,6 +32,9 @@ const registry: Record<string, Renderer> = {
   ),
   "contact-info": ({ section, mode }) => (
     <RestaurantContact01 section={section} mode={mode} />
+  ),
+  "restaurant-footer": ({ section, mode }) => (
+    <RestaurantFooterSection section={section} />
   ),
 };
 

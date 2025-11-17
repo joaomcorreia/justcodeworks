@@ -39,10 +39,10 @@ export function RestaurantMenu01({ section, mode = "public" }: Props) {
         
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 md:text-4xl mb-4">
+          <h2 className="text-3xl font-bold jcw-text-primary md:text-4xl mb-4">
             {categoryTitle}
           </h2>
-          <div className="w-20 h-1 bg-amber-600 mx-auto"></div>
+          <div className="w-20 h-1 jcw-bg-accent mx-auto"></div>
         </div>
 
         {/* Menu Items Grid */}
@@ -53,7 +53,7 @@ export function RestaurantMenu01({ section, mode = "public" }: Props) {
                 
                 {/* Item Info */}
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">
+                  <h3 className="text-lg sm:text-xl font-semibold jcw-text-primary mb-2">
                     {item.name}
                   </h3>
                   {item.description && (
@@ -66,7 +66,7 @@ export function RestaurantMenu01({ section, mode = "public" }: Props) {
                 {/* Price */}
                 {item.price && (
                   <div className="text-left sm:text-right mt-2 sm:mt-0">
-                    <span className="text-xl sm:text-2xl font-bold text-amber-600">
+                    <span className="text-xl sm:text-2xl font-bold jcw-text-accent">
                       {item.price}
                     </span>
                   </div>
@@ -88,7 +88,7 @@ export function RestaurantMenu01({ section, mode = "public" }: Props) {
             </p>
             <a 
               href="/reservations" 
-              className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-6 py-3 font-semibold text-white transition-all hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-lg jcw-bg-accent px-6 py-3 font-semibold text-white transition-all hover:opacity-90 focus:outline-none focus:ring-2 jcw-border-accent focus:ring-offset-2"
             >
               Make a Reservation
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
