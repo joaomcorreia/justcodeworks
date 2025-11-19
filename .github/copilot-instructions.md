@@ -1,27 +1,27 @@
-# JCW – AI Coding Agent Instructions
+JCW – AI Coding Agent Instructions
+1. Project Context
 
-## 1. Project Context
-
-Project: **Just Code Works (JCW) – V1 fresh start**  
-Stack: **Django** backend + **Next.js App Router (TypeScript + Tailwind)** frontend.  
+Project: Just Code Works (JCW) – V1 fresh start
+Stack: Django backend + Next.js App Router (TypeScript + Tailwind) frontend.
 Goal: Multi-tenant website builder with HQ site + user dashboard, but V1 is focused on a clean, working base (no legacy migrations, no old template systems, no huge refactors).
 
-You are an assistant working inside **VS Code** on **Windows**.
+You are an assistant working inside VS Code on Windows.
 
----
+2. Environment Rules
 
-## 2. Environment Rules
+Assume Windows CMD, not PowerShell.
 
-- Assume **Windows CMD**, not PowerShell.
-- Do **not** use `&&` or PowerShell syntax in any commands.
-- Typical commands should look like:
+Do not use && or PowerShell syntax in any commands.
 
-  ```cmd
-  cd C:\projects\justcodeworks\backend
-  python manage.py runserver 8000
+Typical commands should look like:
 
-  cd C:\projects\justcodeworks\frontend
-  npm run dev -- -p 3001
+cd C:\projects\justcodeworks\backend_v1
+python manage.py runserver 8000
+
+cd C:\projects\justcodeworks\frontend_v1
+npm run dev -- -p 3001
+
+
 Never suggest destructive shell commands unless the user explicitly asks for them.
 
 Forbidden without explicit request:
@@ -30,7 +30,7 @@ rm -rf, rmdir /S /Q
 
 git clean -fdx
 
-Deleting or renaming large folders (like backend, frontend, src/app, .github).
+Deleting or renaming large folders (like backend, frontend, src/app, .github)
 
 3. How You Should Work
 General mindset
@@ -54,6 +54,7 @@ Show diffs / edited snippets, not whole files unless necessary.
 Do not introduce new architecture, patterns, or large abstractions unless the user explicitly requests it.
 
 4. Things You MUST NOT Do On Your Own
+
 Unless the user explicitly asks for it in this session, you must not:
 
 Rebuild or redesign the routing tree for Django or Next.js.
@@ -70,30 +71,31 @@ Implement features that are described as “future”, “planned”, or “v2+�
 
 Delete or “clean up” old code just because it looks unused.
 
-If you see large documentation (like old builder specs, template lab reports, etc.), treat them as reference only, not as automatic todo lists.
+If you see large documentation (like old builder specs, template lab reports, etc.), treat them as reference only, NOT as automatic todo lists.
 
 5. How to Treat Documentation in This Repo
+
 Files like project_setup.md are high-level reference.
 Use them to understand the architecture, not as instructions to implement everything you see.
 
-Any long documentation describing:
+Any large documentation describing:
 
-Step 0 builder,
+Step 0 builder
 
-Template Lab,
+Template Lab
 
-Advanced printing system,
+Advanced printing system
 
-Complex SEO,
+SEO systems
 
-v2/v3/v4 plans,
+v0.3, v1.6, v2 or v3 plans
 
-…is historical / planning material.
-Do not start building or refactoring towards those designs unless the user clearly says:
-“Implement this now”.
+…is historical and planning material.
+You must not treat it as something to implement unless the user explicitly asks.
 
 6. When the User Asks You to Edit Files
-When the user wants file changes, follow this pattern:
+
+When the user wants file changes, follow this pattern strictly:
 
 Identify the exact file(s) they mention.
 
@@ -114,6 +116,7 @@ Convert entire files to a new style or pattern.
 Introduce new dependencies without explicit approval.
 
 7. Communication Style
+
 Be concise and practical.
 
 Clearly separate:
@@ -127,6 +130,7 @@ What the user should run or test (if needed).
 If something is risky or not fully verified, say so explicitly.
 
 8. Summary
+
 Your priorities in this repo:
 
 Follow the user’s current request only.
