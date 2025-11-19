@@ -1,6 +1,8 @@
 "use client";
 
 import type { Locale } from "@/i18n";
+import { getDictionary } from "@/i18n";
+import { useEffect, useState } from "react";
 import { MarketingPageShell, MarketingHero, MarketingSection } from "@/components/marketing-layout";
 import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
@@ -9,15 +11,23 @@ import {
   getSeoFieldValue,
 } from "@/store/seo-service-config";
 import { SeoEditorPanel } from "@/components/seo-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function SeoServicePage({
   params,
 }: {
   params: { locale: Locale };
 }) {
+  const { locale } = params;
   const { user } = useAuth();
   const { editMode } = useEditMode();
   const { config } = useSeoPageConfig();
+  const [t, setT] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(locale).then(setT);
+  }, [locale]);
 
   const heroTitle =
     getSeoFieldValue(config, "jcw-main-seo-hero01", "title") ??
@@ -48,9 +58,11 @@ export default function SeoServicePage({
     "You don't have to become an SEO expert – we translate everything into clear actions and results.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <SeoEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <SeoEditorPanel />}
 
       <section
         id="jcw-main-seo-hero01"
@@ -154,6 +166,8 @@ export default function SeoServicePage({
           </div>
         </MarketingSection>
       </section>
-    </MarketingPageShell>
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import type { Locale } from "@/i18n";
+import { getDictionary } from "@/i18n";
+import { useEffect, useState } from "react";
 import { MarketingPageShell, MarketingHero, MarketingSection } from "@/components/marketing-layout";
 import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
@@ -9,15 +11,23 @@ import {
   getUpgradesFieldValue,
 } from "@/store/upgrades-service-config";
 import { UpgradesEditorPanel } from "@/components/upgrades-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function WebsiteUpgradesServicePage({
   params,
 }: {
   params: { locale: Locale };
 }) {
+  const { locale } = params;
   const { user } = useAuth();
   const { editMode } = useEditMode();
   const { config } = useUpgradesPageConfig();
+  const [t, setT] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(locale).then(setT);
+  }, [locale]);
 
   const heroTitle =
     getUpgradesFieldValue(config, "jcw-main-upgrades-hero01", "title") ??
@@ -48,9 +58,11 @@ export default function WebsiteUpgradesServicePage({
     "Perfect when you want better results without replacing a site that already works for you.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <UpgradesEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <UpgradesEditorPanel />}
 
       <section
         id="jcw-main-upgrades-hero01"
@@ -154,6 +166,8 @@ export default function WebsiteUpgradesServicePage({
           </div>
         </MarketingSection>
       </section>
-    </MarketingPageShell>
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

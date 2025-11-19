@@ -17,10 +17,10 @@ from .models import (
     NavigationItem,
     LocaleChoices,
     HeroSlide,
-    DashboardTemplate,
-    DashboardBlock,
     QuoteRequest,
     SectionDraft,
+    MainWebsiteSlider,
+    MainWebsiteSlide,
     HomepageSlider,
     HomepageSlide,
     TestimonialCarousel,
@@ -190,6 +190,7 @@ class PageInlineForProject(admin.StackedInline):
 class SiteProjectAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "get_site_type_display",
         "slug", 
         "get_short_uuid",
         "owner",
@@ -201,7 +202,7 @@ class SiteProjectAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_filter = (
-        "is_master_template", "owner", "primary_goal", "primary_locale", 
+        "is_headquarters", "is_master_template", "owner", "primary_goal", "primary_locale", 
         "header_background_mode", "is_active", "template", "site_template"
     )
     search_fields = ("name", "slug", "business_type", "notes")
@@ -225,6 +226,7 @@ class SiteProjectAdmin(admin.ModelAdmin):
                 "default_theme",
                 "allow_theme_toggle",
                 "header_background_mode",
+                "hero_slider_template",
             ),
         }),
         ("Theme Colors", {
@@ -246,10 +248,27 @@ class SiteProjectAdmin(admin.ModelAdmin):
             ),
             "classes": ("collapse",),
         }),
+        ("Site Type", {
+            "fields": ("is_headquarters",),
+        }),
         ("Other", {
             "fields": ("notes", "is_active"),
         }),
     )
+    
+    def has_delete_permission(self, request, obj=None):
+        """Never allow deleting the HQ project from this admin."""
+        if obj is not None and obj.is_headquarters:
+            return False
+        return super().has_delete_permission(request, obj)
+
+    def get_readonly_fields(self, request, obj=None):
+        """Make HQ project fields readonly to prevent accidental changes."""
+        ro = list(super().get_readonly_fields(request, obj))
+        if obj is not None and obj.is_headquarters:
+            # Don't let someone accidentally change its template or owner
+            ro.extend(["site_template", "owner", "is_headquarters"])
+        return ro
     
     # [TEMPLAB] site_template admin queryset - show all active user-selectable templates
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -259,6 +278,10 @@ class SiteProjectAdmin(admin.ModelAdmin):
         elif db_field.name == "template":
             # Show all Templates (internal JCW templates)
             kwargs["queryset"] = Template.objects.all()
+        elif db_field.name == "hero_slider_template":
+            # Show all active SliderTemplates (HQ slider templates)
+            from main_site.models import SliderTemplate
+            kwargs["queryset"] = SliderTemplate.objects.filter(is_active=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     @admin.action(description='Promote to Master Template')
@@ -383,7 +406,7 @@ class PageAdmin(admin.ModelAdmin):
         "order",
         "is_published",
     )
-    list_filter = ("project", LanguageQuickFilter, LocaleListFilter, "is_published")
+    list_filter = ("project__is_headquarters", "project", LanguageQuickFilter, LocaleListFilter, "is_published")
     search_fields = ("title", "slug", "path")
     inlines = [HeroSlideInline, SectionInline]
     actions = ['duplicate_to_portuguese']
@@ -502,7 +525,7 @@ class PageAdmin(admin.ModelAdmin):
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
     list_display = ("page", "identifier", "internal_name", "order")
-    list_filter = ("page__project", "page")
+    list_filter = ("page__project__is_headquarters", "page__project", "page")
     search_fields = ("identifier", "internal_name")
     inlines = [FieldInline]
 
@@ -510,7 +533,7 @@ class SectionAdmin(admin.ModelAdmin):
 @admin.register(Field)
 class FieldAdmin(admin.ModelAdmin):
     list_display = ("section", "key", "label", "short_value", "created_at")
-    list_filter = ("section__page__project", "section__page", "section")
+    list_filter = ("section__page__project__is_headquarters", "section__page__project", "section__page", "section")
     search_fields = ("key", "label", "value")
 
     def short_value(self, obj):
@@ -615,7 +638,7 @@ class NavigationItemAdmin(admin.ModelAdmin):
         "url",
         "is_external",
     )
-    list_filter = ("location", LanguageQuickFilter, LocaleListFilter, "project", "column")
+    list_filter = ("project__is_headquarters", "location", LanguageQuickFilter, LocaleListFilter, "project", "column")
     search_fields = ("label", "url", "page__slug", "page__path")
     ordering = ("location", "locale", "column", "order")
     actions = ['duplicate_to_portuguese']
@@ -700,42 +723,6 @@ class NavigationItemAdmin(admin.ModelAdmin):
                 request,
                 f'Failed to duplicate {error_count} navigation item(s). Check error messages above.'
             )
-
-
-class DashboardBlockInline(admin.TabularInline):
-    model = DashboardBlock
-    extra = 0
-    fields = (
-        "key",
-        "title", 
-        "region",
-        "order",
-        "is_active",
-        "target_route",
-    )
-    ordering = ("region", "order", "id")
-
-
-@admin.register(DashboardTemplate)
-class DashboardTemplateAdmin(admin.ModelAdmin):
-    list_display = ("name", "key", "is_active", "is_default_for_tenants")
-    list_filter = ("is_active", "is_default_for_tenants")
-    search_fields = ("name", "key")
-    inlines = [DashboardBlockInline]
-    fieldsets = (
-        (None, {
-            "fields": ("name", "key", "description", "is_active", "is_default_for_tenants")
-        }),
-    )
-
-
-@admin.register(DashboardBlock)
-class DashboardBlockAdmin(admin.ModelAdmin):
-    list_display = ("title", "template", "key", "region", "order", "is_active")
-    list_filter = ("template", "region", "is_active")
-    search_fields = ("title", "key", "template__name")
-    list_editable = ("order", "is_active")
-    ordering = ("template", "region", "order")
 
 
 # [GARAGE-FORM] Quote Request Admin
@@ -874,7 +861,71 @@ class SectionDraftAdmin(admin.ModelAdmin):
     ai_output_display.short_description = 'AI Generated Data'
 
 
-# [SLIDERS] Admin for Homepage Slider system
+# [MAIN WEBSITE SLIDERS] Admin for Main Website Slider system  
+class MainWebsiteSlideInline(admin.TabularInline):
+    model = MainWebsiteSlide
+    extra = 1
+    fields = ('order', 'title', 'subtitle', 'primary_cta_text', 'primary_cta_url', 'is_active')
+    ordering = ('order',)
+
+
+@admin.register(MainWebsiteSlider)
+class MainWebsiteSliderAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_active', 'particles_enabled', 'auto_play', 'created_at')
+    list_filter = ('is_active', 'particles_enabled', 'auto_play', 'background_type')
+    search_fields = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+    inlines = [MainWebsiteSlideInline]
+    
+    fieldsets = (
+        ('🏢 Main Website Slider Settings', {
+            'fields': ('name', 'slug', 'is_active'),
+            'description': 'This slider is for the main JustCodeWorks website only.'
+        }),
+        ('Slider Controls', {
+            'fields': ('auto_play', 'auto_play_interval', 'show_navigation', 'show_pagination')
+        }),
+        ('Particle Effects', {
+            'fields': ('particles_enabled', 'particles_density', 'particles_speed', 
+                      'particles_size_min', 'particles_size_max', 'particles_color', 'particles_opacity'),
+            'classes': ('collapse',)
+        }),
+        ('Background', {
+            'fields': ('background_type', 'gradient_from', 'gradient_to', 'gradient_direction',
+                      'background_image', 'background_video', 'background_overlay_opacity'),
+            'classes': ('collapse',)
+        })
+    )
+
+
+@admin.register(MainWebsiteSlide)  
+class MainWebsiteSlideAdmin(admin.ModelAdmin):
+    list_display = ('slider', 'title', 'order', 'is_active', 'animation_type', 'created_at')
+    list_filter = ('is_active', 'animation_type', 'text_alignment', 'slider')
+    search_fields = ('title', 'subtitle', 'content')
+    list_editable = ('order', 'is_active')
+    ordering = ('slider', 'order')
+    
+    fieldsets = (
+        ('🏢 Main Website Slide', {
+            'fields': ('slider', 'order', 'is_active'),
+            'description': 'This slide is for the main JustCodeWorks website.'
+        }),
+        ('Content', {
+            'fields': ('title', 'subtitle', 'content', 'slide_image', 'slide_video')
+        }),
+        ('Call to Action', {
+            'fields': ('primary_cta_text', 'primary_cta_url', 'secondary_cta_text', 'secondary_cta_url'),
+            'classes': ('collapse',)
+        }),
+        ('Styling', {
+            'fields': ('text_color', 'text_alignment', 'animation_type'),
+            'classes': ('collapse',)
+        })
+    )
+
+
+# [TENANT SLIDERS] Admin for Tenant Homepage Slider system
 class HomepageSlideInline(admin.TabularInline):
     model = HomepageSlide
     extra = 1
@@ -885,14 +936,15 @@ class HomepageSlideInline(admin.TabularInline):
 @admin.register(HomepageSlider)
 class HomepageSliderAdmin(admin.ModelAdmin):
     list_display = ('name', 'site_project', 'is_active', 'particles_enabled', 'auto_play', 'created_at')
-    list_filter = ('is_active', 'particles_enabled', 'auto_play', 'background_type', 'site_project')
+    list_filter = ('site_project__is_headquarters', 'is_active', 'particles_enabled', 'auto_play', 'background_type', 'site_project')
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [HomepageSlideInline]
     
     fieldsets = (
-        ('Basic Settings', {
-            'fields': ('name', 'slug', 'site_project', 'is_active')
+        ('👤 Tenant Website Slider Settings', {
+            'fields': ('name', 'slug', 'site_project', 'is_active'),
+            'description': 'This slider is for tenant websites only (not the main JCW website).'
         }),
         ('Slider Controls', {
             'fields': ('auto_play', 'auto_play_interval', 'show_navigation', 'show_pagination')
@@ -919,8 +971,9 @@ class HomepageSlideAdmin(admin.ModelAdmin):
     ordering = ('slider', 'order')
     
     fieldsets = (
-        ('Basic Info', {
-            'fields': ('slider', 'order', 'is_active')
+        ('👤 Tenant Website Slide', {
+            'fields': ('slider', 'order', 'is_active'),
+            'description': 'This slide is for tenant websites only.'
         }),
         ('Content', {
             'fields': ('title', 'subtitle', 'content', 'slide_image', 'slide_video')
@@ -947,7 +1000,7 @@ class TestimonialSlideInline(admin.TabularInline):
 @admin.register(TestimonialCarousel)
 class TestimonialCarouselAdmin(admin.ModelAdmin):
     list_display = ('name', 'site_project', 'is_active', 'auto_play', 'slides_per_view', 'created_at')
-    list_filter = ('is_active', 'auto_play', 'site_project')
+    list_filter = ('site_project__is_headquarters', 'is_active', 'auto_play', 'site_project')
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [TestimonialSlideInline]
@@ -965,7 +1018,7 @@ class TestimonialCarouselAdmin(admin.ModelAdmin):
 @admin.register(TestimonialSlide)
 class TestimonialSlideAdmin(admin.ModelAdmin):
     list_display = ('carousel', 'customer_name', 'customer_company', 'rating', 'order', 'is_active', 'created_at')
-    list_filter = ('is_active', 'rating', 'carousel')
+    list_filter = ('carousel__site_project__is_headquarters', 'is_active', 'rating', 'carousel')
     search_fields = ('customer_name', 'customer_company', 'testimonial_text')
     list_editable = ('order', 'is_active', 'rating')
     ordering = ('carousel', 'order')

@@ -1,20 +1,30 @@
 "use client";
 
 import type { Locale } from "@/i18n";
+import { getDictionary } from "@/i18n";
+import { useEffect, useState } from "react";
 import { MarketingPageShell, MarketingHero, MarketingSection } from "@/components/marketing-layout";
 import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
 import { useMultiPageWebsitesConfig, getMultiPageFieldValue } from "@/hooks/use-multipage-websites-config";
 import { MultiPageEditorPanel } from "@/components/multipage-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function MultiPageWebsitesPage({
   params,
 }: {
   params: { locale: Locale };
 }) {
+  const { locale } = params;
   const { user } = useAuth();
   const { editMode } = useEditMode();
   const { config, loading, error, source, saveField } = useMultiPageWebsitesConfig();
+  const [t, setT] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(locale).then(setT);
+  }, [locale]);
 
   const heroTitle = getMultiPageFieldValue(config, "jcw-multipage-hero01", "title") ?? "Multi page websites";
   const heroSubtitle = getMultiPageFieldValue(config, "jcw-multipage-hero01", "subtitle") ?? "For businesses that need more space: separate pages for services, team, portfolio, blog and more.";
@@ -29,9 +39,11 @@ export default function MultiPageWebsitesPage({
   const benefitsSubtitle = getMultiPageFieldValue(config, "jcw-multipage-benefits01", "subtitle") ?? "Better organization, improved SEO, room to grow your content and services.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <MultiPageEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <MultiPageEditorPanel />}
       
       <section id="jcw-main-multipage-hero01" className={editMode ? "relative border-2 border-dashed border-blue-500" : ""}>
         {editMode && (
@@ -135,13 +147,15 @@ export default function MultiPageWebsitesPage({
         </div>
       </MarketingSection>
 
-      {editMode && user && (
-        <p className="fixed left-3 bottom-32 z-30 rounded-full bg-slate-900/90 px-3 py-1 text-[10px] text-slate-300">
-          Multi-page websites source:{" "}
-          {source === "backend" ? "Django API" : "Local storage"}
-          {error ? ` · ${error}` : ""}
-        </p>
-      )}
-    </MarketingPageShell>
+        {editMode && user && (
+          <p className="fixed left-3 bottom-32 z-30 rounded-full bg-slate-900/90 px-3 py-1 text-[10px] text-slate-300">
+            Multi-page websites source:{" "}
+            {source === "backend" ? "Django API" : "Local storage"}
+            {error ? ` · ${error}` : ""}
+          </p>
+        )}
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

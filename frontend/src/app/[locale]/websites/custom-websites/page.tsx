@@ -1,20 +1,30 @@
 "use client";
 
 import type { Locale } from "@/i18n";
+import { getDictionary } from "@/i18n";
+import { useEffect, useState } from "react";
 import { MarketingPageShell, MarketingHero, MarketingSection } from "@/components/marketing-layout";
 import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
 import { useCustomPageConfig, getCustomFieldValue } from "@/store/custom-website-config";
 import { CustomEditorPanel } from "@/components/custom-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function CustomWebsitesPage({
   params,
 }: {
   params: { locale: Locale };
 }) {
+  const { locale } = params;
   const { user } = useAuth();
   const { editMode } = useEditMode();
   const { config } = useCustomPageConfig();
+  const [t, setT] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(locale).then(setT);
+  }, [locale]);
 
   const heroEyebrow = getCustomFieldValue(config, "jcw-main-custom-hero01", "eyebrow") ?? "Custom websites";
   const heroTitle = getCustomFieldValue(config, "jcw-main-custom-hero01", "title") ?? "Custom Websites";
@@ -29,9 +39,11 @@ export default function CustomWebsitesPage({
   const benefitsParagraph = getCustomFieldValue(config, "jcw-main-custom-benefits01", "paragraph") ?? "Custom websites are an investment in your business's future. When you need something that can't be done with standard templates, we're ready to build it.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <CustomEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <CustomEditorPanel />}
       
       <section id="jcw-main-custom-hero01" className={editMode ? "relative border-2 border-dashed border-blue-500" : ""}>
         {editMode && (
@@ -158,6 +170,8 @@ export default function CustomWebsitesPage({
           </div>
         </MarketingSection>
       </section>
-    </MarketingPageShell>
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

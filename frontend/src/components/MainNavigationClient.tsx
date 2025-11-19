@@ -47,33 +47,33 @@ const MainNavigationClient: React.FC<MainNavigationClientProps> = ({ dict, local
   const navItems = [
     {
       key: 'home',
-      label: dict.nav.home || dict.nav.websites || 'Home',
+      label: dict.nav?.home || dict.nav?.websites || 'Home',
       href: '/',
     },
     {
       key: 'websites',
-      label: dict.nav.websites,
+      label: dict.nav?.websites || 'Websites',
       href: '/websites',
     },
     {
       key: 'pos-systems',
-      label: dict.nav.pos,
-      href: `/${getLocalizedSlug('pos-systems', locale as any)}`,
+      label: dict.nav?.pos || 'POS Systems',
+      href: `/${getLocalizedSlug('pos-systems', locale as any) || 'pos-systems'}`,
     },
     {
       key: 'services',
-      label: dict.nav.services,
-      href: `/${getLocalizedSlug('services', locale as any)}`,
+      label: dict.nav?.services || 'Services',
+      href: `/${getLocalizedSlug('services', locale as any) || 'services'}`,
     },
     {
       key: 'help-center',
-      label: dict.nav.helpCenter,
-      href: `/${getLocalizedSlug('help-center', locale as any)}`,
+      label: dict.nav?.helpCenter || 'Help Center',
+      href: `/${getLocalizedSlug('help-center', locale as any) || 'help-center'}`,
     },
     {
       key: 'print-lab',
-      label: dict.nav.printing,
-      href: `/${getLocalizedSlug('print-lab', locale as any)}`,
+      label: dict.nav?.printing || 'Print Lab',
+      href: `/${getLocalizedSlug('print-lab', locale as any) || 'print-lab'}`,
     },
   ];
 
@@ -95,14 +95,6 @@ const MainNavigationClient: React.FC<MainNavigationClientProps> = ({ dict, local
 
   return (
     <>
-      {/* CSS Animation for gradient */}
-      <style jsx>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
       
       <nav className={`${navClasses} transition-all duration-300 sticky top-0 z-50`}>
         {/* Animated bottom border with gradient */}
@@ -134,16 +126,20 @@ const MainNavigationClient: React.FC<MainNavigationClientProps> = ({ dict, local
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.key}
-                href={`/${locale}${item.href.startsWith('/') ? item.href : `/${item.href}`}`}
-                className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:opacity-80"
-                style={linkStyle}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const href = item.href || '/';
+              const fullHref = `/${locale}${href.startsWith('/') ? href : `/${href}`}`;
+              return (
+                <Link
+                  key={item.key}
+                  href={fullHref}
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:opacity-80"
+                  style={linkStyle}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Login/User Menu and Language Selector */}
@@ -159,13 +155,25 @@ const MainNavigationClient: React.FC<MainNavigationClientProps> = ({ dict, local
                   Login
                 </button>
               ) : (
-                <Link
-                  href={`/${locale}/dashboard`}
-                  className="text-sm font-medium transition-colors duration-300 hover:opacity-80"
-                  style={linkStyle}
-                >
-                  Admin
-                </Link>
+                user?.isStaff || user?.isSuperuser ? (
+                  <a
+                    href="http://localhost:8000/admin/"
+                    className="text-sm font-medium transition-colors duration-300 hover:opacity-80"
+                    style={linkStyle}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Admin
+                  </a>
+                ) : (
+                  <Link
+                    href={`/${locale}/dashboard`}
+                    className="text-sm font-medium transition-colors duration-300 hover:opacity-80"
+                    style={linkStyle}
+                  >
+                    Dashboard
+                  </Link>
+                )
               )}
               <button
                 onClick={() => setIsSidebarOpen(true)}
@@ -181,23 +189,27 @@ const MainNavigationClient: React.FC<MainNavigationClientProps> = ({ dict, local
                 </svg>
               </button>
             </div>
-            <LanguageSelector transparent={transparent} />
+            <LanguageSelector transparent={transparent} isMainSite={true} />
           </div>
         </div>
 
         {/* Mobile Navigation */}
         <div className="md:hidden">
           <div className="pt-2 pb-3 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={`mobile-${item.key}`}
-                href={`/${locale}${item.href.startsWith('/') ? item.href : `/${item.href}`}`}
-                className="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 hover:opacity-80"
-                style={linkStyle}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const href = item.href || '/';
+              const fullHref = `/${locale}${href.startsWith('/') ? href : `/${href}`}`;
+              return (
+                <Link
+                  key={`mobile-${item.key}`}
+                  href={fullHref}
+                  className="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 hover:opacity-80"
+                  style={linkStyle}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -1,10 +1,9 @@
 'use client';
 
-// [JCW] Updated HeroSection with new slider system and fallback support
+// [JCW] Hero section with static background (sliders removed)
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Step0OnboardingModal from './Step0OnboardingModal';
-import HomepageSliderContainer from './HomepageSliderContainer';
 
 interface HeroSectionProps {
   locale: string;
@@ -27,15 +26,8 @@ export default function HeroSection({ locale, dict }: HeroSectionProps) {
 
   return (
     <>
-      {/* New Slider System with Particle Effects */}
-      <HomepageSliderContainer
-        sliderSlug="hq-homepage-hero"
-        className="h-screen"
-        fallbackGradient="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900"
-      />
-      
-      {/* Legacy Fallback (hidden by default, can be shown if slider fails) */}
-      <div className="hidden relative h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+      {/* Static Hero Section (sliders removed) */}
+      <div className="relative h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>

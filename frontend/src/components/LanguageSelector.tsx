@@ -1,29 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { convertPathBetweenLocales, type Locale } from '@/i18n/slugs';
+import { baseLocales } from '@/i18n/utils';
 
-const languages = [
+// Base languages available to all sites
+const baseLanguages = [
   { code: 'en', name: 'English' },
   { code: 'pt', name: 'Português' },
   { code: 'nl', name: 'Nederlands' },
   { code: 'fr', name: 'Français' },
   { code: 'de', name: 'Deutsch' },
   { code: 'es', name: 'Español' },
+  { code: 'it', name: 'Italiano' },
 ];
+
+// Arabic language (conditionally available)
+const arabicLanguage = { code: 'ar', name: 'العربية' };
 
 interface LanguageSelectorProps {
   transparent?: boolean;
+  enableArabic?: boolean; // For tenant sites - controls whether Arabic is available
+  isMainSite?: boolean;   // For main JCW site - always shows Arabic
 }
 
-export default function LanguageSelector({ transparent = false }: LanguageSelectorProps) {
+export default function LanguageSelector({ 
+  transparent = false, 
+  enableArabic = false, 
+  isMainSite = false 
+}: LanguageSelectorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   
   const currentLocale = pathname.split('/')[1] || 'en';
-  const currentLanguage = languages.find(lang => lang.code === currentLocale);
+  
+  // Determine which languages to show
+  const availableLanguages = [...baseLanguages];
+  
+  // Add Arabic if this is the main site or if explicitly enabled for tenant site
+  if (isMainSite || enableArabic) {
+    availableLanguages.push(arabicLanguage);
+  }
+  
+  const currentLanguage = availableLanguages.find(lang => lang.code === currentLocale);
   
   const handleLanguageChange = (newLocale: string) => {
     // Convert the current path to the new locale with proper slug translation
@@ -69,7 +90,7 @@ export default function LanguageSelector({ transparent = false }: LanguageSelect
           {/* Dropdown */}
           <div className={`absolute top-full right-0 mt-1 z-20 min-w-[120px] rounded-lg border shadow-lg ${dropdownStyle}`}>
             <div className="py-1">
-              {languages.map((lang) => (
+              {availableLanguages.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code)}

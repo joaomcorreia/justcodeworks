@@ -1,20 +1,30 @@
 "use client";
 
 import type { Locale } from "@/i18n";
+import { getDictionary } from "@/i18n";
+import { useEffect, useState } from "react";
 import { MarketingPageShell, MarketingHero, MarketingSection } from "@/components/marketing-layout";
 import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
 import { useStorePageConfig, getStoreFieldValue } from "@/store/online-store-config";
 import { StoreEditorPanel } from "@/components/store-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function OnlineShopsPage({
   params,
 }: {
   params: { locale: Locale };
 }) {
+  const { locale } = params;
   const { user } = useAuth();
   const { editMode } = useEditMode();
   const { config } = useStorePageConfig();
+  const [t, setT] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(locale).then(setT);
+  }, [locale]);
 
   const heroEyebrow = getStoreFieldValue(config, "jcw-main-store-hero01", "eyebrow") ?? "Online shops";
   const heroTitle = getStoreFieldValue(config, "jcw-main-store-hero01", "title") ?? "Online Shops";
@@ -29,9 +39,11 @@ export default function OnlineShopsPage({
   const benefitsParagraph = getStoreFieldValue(config, "jcw-main-store-benefits01", "paragraph") ?? "Whether you're selling physical products, digital downloads, or services, our online shop platform adapts to your business model and grows with you.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <StoreEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <StoreEditorPanel />}
       
       <section id="jcw-main-store-hero01" className={editMode ? "relative border-2 border-dashed border-blue-500" : ""}>
         {editMode && (
@@ -142,6 +154,8 @@ export default function OnlineShopsPage({
           </p>
         </div>
       </MarketingSection>
-    </MarketingPageShell>
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

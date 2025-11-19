@@ -1,80 +1,74 @@
-const ptTranslation = {
+import { Dictionary } from "../base-en";
+
+const portugueseDictionary: Dictionary = {
   hero: {
     badge: "Tudo ligado: website, impressão e IA.",
-    title: "Tudo o que precisa para colocar o seu negócio online.",
-    subtitle:
-      "Lance um website moderno, encomende os seus materiais impressos, ligue ferramentas de TPV simples e deixe o seu assistente de IA fazer o trabalho pesado – tudo num só lugar.",
+    title: "Tudo o que precisas para levar o teu negócio online.",
+    subtitle: "Lança um website moderno, encomenda os teus materiais impressos, conecta ferramentas POS simples e deixa o teu assistente IA fazer o trabalho pesado – tudo num lugar.",
     ctaPrimary: "Começar em 2 minutos",
-    ctaSecondary: "Ver website de demonstração",
-    note:
-      "Não precisa de conhecimentos técnicos. Perfeito para pequenas empresas, freelancers e lojas locais.",
-    previewDomain: "biscoitos-da-avo.justcodeworks.eu",
-    previewTitle: "Loja de Biscoitos da Avó",
-    previewText:
-      "Biscoitos frescos cozidos diariamente. Encomende online ou visite a nossa loja acolhedora.",
+    ctaSecondary: "Ver site demo",
+    note: "Não são necessárias competências técnicas. Perfeito para pequenas empresas, freelancers e lojas locais.",
+    previewDomain: "bolachas-vovo.justcodeworks.eu",
+    previewTitle: "Loja de Bolachas da Avó",
+    previewText: "Bolachas frescas cozidas diariamente. Encomenda online ou visita a nossa loja acolhedora.",
     previewWebsiteLabel: "Website",
-    previewWebsiteText: "Online em 1–2 dias",
+    previewWebsiteText: "Online em 1-2 dias",
     previewPrintLabel: "Impressão",
-    previewPrintText: "Cartões e panfletos",
+    previewPrintText: "Cartões e folhetos",
     previewAiLabel: "MagicAI",
     previewAiText: "Textos e imagens",
     assistantTitle: "Clippy 2.0 está pronto",
-    assistantText:
-      '"Responda a algumas perguntas e eu criarei tudo para si."',
+    assistantText: '"Responde a algumas perguntas e construo tudo para ti."',
     assistantCta: "Iniciar assistente",
   },
   nav: {
     home: "Início",
     websites: "Websites",
     printing: "Impressão",
-    pos: "Sistemas TPV",
+    pos: "Sistemas POS",
     services: "Serviços",
     helpCenter: "Centro de Ajuda",
     aiTools: "Ferramentas MagicAI",
     pricing: "Preços",
     login: "Entrar",
-    start: "Começar a criar",
+    start: "Começar a construir",
     templates: "Modelos",
   },
   websites: {
-    title: "Websites que trabalham tanto quanto você",
-    subtitle:
-      "Escolha o tipo de website que combina com o seu negócio hoje – e faça upgrade depois conforme cresce.",
+    title: "Websites que trabalham tanto quanto tu",
+    subtitle: "Escolhe o tipo de website que se adequa ao teu negócio hoje – e atualiza mais tarde enquanto cresces.",
     badge: "Construtor de Websites",
     onePage: {
       badge: "Websites de página única",
       title: "Perfeito para negócios locais simples",
-      desc:
-        "Ideal se tem alguns serviços e quer tudo numa página limpa e rolável.",
+      desc: "Ideal se tens alguns serviços e queres tudo numa página limpa e deslizante.",
       bullets: [
         "Até 6 serviços numa página",
         "Botões de contacto / WhatsApp / chamada",
-        "Optimizado para visitantes móveis",
+        "Otimizado para visitantes móveis",
       ],
       priceLabel: "A partir de €X / mês",
       link: "Ver exemplo",
     },
     multiPage: {
       badge: "Websites multi-página",
-      title: "Cresça com páginas dedicadas para cada serviço",
-      desc:
-        "Óptimo para empresas que querem páginas separadas para serviços, projectos, equipa, blog e mais.",
+      title: "Cresce com páginas dedicadas para cada serviço",
+      desc: "Ótimo para empresas que querem páginas separadas para serviços, projetos, equipa, blog e mais.",
       bullets: [
-        "Páginas de serviços que podem classificar-se no Google",
-        "Secções de blog / notícias para actualizações",
-        "Formulários estruturados de contacto e orçamento",
+        "Páginas de serviços que podem posicionar-se no Google",
+        "Secções de blog / notícias para atualizações",
+        "Formulários de contacto e orçamento estruturados",
       ],
       priceLabel: "A partir de €Y / mês",
       link: "Ver exemplo",
     },
     ecommerce: {
       badge: "Lojas online",
-      title: "Venda os seus produtos com uma loja simples",
-      desc:
-        "Para negócios prontos para receber pagamentos online e gerir encomendas sem sistemas complexos.",
+      title: "Vende os teus produtos com uma loja simples",
+      desc: "Para empresas prontas para aceitar pagamentos online e gerir encomendas sem sistemas complexos.",
       bullets: [
         "Catálogo de produtos e categorias",
-        "Checkout simples e opções de pagamento",
+        "Opções simples de checkout e pagamento",
         "Notificações de encomendas e relatórios básicos",
       ],
       priceLabel: "A partir de €Z / mês",
@@ -82,107 +76,106 @@ const ptTranslation = {
     },
   },
   sections: {
-    printingTitle: "A sua marca, lindamente impressa.",
-    printingText:
-      "Secção placeholder – depois adicionaremos o layout completo de impressão da sua homepage antiga.",
-    posTitle: "Sistemas TPV modernos que crescem consigo.",
-    posText: "Placeholder para conteúdo de sistemas TPV.",
+    solutionsTitle: "Escolhe a Tua Solução Perfeita",
+    printingTitle: "A tua marca, lindamente impressa.",
+    printingText: "Secção placeholder – mais tarde adicionaremos o design completo de impressão da tua homepage antiga.",
+    posTitle: "Sistemas POS modernos que crescem contigo.",
+    posText: "Placeholder para conteúdo de sistemas POS.",
     aiTitle: "Ferramentas MagicAI.",
-    aiText:
-      "Placeholder para cartões de ferramentas AI: redactor de conteúdo, gerador de blog, screenshot-para-site, etc.",
-    pricingTitle: "Visão geral de preços.",
-    pricingText: "Placeholder – depois combinamos as suas tabelas de preços reais.",
-
+    aiText: "Placeholder para cartões de ferramentas IA: escritor de conteúdo, gerador de blog, captura-para-site, etc.",
+    pricingTitle: "Resumo de preços.",
+    pricingText: "Placeholder – mais tarde faremos corresponder às tuas tabelas de preços reais.",
     printingCards: [
       {
         label: "Cartões de visita",
-        title: "Cause uma primeira impressão marcante",
-        description:
-          "Designs clássicos ou modernos com o seu logótipo, cores e dados de contacto, prontos para entregar aos novos clientes.",
-        highlight: "Item inicial mais popular",
+        title: "Causa uma primeira impressão forte",
+        description: "Designs clássicos ou modernos com o teu logótipo, cores e detalhes de contacto, prontos para entregar a novos clientes.",
+        highlight: "Artigo inicial mais popular",
       },
       {
-        label: "Panfletos e folhetos",
-        title: "Promova os seus serviços localmente",
-        description:
-          "Perfeitos para distribuição porta a porta, lojas locais e eventos. Óptimos para construção, beleza, coaching e mais.",
+        label: "Folhetos e brochuras",
+        title: "Promove os teus serviços localmente",
+        description: "Perfeito para entregas porta-a-porta, lojas locais e eventos. Ótimo para construção, beleza, coaching e mais.",
         highlight: "Ideal para marketing local",
       },
       {
-        label: "Autocolantes, etiquetas e brindes",
-        title: "Coloque a sua marca em todo o lado",
-        description:
-          "Marque as suas embalagens, presentes e produtos com autocolantes, etiquetas e itens de brinde simples.",
-        highlight: "Complemento para marcas em crescimento",
+        label: "Autocolantes, etiquetas e merchandising",
+        title: "Leva a tua marca por todo o lado",
+        description: "Marca as tuas embalagens, presentes e produtos com autocolantes, etiquetas e artigos simples de merchandising.",
+        highlight: "Add-on para marcas em crescimento",
       },
     ],
-
     posCards: [
       {
         label: "Terminais de cartão simples",
-        title: "Receba pagamentos sem complicação",
-        description:
-          "Ligue um terminal simples que simplesmente funciona: aproximar, senha, recibo. Não precisa de sistemas complexos.",
-        highlight: "Óptimo para pequenas lojas",
+        title: "Aceita pagamentos sem dores de cabeça",
+        description: "Conecta um terminal simples que funciona: tap, PIN, recibo. Não é necessário sistema complexo.",
+        highlight: "Ótimo para lojas pequenas",
       },
       {
-        label: "TPV em tablet e telemóvel",
-        title: "Use os dispositivos que já tem",
-        description:
-          "Transforme um tablet ou telemóvel num pequeno TPV para serviços, salões, cafés e negócios itinerantes.",
+        label: "POS tablet e telemóvel",
+        title: "Usa os dispositivos que já possuis",
+        description: "Transforma um tablet ou telemóvel num POS pequeno para serviços, salões, cafés e negócios pop-up.",
         highlight: "Flexível para trabalho móvel",
       },
       {
         label: "Relatórios básicos",
-        title: "Veja o que está a vender",
-        description:
-          "Obtenha visões gerais simples de facturação, métodos de pagamento e dias movimentados sem um sistema contabilístico completo.",
+        title: "Vê o que se está a vender",
+        description: "Obtém resumos simples de receitas, métodos de pagamento e dias de pico sem um sistema contabilístico completo.",
         highlight: "Claro e fácil de ler",
       },
+      {
+        label: "Relatórios de inventário",
+        title: "Rastreia facilmente o teu stock",
+        description: "Monitoriza níveis de stock, define alertas de stock baixo e gere produtos com a nossa interface intuitiva.",
+        highlight: "Simplifica a gestão de inventário",
+      },
     ],
-
     aiCards: [
       {
-        label: "Assistente de textos para website",
-        title: "Textos para as suas páginas no seu tom",
-        description:
-          "Gere títulos, descrições de serviços e páginas sobre usando os detalhes do seu negócio e estilo preferido.",
-        highlight: "Baseado nas suas respostas",
+        label: "Assistente de textos de website",
+        title: "Textos para as tuas páginas no teu tom",
+        description: "Gera títulos, descrições de serviços e páginas sobre nós usando os detalhes do teu negócio e estilo preferido.",
+        highlight: "Baseado nas tuas respostas",
       },
       {
-        label: "Gerador de blog e actualizações",
-        title: "Mantenha o seu website activo",
-        description:
-          "Crie posts com ideias, estrutura e rascunhos de textos que pode rever e publicar rapidamente.",
+        label: "Gerador de blog e atualizações",
+        title: "Mantém o teu site ativo",
+        description: "Cria posts com ideias, estrutura e textos de rascunho que podes rever e publicar rapidamente.",
         highlight: "Bom para Google e clientes",
       },
       {
-        label: "Assistente screenshot-para-layout",
-        title: "Transforme ideias em layouts",
-        description:
-          "Use screenshots de exemplo como inspiração e transforme-os em layouts que combinam com a sua própria marca.",
-        highlight: "Economiza tempo de design",
+        label: "Assistente captura-para-layout",
+        title: "Converte ideias em layouts",
+        description: "Usa capturas de ecrã de exemplo como inspiração e converte-as em layouts que se adequam à tua marca.",
+        highlight: "Poupa tempo de design",
+      },
+      {
+        label: "Gerador de conteúdo IA",
+        title: "Cria automaticamente conteúdo envolvente",
+        description: "Gera descrições de produtos, conteúdo de blog e textos de marketing adaptados à voz da tua marca.",
+        highlight: "Conteúdo de qualidade em segundos",
       },
     ],
   },
   footer: {
-    tagline: "Websites • Impressão • TPV • Ferramentas",
-    description: "Ajudamos pequenas empresas da UE a ficarem online com websites modernos, materiais impressos correspondentes e ferramentas simples – tudo ligado num só sistema.",
+    tagline: "Websites • Impressão • POS • Ferramentas",
+    description: "Ajudamos pequenas empresas da UE a ir online com websites modernos, materiais impressos combinados e ferramentas simples – tudo conectado num sistema.",
     services: {
       title: "Serviços",
-      websites: "Design de Websites",
-      pos: "Sistemas TPV",
-      printing: "Design Gráfico",
-      consulting: "Consultoria Empresarial",
-      maintenance: "Manutenção de Websites",
-      hosting: "Alojamento Web"
+      websites: "Design de websites",
+      pos: "Sistemas POS",
+      printing: "Design de impressão",
+      consulting: "Consultoria empresarial",
+      maintenance: "Manutenção de websites",
+      hosting: "Alojamento web"
     },
     company: {
       title: "Empresa",
-      about: "Sobre Nós",
-      team: "A Nossa Equipa",
+      about: "Sobre",
+      team: "A nossa equipa",
       careers: "Carreiras",
-      news: "Notícias e Atualizações",
+      news: "Notícias e atualizações",
       partners: "Parceiros",
       testimonials: "Testemunhos"
     },
@@ -190,29 +183,29 @@ const ptTranslation = {
       title: "Ferramentas",
       jsonReader: "Leitor JSON",
       qrGenerator: "Gerador QR",
-      passwordChecker: "Verificador de Palavras-passe",
-      passwordGenerator: "Gerador de Palavras-passe",
-      imageResizer: "Redimensionador de Imagens",
-      imageCropper: "Editor de Imagens"
+      passwordChecker: "Verificador de passwords",
+      passwordGenerator: "Gerador de passwords",
+      imageResizer: "Redimensionador de imagens",
+      imageCropper: "Recortador de imagens"
     },
     support: {
-      title: "Apoio",
-      help: "Centro de Ajuda",
-      contact: "Contacte-nos",
-      faq: "Perguntas Frequentes",
+      title: "Suporte",
+      help: "Centro de ajuda",
+      contact: "Contacta-nos",
+      faq: "FAQ",
       documentation: "Documentação",
-      tutorials: "Tutoriais em Vídeo",
-      community: "Fórum da Comunidade"
+      tutorials: "Tutoriais em vídeo",
+      community: "Fórum da comunidade"
     },
     legal: {
       privacy: "Política de Privacidade",
       terms: "Termos de Serviço",
       cookies: "Política de Cookies",
-      gdpr: "Conformidade RGPD"
+      gdpr: "Conformidade GDPR"
     },
     newsletter: {
-      title: "Subscreva a nossa newsletter",
-      placeholder: "Introduza o seu email",
+      title: "Subscreve a nossa newsletter",
+      placeholder: "Insere o teu email",
       subscribe: "Subscrever"
     },
     copyright: {
@@ -224,366 +217,395 @@ const ptTranslation = {
   },
   builder: {
     title: "Construtor de websites",
-    subtitle:
-      "Responda a algumas perguntas simples e prepararemos o seu website, impressão e configuração básica de TPV para si.",
+    subtitle: "Responde a algumas perguntas simples e prepararemos o teu website, impressão e configuração POS básica para ti.",
     introBadge: "Passo 1 de 4",
     introTitle: "Vamos começar com o básico.",
-    introText:
-      "Perguntaremos sobre o seu negócio, serviços e cores preferidas. Pode sempre mudar tudo depois.",
-    startButton: "Iniciar o assistente",
-    backHome: "Voltar à página inicial",
-
+    introText: "Perguntaremos sobre o teu negócio, serviços e cores preferidas. Sempre podes mudar tudo depois.",
+    startButton: "Iniciar assistente",
+    backHome: "Voltar ao início",
     steps: {
       step1Label: "Detalhes do negócio",
-      step2Label: "Serviços e tipo de site",
+      step2Label: "Serviços e tipo de website",
       step3Label: "Cores e estilo",
       step4Label: "Revisão",
-
-      next: "Próximo",
-      previous: "Voltar",
-      finish: "Finalizar e revisar",
+      next: "Seguinte",
+      previous: "Anterior",
+      finish: "Finalizar e rever",
     },
-
     fields: {
       businessName: "Nome do negócio",
       country: "País",
       city: "Cidade",
-      contactEmail: "E-mail de contacto",
+      contactEmail: "Email de contacto",
       contactPhone: "Telefone / WhatsApp",
       websiteType: "Tipo de website",
       onePage: "Website de página única",
       multiPage: "Website multi-página",
       store: "Loja online",
-      servicesLabel: "Principais serviços",
-      servicesHint: "Liste alguns serviços, separados por vírgulas.",
+      servicesLabel: "Serviços principais",
+      servicesHint: "Lista alguns serviços, separados por vírgulas.",
       colorsLabel: "Cores preferidas",
-      colorsHint: "Por exemplo: azul e branco, ou as cores existentes da sua marca.",
+      colorsHint: "Exemplo: azul e branco, ou as cores da tua marca existente.",
       styleLabel: "Estilo",
-      styleHint: "Exemplo: moderno e limpo, caloroso e amigável, luxuoso, etc.",
+      styleHint: "Exemplo: moderno e limpo, caloroso e amigável, luxo, etc.",
     },
-
     review: {
-      title: "Revise a sua configuração",
-      description:
-        "Verifique se estes detalhes estão correctos. No próximo passo geraremos o rascunho do seu website baseado nestas informações.",
+      title: "Revê a tua configuração",
+      description: "Verifica se estes detalhes parecem corretos. No próximo passo geraremos o rascunho do teu website baseado nestas informações.",
       businessSection: "Detalhes do negócio",
       servicesSection: "Serviços e tipo de website",
       styleSection: "Cores e estilo",
-      changeNote:
-        "Ainda pode mudar tudo isto depois no seu painel antes de publicar.",
+      changeNote: "Ainda podes mudar tudo isto depois no teu dashboard antes da publicação.",
     },
   },
   pricing: {
-    title: "Preços simples que crescem consigo.",
-    subtitle:
-      "Comece pequeno e faça upgrade depois. Todos os planos incluem alojamento, actualizações de segurança e suporte básico.",
+    title: "Preços simples que crescem contigo.",
+    subtitle: "Começa pequeno e atualiza depois. Todos os planos incluem alojamento, atualizações de segurança e suporte básico.",
     note: "Os preços reais serão confirmados depois – estes são placeholders.",
     plans: [
       {
         id: "one-page",
-        name: "Site de página única",
+        name: "Website de página única",
         short: "Para negócios locais simples",
         price: "A partir de €X / mês",
-        bestFor: "Ideal se tem alguns serviços e só precisa de uma página limpa e rolável.",
+        bestFor: "Ideal se tens alguns serviços e só precisas de uma página limpa e deslizante.",
         features: [
           "Até 6 serviços numa única página",
           "Botões de contacto / WhatsApp / chamada",
-          "Design optimizado para mobile",
+          "Design otimizado para móvel",
           "Estrutura SEO básica para Google",
         ],
-        highlight: "Óptima opção inicial",
+        highlight: "Ótima escolha inicial",
       },
       {
         id: "multi-page",
         name: "Website multi-página",
         short: "Para negócios em crescimento",
         price: "A partir de €Y / mês",
-        bestFor:
-          "Bom se quer páginas separadas para serviços, projectos, equipa, blog e mais.",
+        bestFor: "Bom se queres páginas separadas para serviços, projetos, equipa, blog e mais.",
         features: [
-          "Páginas de serviços que podem classificar-se no Google",
+          "Páginas de serviços que podem posicionar-se no Google",
           "Secção de blog ou notícias",
           "Páginas de portfólio / projetos",
           "Mais espaço para fotos e explicações",
         ],
-        highlight: "Escolha mais flexível",
+        highlight: "Opção mais flexível",
       },
       {
         id: "store",
         name: "Loja online",
         short: "Para vender produtos online",
         price: "A partir de €Z / mês",
-        bestFor:
-          "Para negócios que querem aceitar encomendas e pagamentos directamente pelo website.",
+        bestFor: "Para negócios que querem aceitar encomendas e pagamentos diretamente através do website.",
         features: [
           "Catálogo de produtos e categorias",
-          "Checkout simples e opções de pagamento",
+          "Opções simples de checkout e pagamento",
           "Notificações de encomendas",
-          "Visão geral básica de vendas",
+          "Resumo básico de vendas",
         ],
-        highlight: "Melhor se vende produtos",
+        highlight: "Melhor se vendes produtos",
       },
     ],
   },
   templates: {
-    title: "Escolha um ponto de partida para o seu website.",
-    subtitle:
-      "Escolha um layout que combina com o seu tipo de negócio. Adaptaremos cores, fotos e textos aos seus detalhes.",
-    badge: "Passo 1 · Escolha um modelo",
-    note: "Estes são layouts de exemplo. Pode mudar tudo depois.",
+    title: "Escolhe um ponto de partida para o teu website.",
+    subtitle: "Escolhe um layout que se adequa ao teu tipo de negócio. Adaptaremos cores, fotos e textos aos teus detalhes.",
+    badge: "Passo 1 · Escolher modelo",
+    note: "Estes são layouts de exemplo. Podes mudar tudo depois.",
     list: [
       {
         id: "local-service-01",
         name: "Serviço local (limpo e simples)",
         type: "Layout de página única",
-        bestFor:
-          "Ideal para faz-tudo, funcionárias de limpeza, coaches, explicadores, pequenos serviços locais.",
+        bestFor: "Ideal para trabalhadores freelance, limpadores, coaches, tutores, pequenos serviços locais.",
         complexity: "Rápido de lançar",
-        highlight: "Recomendado para negócios de serviço simples.",
+        highlight: "Recomendado para negócios de serviços simples.",
       },
       {
         id: "multi-service-01",
         name: "Empresa multi-serviços",
         type: "Layout multi-página",
-        bestFor:
-          "Bom para construção, remodelações, salões de beleza e outros negócios com vários serviços.",
+        bestFor: "Bom para construção, renovações, salões de beleza e outros negócios com múltiplos serviços.",
         complexity: "Mais espaço para conteúdo",
-        highlight: "Melhor quando tem vários serviços principais.",
+        highlight: "Melhor quando tens múltiplos serviços principais.",
       },
       {
         id: "store-01",
         name: "Loja online simples",
         type: "Layout de loja",
-        bestFor:
-          "Para pequenas lojas que querem mostrar produtos e aceitar encomendas online básicas.",
+        bestFor: "Para lojas pequenas que querem mostrar produtos e aceitar encomendas online básicas.",
         complexity: "Inclui grelha de produtos",
         highlight: "Bom ponto de partida para pequeno e-commerce.",
       },
     ],
     buttons: {
       useTemplate: "Usar este modelo",
-      backHome: "Voltar à página inicial",
-      goToBuilder: "Continuar ao construtor",
+      backHome: "Voltar ao início",
+      goToBuilder: "Continuar para o construtor",
     },
   },
   auth: {
     login: {
-      title: "Entre na sua conta Just Code Works",
-      subtitle:
-        "Aceda aos seus websites, rascunhos, encomendas de impressão e ferramentas MagicAI do seu painel.",
-      emailLabel: "E-mail",
-      passwordLabel: "Palavra-passe",
+      title: "Entra na tua conta Just Code Works",
+      subtitle: "Acede aos teus websites, rascunhos, encomendas de impressão e ferramentas MagicAI a partir do teu dashboard.",
+      emailLabel: "Email",
+      passwordLabel: "Password",
       button: "Entrar",
-      noAccount: "Ainda não tem uma conta?",
+      noAccount: "Ainda não tens uma conta?",
       goToRegister: "Criar uma conta",
-      backHome: "Voltar à página inicial",
-      note:
-        "Esta é uma página de login demonstrativa. Na versão completa, isto ligar-se-á ao sistema de autenticação real.",
+      backHome: "Voltar ao início",
+      note: "Esta é uma página de login demo. Na versão completa, conectar-se-á ao sistema de autenticação real.",
     },
     register: {
-      title: "Crie a sua conta Just Code Works",
-      subtitle:
-        "Usaremos estes detalhes para ligar os seus websites, encomendas de impressão e facturação num só lugar.",
+      title: "Cria a tua conta Just Code Works",
+      subtitle: "Usaremos estes detalhes para conectar os teus websites, encomendas de impressão e faturação num lugar.",
       nameLabel: "Nome",
-      emailLabel: "E-mail",
-      passwordLabel: "Palavra-passe",
-      button: "Criar conta",
-      haveAccount: "Já tem uma conta?",
-      goToLogin: "Ir para login",
-      backHome: "Voltar à página inicial",
-      note:
-        "Esta é uma página de registo demonstrativa. Na versão completa, isto criará uma conta real para si.",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      button: "Criar Conta",
+      haveAccount: "Já tens uma conta?",
+      goToLogin: "Ir para o login",
+      backHome: "Voltar ao início",
+      note: "Esta é uma página de registo demo. Na versão completa, criará uma conta real para ti.",
     },
   },
   reviewPage: {
-    title: "Resumo da sua configuração",
-    subtitle:
-      "Aqui está o que usaremos para gerar o rascunho do seu website e sugerir itens de impressão.",
-    missingDataTitle: "Nenhum dado encontrado ainda",
-    missingDataText:
-      "Parece que ainda não completou o assistente construtor. Por favor, passe pelos passos primeiro.",
+    title: "Resumo da tua configuração",
+    subtitle: "Isto é o que usaremos para gerar o rascunho do teu website e sugerir artigos de impressão.",
+    missingDataTitle: "Dados ainda não encontrados",
+    missingDataText: "Parece que ainda não completaste o assistente do construtor. Por favor, passa primeiro pelos passos.",
     backToBuilder: "Voltar ao construtor",
-    backHome: "Voltar à página inicial",
-    selectedTemplate: "Modelo seleccionado",
+    backHome: "Voltar ao início",
+    selectedTemplate: "Modelo selecionado",
     builderDataTitle: "Informações do construtor",
     businessSection: "Detalhes do negócio",
     servicesSection: "Serviços e tipo de website",
     styleSection: "Cores e estilo",
-    editInBuilder: "Alterar no construtor",
+    editInBuilder: "Mudar no construtor",
   },
-  
-  // Layout and navigation translations
-  layout: {
-    tagline: "Sites • Impressão • Ferramentas IA",
-    login: "Entrar",
-    startBuilding: "Começar a criar",
-    logout: "Sair",
-    lightMode: "Modo claro",
-    darkMode: "Modo escuro",
-  },
-
-  // Page-specific translations
   pages: {
     home: {
       title: "Just Code Works - Início",
-      subtitle: "Bem-vindo à nossa página inicial",
-      pageInfo: "Informações da Página",
-      languageTesting: "Teste de Idiomas",
-      languageHelp: "Use o selector acima para testar diferentes versões linguísticas do website.",
+      subtitle: "Bem-vindo à nossa página principal",
+      pageInfo: "Informações da página",
+      languageTesting: "Teste de idiomas",
+      languageHelp: "Usa o seletor acima para testar diferentes versões de idioma do site.",
       navigation: "Navegação",
       published: "Publicado",
-      // Admin panel sections
       systemOverview: {
-        title: "📊 Visão Geral do Sistema",
+        title: "📊 Visão geral do sistema",
         template: "Modelo",
         templateName: "jcw-main",
-        sections: "Seções",
-        sectionsList: "Hero, Características, Serviços, Soluções, Contato",
-        status: "Status",
-        statusActive: "✅ Ativo & Pronto",
-        description: "O Just Code Works fornece soluções empresariais abrangentes que se adaptam às suas necessidades."
+        sections: "Secções",
+        sectionsList: "Hero, Funcionalidades, Serviços, Soluções, Contacto",
+        status: "Estado",
+        statusActive: "✅ Ativo e pronto",
+        description: "Just Code Works fornece soluções empresariais completas que se adaptam às tuas necessidades."
       },
       multiLanguageSupport: {
-        title: "🌍 Suporte Multi-Idioma",
-        description: "Nossa plataforma suporta 6 idiomas com tradução automática de conteúdo e roteamento localizado.",
+        title: "🌍 Suporte multi-idioma",
+        description: "A nossa plataforma suporta 6 idiomas com tradução automática de conteúdo e encaminhamento localizado.",
         languages: "Idiomas: Inglês, Holandês, Português, Espanhol, Francês, Alemão",
-        testInstructions: "Use o seletor de idiomas para experimentar navegação multi-idioma perfeita."
+        testInstructions: "Usa o seletor de idioma para experimentar navegação multi-idioma sem problemas."
       }
     },
     posystems: {
-      title: "Sistemas TPV",
-      subtitle: "Soluções modernas de terminal de pagamento para o seu negócio",
+      title: "Sistemas POS",
+      subtitle: "Soluções point-of-sale modernas para o teu negócio",
       features: {
-        payment: "Processamento de Pagamentos",
-        paymentDesc: "Aceite cartões de crédito, débito e pagamentos sem contacto com taxas competitivas e processamento rápido.",
-        inventory: "Gestão de Inventário",
-        inventoryDesc: "Acompanhe o stock, gira alertas de stock baixo e gira produtos com facilidade através da nossa interface intuitiva.",
-        analytics: "Análise de Vendas",
-        analyticsDesc: "Obtenha informações sobre padrões de vendas, produtos mais vendidos e desempenho financeiro com relatórios detalhados.",
+        payment: "Processamento de pagamentos",
+        paymentDesc: "Aceita pagamentos com cartões de crédito, débito e contactless com tarifas competitivas e processamento rápido.",
+        inventory: "Gestão de inventário",
+        inventoryDesc: "Rastreia stock, define alertas de stock baixo e gere produtos facilmente através da nossa interface intuitiva.",
+        analytics: "Análises de vendas",
+        analyticsDesc: "Obtém insights sobre padrões de vendas, produtos mais vendidos e desempenho financeiro com relatórios detalhados.",
       },
     },
     websites: {
       title: "Websites",
       subtitle: "Websites personalizados e serviços de desenvolvimento web",
       features: {
-        onePage: "Websites de Página Única",
-        onePageDesc: "Perfeito para pequenas empresas e portfólios. Fique online rapidamente com um design moderno e responsivo.",
-        multiPage: "Websites Multi-página",
-        multiPageDesc: "Websites empresariais completos com múltiplas páginas, navegação e funcionalidades personalizadas.",
-        ecommerce: "Lojas Online",
-        ecommerceDesc: "Websites de e-commerce com carrinho de compras, processamento de pagamentos e gestão de inventário.",
+        onePage: "Sites de página única",
+        onePageDesc: "Perfeito para pequenos negócios e portfólios. Vai online rapidamente com um design moderno e responsivo.",
+        multiPage: "Websites multi-página",
+        multiPageDesc: "Websites empresariais completos com páginas múltiplas, navegação e funcionalidades personalizadas.",
+        ecommerce: "Lojas online",
+        ecommerceDesc: "Websites de e-commerce com carrinhos, processamento de pagamentos e gestão de inventário.",
       },
     },
     services: {
       title: "Serviços",
       subtitle: "Todos os nossos serviços profissionais",
       features: {
-        webDev: "Desenvolvimento Web",
-        webDevDesc: "Websites e aplicações web personalizados construídos com tecnologias modernas.",
-        mobileApps: "Aplicações Móveis",
-        mobileAppsDesc: "Aplicações móveis nativas e multiplataforma para iOS e Android.",
-        cloud: "Soluções em Nuvem",
-        cloudDesc: "Infraestrutura em nuvem escalável e soluções de implementação para as suas aplicações.",
+        webDev: "Desenvolvimento web",
+        webDevDesc: "Websites personalizados e aplicações web construídas com tecnologias modernas.",
+        mobileApps: "Apps móveis",
+        mobileAppsDesc: "Aplicações móveis nativas e cross-platform para iOS e Android.",
+        cloud: "Soluções de nuvem",
+        cloudDesc: "Infraestrutura de nuvem escalável e soluções de implementação para as tuas aplicações.",
         maintenance: "Manutenção",
-        maintenanceDesc: "Suporte contínuo e manutenção para as suas soluções digitais existentes.",
+        maintenanceDesc: "Suporte contínuo e manutenção para as tuas soluções digitais existentes.",
       },
     },
     helpCenter: {
       title: "Centro de Ajuda",
-      subtitle: "Obtenha ajuda e suporte",
+      subtitle: "Obtém ajuda e suporte",
       features: {
         documentation: "Documentação",
         documentationDesc: "Guias completos e documentação para todos os nossos produtos e serviços.",
         support: "Suporte",
-        supportDesc: "Obtenha ajuda directa da nossa equipa de suporte técnico para quaisquer questões ou problemas.",
+        supportDesc: "Obtém ajuda direta da nossa equipa de suporte técnico para qualquer pergunta ou problema.",
         faq: "FAQ",
-        faqDesc: "Encontre respostas às perguntas mais frequentes sobre os nossos serviços.",
+        faqDesc: "Encontra respostas para perguntas frequentes sobre os nossos serviços.",
         tutorials: "Tutoriais",
-        tutorialsDesc: "Tutoriais passo a passo e guias em vídeo para o ajudar a aproveitar ao máximo a nossa plataforma.",
+        tutorialsDesc: "Tutoriais passo-a-passo e guias em vídeo para te ajudar a tirar o máximo proveito da nossa plataforma.",
         categories: {
-          getting: "Guias de Início",
+          getting: "Guias de início",
           api: "Documentação API",
-          practices: "Melhores Práticas",
-          live: "Suporte por Chat ao Vivo",
-          email: "Suporte por Email",
-          phone: "Suporte Telefónico",
-          billing: "Questões de Facturação",
-          technical: "Problemas Técnicos",
-          account: "Gestão de Conta",
-          video: "Tutoriais em Vídeo",
-          written: "Guias Escritos",
-          interactive: "Exemplos Interactivos",
+          practices: "Melhores práticas",
+          live: "Suporte de chat ao vivo",
+          email: "Suporte por email",
+          phone: "Suporte telefónico",
+          billing: "Perguntas de faturação",
+          technical: "Problemas técnicos",
+          account: "Gestão de conta",
+          video: "Tutoriais em vídeo",
+          written: "Guias escritos",
+          interactive: "Exemplos interativos",
         },
       },
     },
     common: {
       title: "Título",
-      slug: "Slug", 
+      slug: "Slug",
       path: "Caminho",
       language: "Idioma",
       order: "Ordem",
-      project: "Projecto",
+      project: "Projeto",
       template: "Modelo",
-      loading: "A carregar...",
+      loading: "Carregando..."
     },
   },
-
-  // Website types and pages
-  websiteTypes: {
-    onePageWebsites: "Websites de Página Única",
-    onePageDesc: "Rápido, simples, eficaz",
-    multiPageWebsites: "Websites Multi-página",
-    multiPageDesc: "Presença empresarial completa",
-    onlineShops: "Lojas Online",
-    onlineShopsDesc: "Venda produtos online",
-    customWebsites: "Websites Personalizados",
-    customDesc: "Soluções sob medida",
-    
-    // One-page website content
-    onePage: {
-      hero: {
-        eyebrow: "Website de página única",
-        title: "Website de Página Única",
-        subtitle: "A maneira mais rápida de ficar online. Uma página limpa e profissional que mostra quem é, o que faz e como entrar em contacto.",
+  onboarding: {
+    step0: {
+      title: "Vamos começar",
+      subtitle: "Conta-nos sobre o teu negócio e o que gostarias de criar",
+      progress: {
+        intent: "Intenção",
+        details: "Detalhes", 
+        branding: "Marca"
       },
-      overview: {
-        badge: "Simples e Eficaz",
-        title: "Perfeito para pequenas empresas e freelancers",
-        subtitle: "Se só precisa aparecer online – rápido, simples e confiável – o Website de Página Única é o seu melhor ponto de partida.",
+      intents: {
+        website: {
+          title: "Construir um website",
+          description: "Criar um website profissional para o teu negócio"
+        },
+        prints: {
+          title: "Desenhar impressões",
+          description: "Criar cartões de visita, folhetos e materiais de marketing"
+        },
+        pos: {
+          title: "Point of Sale",
+          description: "Configurar processamento de pagamentos e gestão de inventário"
+        }
       },
-      included: {
-        title: "O que está incluído",
-        subtitle: "Uma página, todos os básicos cobertos:",
-        items: [
-          "Uma página de destino profissional com design limpo",
-          "Secções para os seus serviços, fotos, detalhes de contacto e informações do negócio",
-          "Formulário de contacto simples com notificações por e-mail",
-          "Design optimizado para mobile que funciona em todos os dispositivos",
-          "SEO básico configurado para aparecer nas pesquisas do Google",
-          "Alojamento confiável e domínio incluído no primeiro ano",
-        ],
+      form: {
+        businessName: {
+          label: "Nome do negócio",
+          placeholder: "Insere o nome do teu negócio",
+          required: "O nome do negócio é obrigatório"
+        },
+        businessType: {
+          label: "Tipo de negócio",
+          placeholder: "ex. Restaurante, Consultoria, Loja de retalho"
+        },
+        primaryCountry: {
+          label: "País principal",
+          placeholder: "Seleciona o teu país"
+        },
+        primaryLanguage: {
+          label: "Idioma principal",
+          placeholder: "Seleciona idioma principal"
+        },
+        primaryGoal: {
+          label: "Objetivo principal",
+          placeholder: "Qual é o teu objetivo principal?"
+        },
+        brandColors: {
+          primaryLabel: "Cor principal da marca",
+          secondaryLabel: "Cor secundária da marca",
+          primaryPlaceholder: "#1D4ED8",
+          secondaryPlaceholder: "#6366F1"
+        },
+        themeMode: {
+          label: "Tema preferido",
+          light: "Claro",
+          dark: "Escuro",
+          auto: "Auto"
+        },
+        notes: {
+          label: "Notas adicionais",
+          placeholder: "Quaisquer requisitos específicos ou preferências..."
+        }
       },
-      benefits: {
-        title: "Por que escolher um Website de Página Única?",
-        subtitle: "Rápido de configurar, fácil de manter, mobile-friendly por padrão.",
+      actions: {
+        back: "Voltar",
+        continue: "Continuar para marca",
+        continueDetails: "Continuar para detalhes",
+        complete: "Completar configuração",
+        creating: "A criar..."
       },
-    },
+      success: {
+        title: "Bem-vindo ao JustCodeWorks!",
+        subtitle: "O teu onboarding está completo. A redirecionar para o teu dashboard...",
+        redirecting: "A redirecionar..."
+      },
+      errors: {
+        general: "Algo correu mal. Tenta novamente.",
+        businessName: "O nome do negócio não pode estar vazio",
+        invalidColor: "Por favor insere uma cor hex válida (ex. #1D4ED8)",
+        submitFailed: "Erro ao guardar dados de onboarding. Tenta novamente."
+      },
+      countries: [
+        "Estados Unidos",
+        "Reino Unido", 
+        "Canadá",
+        "Austrália",
+        "Alemanha",
+        "França",
+        "Espanha",
+        "Portugal",
+        "Brasil",
+        "México",
+        "Outro"
+      ],
+      languages: {
+        en: "English",
+        pt: "Português",
+        es: "Español", 
+        fr: "Français",
+        de: "Deutsch"
+      },
+      goals: {
+        "get-leads": "Obter leads / consultas",
+        "show-info": "Mostrar info / menu",
+        "sell-online": "Vender online",
+        "take-bookings": "Aceitar reservas",
+        "other": "Outro"
+      }
+    }
   },
-
-  // Website promise section
   websitePromise: {
     items: [
-      "Domínio e alojamento gratuitos no primeiro ano",
+      "Domínio gratuito e alojamento primeiro ano",
       "Servidores seguros baseados na UE",
       "Certificado SSL e backups diários",
-      "Tempo de entrega rápido",
-      "Opções de upgrade contínuas",
+      "Tempos de entrega rápidos",
+      "Opções de upgrade contínuo",
     ],
-    description: "Todos os websites são criados com o nosso sistema inteligente que torna a criação de conteúdo simples e intuitiva — para que possa focar-se no seu negócio, não nas ferramentas.",
-    exploreTitle: "Explore os Nossos Tipos de Website",
-  },
+    description: "Todos os websites são construídos com o nosso sistema inteligente que torna a criação de conteúdo simples e intuitiva — para que te possas focar no teu negócio, não nas ferramentas.",
+    exploreTitle: "Explora os Nossos Tipos de Websites",
+  }
 };
 
-export type Dictionary = typeof ptTranslation;
-
-export default ptTranslation;
+export default portugueseDictionary;

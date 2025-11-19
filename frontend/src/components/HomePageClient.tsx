@@ -40,7 +40,7 @@ export default function HomePageClient({ dict }: { dict: any }) {
                   <p className="text-gray-500 dark:text-gray-400 text-xs">{dict.pages.home.multiLanguageSupport.languages}</p>
                   <p className="text-gray-600 dark:text-gray-300">{dict.pages.home.multiLanguageSupport.testInstructions}</p>
                   <div className="mt-4">
-                    <LanguageSelector />
+                    <LanguageSelector isMainSite={true} />
                   </div>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export default function HomePageClient({ dict }: { dict: any }) {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Perfect Solution
+              {dict.sections.solutionsTitle}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               From simple landing pages to complex e-commerce platforms, we have the right solution for your business needs.

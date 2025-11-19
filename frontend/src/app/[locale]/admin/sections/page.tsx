@@ -9,9 +9,7 @@ import {
   DocumentTextIcon, 
   PhotoIcon, 
   PlusIcon, 
-  Cog6ToothIcon,
-  RectangleGroupIcon,
-  PlayIcon
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 interface SectionsPageProps {
@@ -20,7 +18,7 @@ interface SectionsPageProps {
   };
 }
 
-type TabType = 'sections' | 'sliders';
+type TabType = 'sections';
 
 export default function SectionsPage({ params }: SectionsPageProps) {
   const [dictionary, setDictionary] = useState<any>(null);
@@ -81,52 +79,10 @@ export default function SectionsPage({ params }: SectionsPageProps) {
     }
   ];
 
-  const sliderTools = [
-    {
-      name: 'Manage Hero Sliders',
-      description: 'Configure homepage hero sliders with particle effects and custom gradients',
-      href: `/${params.locale}/admin/sliders/homepage`,
-      icon: RectangleGroupIcon,
-      color: 'bg-indigo-50 border-indigo-200',
-      iconColor: 'text-indigo-600',
-      badge: 'New!',
-      badgeColor: 'bg-green-100 text-green-800'
-    },
-    {
-      name: 'Testimonial Carousel',
-      description: 'Create rotating testimonials and customer review carousels',
-      href: `/${params.locale}/admin/sliders/create-testimonial`,
-      icon: PlayIcon,
-      color: 'bg-teal-50 border-teal-200',
-      iconColor: 'text-teal-600',
-      badge: 'Coming Soon',
-      badgeColor: 'bg-gray-100 text-gray-600'
-    },
-    {
-      name: 'Product Gallery',
-      description: 'Showcase products with interactive image galleries and sliders',
-      href: `/${params.locale}/admin/sliders/create-gallery`,
-      icon: PhotoIcon,
-      color: 'bg-pink-50 border-pink-200',
-      iconColor: 'text-pink-600',
-      badge: 'Coming Soon',
-      badgeColor: 'bg-gray-100 text-gray-600'
-    },
-    {
-      name: 'Slider Settings',
-      description: 'Configure slider animations, timing, and global behavior',
-      href: `/${params.locale}/admin/sliders/settings`,
-      icon: Cog6ToothIcon,
-      color: 'bg-amber-50 border-amber-200',
-      iconColor: 'text-amber-600',
-      badge: 'Coming Soon',
-      badgeColor: 'bg-gray-100 text-gray-600'
-    }
-  ];
+
 
   const tabs = [
-    { id: 'sections' as TabType, name: 'Sections', icon: DocumentTextIcon },
-    { id: 'sliders' as TabType, name: 'Sliders', icon: RectangleGroupIcon }
+    { id: 'sections' as TabType, name: 'Sections', icon: DocumentTextIcon }
   ];
 
   const renderSectionsTab = () => (
@@ -224,90 +180,7 @@ export default function SectionsPage({ params }: SectionsPageProps) {
     </>
   );
 
-  const renderSlidersTab = () => (
-    <>
-      {/* Slider Tools Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {sliderTools.map((tool) => (
-          <div key={tool.name} className="relative">
-            <Link
-              href={tool.href}
-              className={`block p-6 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
-                tool.href.includes('homepage')
-                  ? tool.color + ' hover:border-indigo-300'
-                  : tool.color + ' opacity-60 cursor-not-allowed'
-              }`}
-              onClick={!tool.href.includes('homepage') ? (e) => e.preventDefault() : undefined}
-            >
-              {/* Badge */}
-              <div className="flex justify-between items-start mb-4">
-                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tool.badgeColor}`}>
-                  {tool.badge}
-                </div>
-                <tool.icon className={`h-8 w-8 ${tool.iconColor}`} />
-              </div>
 
-              {/* Content */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {tool.name}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {tool.description}
-                </p>
-              </div>
-            </Link>
-          </div>
-        ))}
-      </div>
-
-      {/* Stats */}
-      <div className="mt-12 bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Slider Stats</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-indigo-600">0</div>
-            <div className="text-sm text-gray-600">Hero Sliders</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-teal-600">0</div>
-            <div className="text-sm text-gray-600">Testimonial Carousels</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-pink-600">0</div>
-            <div className="text-sm text-gray-600">Product Galleries</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-amber-600">4</div>
-            <div className="text-sm text-gray-600">Tools Coming Soon</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Help Section */}
-      <div className="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-indigo-900 mb-2">🎬 Getting Started with Sliders</h3>
-        <p className="text-indigo-700 mb-4">
-          Sliders and carousels add dynamic, interactive elements to your websites. Create engaging hero sections, testimonial rotations, and product showcases.
-        </p>
-        <div className="flex flex-wrap gap-4">
-          <button
-            disabled
-            className="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-          >
-            <RectangleGroupIcon className="h-4 w-4 mr-2" />
-            Coming Soon
-          </button>
-          <a
-            href="#"
-            className="inline-flex items-center px-4 py-2 border border-indigo-300 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors"
-          >
-            📖 View Slider Examples
-          </a>
-        </div>
-      </div>
-    </>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -316,7 +189,7 @@ export default function SectionsPage({ params }: SectionsPageProps) {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Content Management</h1>
           <p className="mt-2 text-gray-600">
-            Create, manage, and organize website sections and sliders across all your projects.
+            Create, manage, and organize website sections across all your projects.
           </p>
         </div>
 
@@ -344,7 +217,6 @@ export default function SectionsPage({ params }: SectionsPageProps) {
 
         {/* Tab Content */}
         {activeTab === 'sections' && renderSectionsTab()}
-        {activeTab === 'sliders' && renderSlidersTab()}
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import type { Locale } from "@/i18n";
+import { getDictionary } from "@/i18n";
+import { useEffect, useState } from "react";
 import { MarketingPageShell, MarketingHero, MarketingSection } from "@/components/marketing-layout";
 import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
@@ -9,15 +11,23 @@ import {
   getSocialFieldValue,
 } from "@/store/social-service-config";
 import { SocialEditorPanel } from "@/components/social-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function SocialMediaServicePage({
   params,
 }: {
   params: { locale: Locale };
 }) {
+  const { locale } = params;
   const { user } = useAuth();
   const { editMode } = useEditMode();
   const { config } = useSocialPageConfig();
+  const [t, setT] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(locale).then(setT);
+  }, [locale]);
 
   const heroTitle =
     getSocialFieldValue(config, "jcw-main-social-hero01", "title") ??
@@ -48,9 +58,11 @@ export default function SocialMediaServicePage({
     "Your website becomes the hub: posts, campaigns and ads always lead back to a page that can convert.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <SocialEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <SocialEditorPanel />}
 
       <section
         id="jcw-main-social-hero01"
@@ -153,6 +165,8 @@ export default function SocialMediaServicePage({
           </div>
         </MarketingSection>
       </section>
-    </MarketingPageShell>
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

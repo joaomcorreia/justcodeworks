@@ -2,7 +2,8 @@ import base64
 import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
-from .models import Template, SiteTemplate, TemplateSection, SiteProject, Page, Section, Field, BugReport, BugScreenshot, NavigationItem, HeroSlide, DashboardTemplate, DashboardBlock, QuoteRequest, SectionDraft, HomepageSlider, HomepageSlide, TestimonialCarousel, TestimonialSlide
+from .models import Template, SiteTemplate, TemplateSection, SiteProject, Page, Section, Field, BugReport, BugScreenshot, NavigationItem, HeroSlide, QuoteRequest, SectionDraft, HomepageSlider, HomepageSlide, TestimonialCarousel, TestimonialSlide
+from tenant_dashboards.models import DashboardTemplate, DashboardBlock
 
 
 class TemplateSerializer(serializers.ModelSerializer):
@@ -236,6 +237,7 @@ class SiteProjectSerializer(serializers.ModelSerializer):
             "primary_goal",
             "primary_locale",
             "additional_locales",
+            "enable_arabic_language",
             "primary_color",
             "notes",
             "is_active",

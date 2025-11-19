@@ -25,6 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin/tenant-showcase/', tenant_showcase_html_view, name='admin-tenant-showcase-html'),
     path('api/', include('sites.api_urls')),
+    # [MAIN-SITE] Main website API
+    path('api/main-site/', include('main_site.urls')),
     # [AUTH] JWT endpoints for API token access (if needed later)
     path('api/jwt/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/jwt/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

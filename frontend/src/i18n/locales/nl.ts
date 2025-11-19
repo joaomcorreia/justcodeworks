@@ -1,51 +1,47 @@
-const nlTranslation = {
+import { Dictionary } from "../base-en";
+
+const dutchDictionary: Dictionary = {
   hero: {
-    badge: "Alles verbonden: website, drukwerk & AI.",
-    title: "Alles wat u nodig heeft om uw bedrijf online te krijgen.",
-    subtitle:
-      "Start een moderne website, bestel uw drukwerk, verbind eenvoudige kassasystemen en laat uw AI-assistent het zware werk doen – alles vanaf één plek.",
+    badge: "Alles verbonden: website, drukwerk en AI.",
+    title: "Alles wat je nodig hebt om je bedrijf online te brengen.",
+    subtitle: "Start een moderne website, bestel je drukwerk, verbind eenvoudige POS-tools en laat je AI-assistent het zware werk doen – allemaal vanaf één plek.",
     ctaPrimary: "Start in 2 minuten",
-    ctaSecondary: "Bekijk demo website",
-    note:
-      "Geen technische vaardigheden nodig. Perfect voor kleine bedrijven, freelancers en lokale winkels.",
-    previewDomain: "omas-koekjes.justcodeworks.eu",
+    ctaSecondary: "Bekijk demo site",
+    note: "Geen technische vaardigheden nodig. Perfect voor kleine bedrijven, freelancers en lokale winkels.",
+    previewDomain: "oma-koekjes.justcodeworks.eu",
     previewTitle: "Oma's Koekjeswinkel",
-    previewText:
-      "Verse koekjes dagelijks gebakken. Bestel online of bezoek onze gezellige winkel.",
+    previewText: "Verse koekjes dagelijks gebakken. Bestel online of bezoek onze gezellige winkel.",
     previewWebsiteLabel: "Website",
-    previewWebsiteText: "Online in 1–2 dagen",
+    previewWebsiteText: "Online in 1-2 dagen",
     previewPrintLabel: "Drukwerk",
-    previewPrintText: "Kaarten & flyers",
+    previewPrintText: "Visitekaartjes en folders",
     previewAiLabel: "MagicAI",
-    previewAiText: "Teksten & afbeeldingen",
+    previewAiText: "Teksten en afbeeldingen",
     assistantTitle: "Clippy 2.0 is klaar",
-    assistantText:
-      '"Beantwoord een paar vragen en ik bouw alles voor u."',
-    assistantCta: "Start wizard",
+    assistantText: '"Beantwoord een paar vragen en ik bouw alles voor je."',
+    assistantCta: "Start assistent",
   },
   nav: {
     home: "Home",
     websites: "Websites",
     printing: "Drukwerk",
-    pos: "Kassasystemen",
+    pos: "POS Systemen",
     services: "Diensten",
-    helpCenter: "Hulpcentrum",
+    helpCenter: "Helpcentrum",
     aiTools: "MagicAI Tools",
     pricing: "Prijzen",
     login: "Inloggen",
-    start: "Beginnen met bouwen",
+    start: "Start met bouwen",
     templates: "Sjablonen",
   },
   websites: {
-    title: "Websites die net zo hard werken als u",
-    subtitle:
-      "Kies het type website dat vandaag bij uw bedrijf past – en upgrade later naarmate u groeit.",
+    title: "Websites die zo hard werken als jij",
+    subtitle: "Kies het type website dat past bij je bedrijf vandaag – en upgrade later terwijl je groeit.",
     badge: "Website Bouwer",
     onePage: {
       badge: "Eén-pagina websites",
       title: "Perfect voor eenvoudige lokale bedrijven",
-      desc:
-        "Ideaal als u een paar diensten heeft en alles op één schone, scrollbare pagina wilt.",
+      desc: "Ideaal als je enkele diensten hebt en alles op één schone, scrollbare pagina wilt.",
       bullets: [
         "Tot 6 diensten op één pagina",
         "Contact / WhatsApp / bel knoppen",
@@ -56,25 +52,23 @@ const nlTranslation = {
     },
     multiPage: {
       badge: "Multi-pagina websites",
-      title: "Groei met speciale pagina's voor elke dienst",
-      desc:
-        "Geweldig voor bedrijven die aparte pagina's willen voor diensten, projecten, team, blog en meer.",
+      title: "Groei met toegewijde pagina's voor elke dienst",
+      desc: "Geweldig voor bedrijven die aparte pagina's willen voor diensten, projecten, team, blog en meer.",
       bullets: [
         "Dienst pagina's die kunnen ranken op Google",
         "Blog / nieuws secties voor updates",
-        "Gestructureerde contact & offerte formulieren",
+        "Gestructureerde contact en offerte formulieren",
       ],
       priceLabel: "Vanaf €Y / maand",
       link: "Bekijk voorbeeld",
     },
     ecommerce: {
       badge: "Online winkels",
-      title: "Verkoop uw producten met een eenvoudige winkel",
-      desc:
-        "Voor bedrijven die klaar zijn om online betalingen te accepteren en bestellingen te beheren zonder complexe systemen.",
+      title: "Verkoop je producten met een eenvoudige winkel",
+      desc: "Voor bedrijven die klaar zijn om online betalingen te accepteren en bestellingen te beheren zonder complexe systemen.",
       bullets: [
         "Product catalogus en categorieën",
-        "Eenvoudige checkout en betaalopties",
+        "Eenvoudige checkout en betaal opties",
         "Bestelling notificaties en basis rapporten",
       ],
       priceLabel: "Vanaf €Z / maand",
@@ -82,107 +76,106 @@ const nlTranslation = {
     },
   },
   sections: {
-    printingTitle: "Uw merk, prachtig gedrukt.",
-    printingText:
-      "Placeholder sectie – we voegen later de volledige drukwerk layout toe van uw oude homepage.",
-    posTitle: "Moderne kassasystemen die met u meegroeien.",
-    posText: "Placeholder voor kassasystemen inhoud.",
-    aiTitle: "MagicAI tools.",
-    aiText:
-      "Placeholder voor AI tool kaarten: content schrijver, blog generator, screenshot-naar-site, etc.",
+    solutionsTitle: "Kies Je Perfecte Oplossing",
+    printingTitle: "Jouw merk, prachtig gedrukt.",
+    printingText: "Placeholder sectie – later voegen we het volledige drukwerk ontwerp toe van je oude homepage.",
+    posTitle: "Moderne POS systemen die met je meegroeien.",
+    posText: "Placeholder voor POS systemen inhoud.",
+    aiTitle: "MagicAI Tools.",
+    aiText: "Placeholder voor AI tool kaarten: content writer, blog generator, capture-to-site, etc.",
     pricingTitle: "Prijzen overzicht.",
-    pricingText: "Placeholder – later matchen we uw echte prijstabellen.",
-
+    pricingText: "Placeholder – later matchen we dit met je echte prijstabellen.",
     printingCards: [
       {
         label: "Visitekaartjes",
         title: "Maak een sterke eerste indruk",
-        description:
-          "Klassieke of moderne ontwerpen met uw logo, kleuren en contactgegevens, klaar om uit te delen aan nieuwe klanten.",
-        highlight: "Meest populaire starter item",
+        description: "Klassieke of moderne ontwerpen met je logo, kleuren en contactgegevens, klaar om uit te delen aan nieuwe klanten.",
+        highlight: "Populairste startartikel",
       },
       {
-        label: "Flyers en brochures",
-        title: "Promoot uw diensten lokaal",
-        description:
-          "Perfect voor deur-tot-deur distributie, lokale winkels en evenementen. Geweldig voor bouw, schoonheid, coaching en meer.",
+        label: "Folders en brochures",
+        title: "Promoot je diensten lokaal",
+        description: "Perfect voor huis-aan-huis bezorging, lokale winkels en evenementen. Geweldig voor bouw, schoonheid, coaching en meer.",
         highlight: "Ideaal voor lokale marketing",
       },
       {
-        label: "Stickers, labels en gadgets",
-        title: "Zet uw merk overal neer",
-        description:
-          "Merk uw verpakkingen, geschenken en producten met stickers, labels en eenvoudige gadgets.",
+        label: "Stickers, labels en merchandise",
+        title: "Neem je merk overal mee naartoe",
+        description: "Brandmerk je verpakkingen, cadeaus en producten met stickers, labels en eenvoudige merchandise artikelen.",
         highlight: "Add-on voor groeiende merken",
       },
     ],
-
     posCards: [
       {
         label: "Eenvoudige kaart terminals",
-        title: "Accepteer betalingen zonder gedoe",
-        description:
-          "Sluit een eenvoudige terminal aan die gewoon werkt: tikken, pincode, bonnetje. Geen complexe systemen nodig.",
+        title: "Accepteer betalingen zonder hoofdpijn",
+        description: "Sluit een eenvoudige terminal aan die gewoon werkt: tap, PIN, bon. Geen complex systeem nodig.",
         highlight: "Geweldig voor kleine winkels",
       },
       {
-        label: "Tablet en telefoon kassa",
-        title: "Gebruik apparaten die u al heeft",
-        description:
-          "Verander een tablet of telefoon in een kleine kassa voor diensten, salons, cafés en mobiele bedrijven.",
+        label: "POS tablet en telefoon",
+        title: "Gebruik de apparaten die je al hebt",
+        description: "Verander een tablet of telefoon in een kleine POS voor diensten, salons, cafés en pop-up bedrijven.",
         highlight: "Flexibel voor mobiel werk",
       },
       {
         label: "Basis rapporten",
-        title: "Zie wat u verkoopt",
-        description:
-          "Krijg eenvoudige overzichten van facturering, betaalmethoden en drukke dagen zonder een volledig boekhoudsysteem.",
-        highlight: "Duidelijk en makkelijk te lezen",
+        title: "Zie wat er verkocht wordt",
+        description: "Krijg eenvoudige samenvattingen van inkomsten, betaalmethoden en piekdagen zonder een volledig boekhoudsysteem.",
+        highlight: "Helder en makkelijk te lezen",
+      },
+      {
+        label: "Voorraad rapporten",
+        title: "Volg je voorraad eenvoudig",
+        description: "Monitor voorraadniveaus, stel lage voorraad waarschuwingen in en beheer producten met onze intuïtieve interface.",
+        highlight: "Vereenvoudigt voorraadbeheer",
       },
     ],
-
     aiCards: [
       {
         label: "Website tekst assistent",
-        title: "Teksten voor uw pagina's in uw toon",
-        description:
-          "Genereer titels, dienst beschrijvingen en over pagina's met uw bedrijfsgegevens en voorkeurssstijl.",
-        highlight: "Gebaseerd op uw antwoorden",
+        title: "Teksten voor je pagina's in jouw toon",
+        description: "Genereer titels, dienst beschrijvingen en over ons pagina's met je bedrijfsdetails en gewenste stijl.",
+        highlight: "Gebaseerd op jouw antwoorden",
       },
       {
         label: "Blog en updates generator",
-        title: "Houd uw website actief",
-        description:
-          "Creëer posts met ideeën, structuur en tekst concepten die u snel kunt bekijken en publiceren.",
+        title: "Houd je site actief",
+        description: "Maak posts met ideeën, structuur en conceptteksten die je snel kunt reviewen en publiceren.",
         highlight: "Goed voor Google en klanten",
       },
       {
-        label: "Screenshot-naar-layout assistent",
+        label: "Capture-to-layout assistent",
         title: "Verander ideeën in layouts",
-        description:
-          "Gebruik voorbeeld screenshots als inspiratie en verander ze in layouts die passen bij uw eigen merk.",
-        highlight: "Bespaart ontwerp tijd",
+        description: "Gebruik voorbeeld screenshots als inspiratie en converteer ze naar layouts die bij jouw merk passen.",
+        highlight: "Bespaart ontwerptijd",
+      },
+      {
+        label: "AI content generator",
+        title: "Creëer automatisch boeiende content",
+        description: "Genereer product beschrijvingen, blog content en marketing teksten afgestemd op jouw merkstem.",
+        highlight: "Kwaliteit content in seconden",
       },
     ],
   },
   footer: {
-    tagline: "Websites • Drukwerk • Kassa • Tools",
-    description: "We helpen kleine EU bedrijven online te komen met moderne websites, bijpassend drukwerk en eenvoudige tools – alles verbonden in één systeem.",
+    tagline: "Websites • Drukwerk • POS • Tools",
+    description: "We helpen kleine EU bedrijven online te gaan met moderne websites, bijpassend drukwerk en eenvoudige tools – alles verbonden in één systeem.",
     services: {
       title: "Diensten",
-      websites: "Website Ontwerp",
-      pos: "Kassasystemen",
-      printing: "Grafisch Ontwerp",
-      consulting: "Bedrijfs Consultancy",
-      maintenance: "Website Onderhoud",
-      hosting: "Web Hosting"
+      websites: "Website ontwerp",
+      pos: "POS Systemen",
+      printing: "Drukwerk ontwerp",
+      consulting: "Bedrijfsadvies",
+      maintenance: "Website onderhoud",
+      hosting: "Web hosting"
     },
     company: {
       title: "Bedrijf",
-      about: "Over Ons",
-      team: "Ons Team",
+      about: "Over ons",
+      team: "Ons team",
       careers: "Carrières",
-      news: "Nieuws & Updates",
+      news: "Nieuws en updates",
       partners: "Partners",
       testimonials: "Testimonials"
     },
@@ -192,58 +185,53 @@ const nlTranslation = {
       qrGenerator: "QR Generator",
       passwordChecker: "Wachtwoord Checker",
       passwordGenerator: "Wachtwoord Generator",
-      imageResizer: "Afbeelding Resizer",
-      imageCropper: "Afbeelding Editor"
+      imageResizer: "Afbeelding Verkleiner",
+      imageCropper: "Afbeelding Bijsnijder"
     },
     support: {
       title: "Ondersteuning",
-      help: "Hulpcentrum",
-      contact: "Contact Ons",
-      faq: "Veelgestelde Vragen",
+      help: "Helpcentrum",
+      contact: "Contact ons",
+      faq: "FAQ",
       documentation: "Documentatie",
-      tutorials: "Video Tutorials",
-      community: "Community Forum"
+      tutorials: "Video tutorials",
+      community: "Community forum"
     },
     legal: {
-      privacy: "Privacybeleid",
+      privacy: "Privacy Beleid",
       terms: "Servicevoorwaarden",
-      cookies: "Cookiebeleid",
+      cookies: "Cookie Beleid",
       gdpr: "GDPR Naleving"
     },
     newsletter: {
       title: "Abonneer op onze nieuwsbrief",
-      placeholder: "Voer uw email in",
+      placeholder: "Voer je email in",
       subscribe: "Abonneren"
     },
     copyright: {
       rights: "Alle rechten voorbehouden.",
       made: "Gemaakt met",
-      location: "in Nederland",
-      powered: "Powered by"
+      location: "in Portugal",
+      powered: "Aangedreven door"
     }
   },
   builder: {
     title: "Website bouwer",
-    subtitle:
-      "Beantwoord een paar eenvoudige vragen en we zetten uw website, drukwerk en basis kassa setup voor u klaar.",
+    subtitle: "Beantwoord enkele eenvoudige vragen en we bereiden je website, drukwerk en basis POS setup voor je voor.",
     introBadge: "Stap 1 van 4",
-    introTitle: "Laten we beginnen met de basis.",
-    introText:
-      "We vragen over uw bedrijf, diensten en voorkeurskluren. U kunt alles later altijd wijzigen.",
-    startButton: "Start de wizard",
+    introTitle: "Laten we beginnen met de basics.",
+    introText: "We vragen je naar je bedrijf, diensten en favoriete kleuren. Je kunt altijd alles later veranderen.",
+    startButton: "Start assistent",
     backHome: "Terug naar home",
-
     steps: {
-      step1Label: "Bedrijfs details",
-      step2Label: "Diensten en site type",
+      step1Label: "Bedrijfsdetails",
+      step2Label: "Diensten en website type",
       step3Label: "Kleuren en stijl",
       step4Label: "Review",
-
       next: "Volgende",
-      previous: "Terug",
-      finish: "Voltooien en bekijken",
+      previous: "Vorige",
+      finish: "Afmaken en reviewen",
     },
-
     fields: {
       businessName: "Bedrijfsnaam",
       country: "Land",
@@ -255,89 +243,81 @@ const nlTranslation = {
       multiPage: "Multi-pagina website",
       store: "Online winkel",
       servicesLabel: "Hoofddiensten",
-      servicesHint: "Lijst een paar diensten, gescheiden door komma's.",
-      colorsLabel: "Voorkeurskluren",
-      colorsHint: "Bijvoorbeeld: blauw en wit, of uw bestaande merk kleuren.",
+      servicesHint: "Lijst enkele diensten, gescheiden door komma's.",
+      colorsLabel: "Favoriete kleuren",
+      colorsHint: "Bijvoorbeeld: blauw en wit, of je bestaande merkkleuren.",
       styleLabel: "Stijl",
-      styleHint: "Bijvoorbeeld: modern en schoon, warm en vriendelijk, luxueus, etc.",
+      styleHint: "Bijvoorbeeld: modern en schoon, warm en vriendelijk, luxe, etc.",
     },
-
     review: {
-      title: "Bekijk uw setup",
-      description:
-        "Controleer of deze details kloppen. In de volgende stap genereren we uw website concept gebaseerd op deze informatie.",
-      businessSection: "Bedrijfs details",
+      title: "Review je setup",
+      description: "Controleer of deze details er correct uitzien. In de volgende stap genereren we je website concept gebaseerd op deze informatie.",
+      businessSection: "Bedrijfsdetails",
       servicesSection: "Diensten en website type",
       styleSection: "Kleuren en stijl",
-      changeNote:
-        "U kunt dit alles nog steeds wijzigen in uw dashboard voordat u publiceert.",
+      changeNote: "Je kunt dit allemaal nog steeds veranderen in je dashboard voor publicatie.",
     },
   },
   pricing: {
-    title: "Eenvoudige prijzen die met u meegroeien.",
-    subtitle:
-      "Begin klein en upgrade later. Alle plannen bevatten hosting, beveiligingsupdates en basis ondersteuning.",
+    title: "Eenvoudige prijzen die met je meegroeien.",
+    subtitle: "Begin klein en upgrade later. Alle plannen bevatten hosting, beveiligingsupdates en basis ondersteuning.",
     note: "Echte prijzen worden later bevestigd – dit zijn placeholders.",
     plans: [
       {
         id: "one-page",
-        name: "Eén-pagina site",
+        name: "Eén-pagina website",
         short: "Voor eenvoudige lokale bedrijven",
         price: "Vanaf €X / maand",
-        bestFor: "Ideaal als u een paar diensten heeft en slechts één schone, scrollbare pagina nodig heeft.",
+        bestFor: "Ideaal als je enkele diensten hebt en alleen een schone, scrollbare pagina nodig hebt.",
         features: [
-          "Tot 6 diensten op één pagina",
+          "Tot 6 diensten op een enkele pagina",
           "Contact / WhatsApp / bel knoppen",
-          "Mobiel geoptimaliseerd ontwerp",
+          "Mobiel-geoptimaliseerd ontwerp",
           "Basis SEO structuur voor Google",
         ],
-        highlight: "Geweldige start optie",
+        highlight: "Geweldige startkeuze",
       },
       {
         id: "multi-page",
         name: "Multi-pagina website",
         short: "Voor groeiende bedrijven",
         price: "Vanaf €Y / maand",
-        bestFor:
-          "Goed als u aparte pagina's wilt voor diensten, projecten, team, blog en meer.",
+        bestFor: "Goed als je aparte pagina's wilt voor diensten, projecten, team, blog en meer.",
         features: [
           "Dienst pagina's die kunnen ranken op Google",
           "Blog of nieuws sectie",
           "Portfolio / project pagina's",
           "Meer ruimte voor foto's en uitleg",
         ],
-        highlight: "Flexibelere keuze",
+        highlight: "Meest flexibele optie",
       },
       {
         id: "store",
         name: "Online winkel",
-        short: "Voor het online verkopen van producten",
+        short: "Voor online producten verkoop",
         price: "Vanaf €Z / maand",
-        bestFor:
-          "Voor bedrijven die bestellingen en betalingen direct via de website willen accepteren.",
+        bestFor: "Voor bedrijven die bestellingen en betalingen direct via de website willen accepteren.",
         features: [
           "Product catalogus en categorieën",
-          "Eenvoudige checkout en betaalopties",
+          "Eenvoudige checkout en betaal opties",
           "Bestelling notificaties",
           "Basis verkoop overzicht",
         ],
-        highlight: "Het beste als u producten verkoopt",
+        highlight: "Best als je producten verkoopt",
       },
     ],
   },
   templates: {
-    title: "Kies een startpunt voor uw website.",
-    subtitle:
-      "Kies een layout die past bij uw bedrijfstype. We passen kleuren, foto's en teksten aan uw details aan.",
-    badge: "Stap 1 · Kies een sjabloon",
-    note: "Dit zijn voorbeeld layouts. U kunt alles later wijzigen.",
+    title: "Kies een startpunt voor je website.",
+    subtitle: "Kies een layout die past bij je bedrijfstype. We passen kleuren, foto's en teksten aan naar jouw details.",
+    badge: "Stap 1 · Kies sjabloon",
+    note: "Dit zijn voorbeeld layouts. Je kunt alles later veranderen.",
     list: [
       {
         id: "local-service-01",
         name: "Lokale dienst (schoon en eenvoudig)",
         type: "Eén-pagina layout",
-        bestFor:
-          "Ideaal voor klussers, schoonmakers, coaches, bijles, kleine lokale diensten.",
+        bestFor: "Ideaal voor freelancers, schoonmakers, coaches, tutors, kleine lokale diensten.",
         complexity: "Snel te lanceren",
         highlight: "Aanbevolen voor eenvoudige dienst bedrijven.",
       },
@@ -345,151 +325,130 @@ const nlTranslation = {
         id: "multi-service-01",
         name: "Multi-dienst bedrijf",
         type: "Multi-pagina layout",
-        bestFor:
-          "Goed voor bouw, renovaties, schoonheidssalons en andere bedrijven met meerdere diensten.",
+        bestFor: "Goed voor bouw, verbouwingen, schoonheidssalons en andere bedrijven met meerdere diensten.",
         complexity: "Meer ruimte voor content",
-        highlight: "Het beste wanneer u meerdere hoofddiensten heeft.",
+        highlight: "Beter wanneer je meerdere hoofddiensten hebt.",
       },
       {
         id: "store-01",
         name: "Eenvoudige online winkel",
         type: "Winkel layout",
-        bestFor:
-          "Voor kleine winkels die producten willen tonen en basis online bestellingen willen accepteren.",
+        bestFor: "Voor kleine winkels die producten willen tonen en basis online bestellingen willen accepteren.",
         complexity: "Bevat product raster",
         highlight: "Goed startpunt voor kleine e-commerce.",
       },
     ],
     buttons: {
-      useTemplate: "Gebruik dit sjabloon",
+      useTemplate: "Gebruik deze sjabloon",
       backHome: "Terug naar home",
-      goToBuilder: "Ga verder naar bouwer",
+      goToBuilder: "Ga door naar bouwer",
     },
   },
   auth: {
     login: {
-      title: "Log in op uw Just Code Works account",
-      subtitle:
-        "Krijg toegang tot uw websites, concepten, drukwerk bestellingen en MagicAI tools vanuit uw dashboard.",
+      title: "Log in op je Just Code Works account",
+      subtitle: "Toegang tot je websites, concepten, drukwerk bestellingen en MagicAI tools vanuit je dashboard.",
       emailLabel: "Email",
       passwordLabel: "Wachtwoord",
       button: "Inloggen",
-      noAccount: "Heeft u nog geen account?",
-      goToRegister: "Account aanmaken",
+      noAccount: "Nog geen account?",
+      goToRegister: "Maak een account",
       backHome: "Terug naar home",
-      note:
-        "Dit is een demo login pagina. In de volledige versie verbindt dit met het echte authenticatie systeem.",
+      note: "Dit is een demo login pagina. In de volledige versie verbindt het met het echte authenticatiesysteem.",
     },
     register: {
-      title: "Maak uw Just Code Works account aan",
-      subtitle:
-        "We gebruiken deze details om uw websites, drukwerk bestellingen en facturering op één plek te verbinden.",
+      title: "Maak je Just Code Works account",
+      subtitle: "We gebruiken deze details om je websites, drukwerk bestellingen en facturering op één plek te verbinden.",
       nameLabel: "Naam",
       emailLabel: "Email",
       passwordLabel: "Wachtwoord",
-      button: "Account aanmaken",
-      haveAccount: "Heeft u al een account?",
+      button: "Maak Account",
+      haveAccount: "Al een account?",
       goToLogin: "Ga naar login",
       backHome: "Terug naar home",
-      note:
-        "Dit is een demo registratie pagina. In de volledige versie maakt dit een echt account voor u aan.",
+      note: "Dit is een demo registratie pagina. In de volledige versie maakt het een echt account voor je aan.",
     },
   },
   reviewPage: {
-    title: "Uw setup samenvatting",
-    subtitle:
-      "Dit is wat we gebruiken om uw website concept te genereren en drukwerk items voor te stellen.",
+    title: "Samenvatting van je setup",
+    subtitle: "Dit is wat we gebruiken om je website concept te genereren en drukwerk artikelen voor te stellen.",
     missingDataTitle: "Nog geen data gevonden",
-    missingDataText:
-      "Het lijkt erop dat u de bouwer wizard nog niet heeft voltooid. Doorloop eerst de stappen.",
+    missingDataText: "Het lijkt erop dat je de bouwer assistent nog niet hebt voltooid. Ga eerst door de stappen.",
     backToBuilder: "Terug naar bouwer",
     backHome: "Terug naar home",
-    selectedTemplate: "Geselecteerd sjabloon",
+    selectedTemplate: "Geselecteerde sjabloon",
     builderDataTitle: "Bouwer informatie",
-    businessSection: "Bedrijfs details",
+    businessSection: "Bedrijfsdetails",
     servicesSection: "Diensten en website type",
     styleSection: "Kleuren en stijl",
-    editInBuilder: "Wijzigen in bouwer",
+    editInBuilder: "Wijzig in bouwer",
   },
-  
-  // Layout and navigation translations
-  layout: {
-    tagline: "Sites • Drukwerk • AI Tools",
-    login: "Inloggen",
-    startBuilding: "Beginnen met bouwen",
-    logout: "Uitloggen",
-    lightMode: "Lichte modus",
-    darkMode: "Donkere modus",
-  },
-
-  // Page-specific translations
   pages: {
     home: {
       title: "Just Code Works - Home",
-      subtitle: "Welkom op onze homepage",
-      pageInfo: "Pagina Informatie",
-      languageTesting: "Taal Testen",
-      languageHelp: "Gebruik de selector hierboven om verschillende taalversies van de website te testen.",
+      subtitle: "Welkom op onze hoofdpagina",
+      pageInfo: "Pagina informatie",
+      languageTesting: "Taal testen",
+      languageHelp: "Gebruik de selector hierboven om verschillende taalversies van de site te testen.",
       navigation: "Navigatie",
       published: "Gepubliceerd",
-      // Admin panel sections
       systemOverview: {
-        title: "📊 Systeem Overzicht",
+        title: "📊 Systeem overzicht",
         template: "Sjabloon",
         templateName: "jcw-main",
         sections: "Secties",
-        sectionsList: "Hero, Kenmerken, Diensten, Oplossingen, Contact",
+        sectionsList: "Hero, Features, Diensten, Oplossingen, Contact",
         status: "Status",
-        statusActive: "✅ Actief & Klaar",
-        description: "Just Code Works biedt uitgebreide bedrijfsoplossingen die zich aanpassen aan uw behoeften."
+        statusActive: "✅ Actief en klaar",
+        description: "Just Code Works biedt complete bedrijfsoplossingen die zich aanpassen aan jouw behoeften."
       },
       multiLanguageSupport: {
-        title: "🌍 Meertalige Ondersteuning",
-        description: "Ons platform ondersteunt 6 talen met automatische contenttranslatie en gelokaliseerde routing.",
+        title: "🌍 Multi-taal ondersteuning",
+        description: "Ons platform ondersteunt 6 talen met automatische content vertaling en gelokaliseerde routing.",
         languages: "Talen: Engels, Nederlands, Portugees, Spaans, Frans, Duits",
-        testInstructions: "Gebruik de taalkiezer om naadloze meertalige navigatie te ervaren."
+        testInstructions: "Gebruik de taal selector om naadloze multi-taal navigatie te ervaren."
       }
     },
     posystems: {
-      title: "Kassasystemen",
-      subtitle: "Moderne betaalterminal oplossingen voor uw bedrijf",
+      title: "POS Systemen",
+      subtitle: "Moderne point-of-sale oplossingen voor je bedrijf",
       features: {
         payment: "Betalingsverwerking",
-        paymentDesc: "Accepteer creditcards, debetkaarten en contactloze betalingen met competitieve tarieven en snelle verwerking.",
-        inventory: "Voorraad Beheer",
-        inventoryDesc: "Houd voorraad bij, stel lage voorraad waarschuwingen in en beheer producten met gemak via onze intuïtieve interface.",
-        analytics: "Verkoop Analytics",
-        analyticsDesc: "Krijg inzicht in verkooppatronen, best verkochte producten en financiële prestaties met gedetailleerde rapporten.",
+        paymentDesc: "Accepteer creditcard, debit en contactloze betalingen met competitieve tarieven en snelle verwerking.",
+        inventory: "Voorraadbeheer",
+        inventoryDesc: "Volg voorraad, stel lage voorraad waarschuwingen in en beheer producten eenvoudig via onze intuïtieve interface.",
+        analytics: "Verkoop analytics",
+        analyticsDesc: "Krijg inzichten in verkooppatronen, best verkochte producten en financiële prestaties met gedetailleerde rapporten.",
       },
     },
     websites: {
       title: "Websites",
-      subtitle: "Aangepaste websites en webontwikkeling diensten",
+      subtitle: "Aangepaste websites en web ontwikkeling diensten",
       features: {
-        onePage: "Eén-Pagina Websites",
-        onePageDesc: "Perfect voor kleine bedrijven en portfolio's. Kom snel online met een modern, responsief ontwerp.",
-        multiPage: "Multi-Pagina Websites",
-        multiPageDesc: "Volledige bedrijfswebsites met meerdere pagina's, navigatie en aangepaste functionaliteiten.",
-        ecommerce: "Online Winkels",
-        ecommerceDesc: "E-commerce websites met winkelwagen, betalingsverwerking en voorraad beheer.",
+        onePage: "Eén-pagina sites",
+        onePageDesc: "Perfect voor kleine bedrijven en portfolio's. Ga snel online met een modern, responsief ontwerp.",
+        multiPage: "Multi-pagina websites",
+        multiPageDesc: "Complete bedrijfswebsites met meerdere pagina's, navigatie en aangepaste functionaliteit.",
+        ecommerce: "Online winkels",
+        ecommerceDesc: "E-commerce websites met winkelwagentjes, betalingsverwerking en voorraadbeheer.",
       },
     },
     services: {
       title: "Diensten",
       subtitle: "Al onze professionele diensten",
       features: {
-        webDev: "Web Ontwikkeling",
+        webDev: "Web ontwikkeling",
         webDevDesc: "Aangepaste websites en web applicaties gebouwd met moderne technologieën.",
-        mobileApps: "Mobiele Apps",
+        mobileApps: "Mobiele apps",
         mobileAppsDesc: "Native en cross-platform mobiele applicaties voor iOS en Android.",
-        cloud: "Cloud Oplossingen",
-        cloudDesc: "Schaalbare cloud infrastructuur en deployment oplossingen voor uw applicaties.",
+        cloud: "Cloud oplossingen",
+        cloudDesc: "Schaalbare cloud infrastructuur en deployment oplossingen voor je applicaties.",
         maintenance: "Onderhoud",
-        maintenanceDesc: "Doorlopende ondersteuning en onderhoud voor uw bestaande digitale oplossingen.",
+        maintenanceDesc: "Doorlopende ondersteuning en onderhoud voor je bestaande digitale oplossingen.",
       },
     },
     helpCenter: {
-      title: "Hulpcentrum",
+      title: "Helpcentrum",
       subtitle: "Krijg hulp en ondersteuning",
       features: {
         documentation: "Documentatie",
@@ -497,93 +456,156 @@ const nlTranslation = {
         support: "Ondersteuning",
         supportDesc: "Krijg directe hulp van ons technische ondersteuningsteam voor vragen of problemen.",
         faq: "FAQ",
-        faqDesc: "Vind antwoorden op de meest gestelde vragen over onze diensten.",
+        faqDesc: "Vind antwoorden op veelgestelde vragen over onze diensten.",
         tutorials: "Tutorials",
-        tutorialsDesc: "Stap-voor-stap tutorials en video gidsen om u te helpen het maximale uit ons platform te halen.",
+        tutorialsDesc: "Stap-voor-stap tutorials en video gidsen om je te helpen het maximale uit ons platform te halen.",
         categories: {
-          getting: "Aan de Slag Gidsen",
+          getting: "Aan de slag gidsen",
           api: "API Documentatie",
-          practices: "Beste Praktijken",
-          live: "Live Chat Ondersteuning",
-          email: "Email Ondersteuning",
-          phone: "Telefoon Ondersteuning",
-          billing: "Facturering Vragen",
-          technical: "Technische Problemen",
-          account: "Account Beheer",
-          video: "Video Tutorials",
-          written: "Geschreven Gidsen",
-          interactive: "Interactieve Voorbeelden",
+          practices: "Best practices",
+          live: "Live chat ondersteuning",
+          email: "Email ondersteuning",
+          phone: "Telefoon ondersteuning",
+          billing: "Factureringsvragen",
+          technical: "Technische problemen",
+          account: "Account beheer",
+          video: "Video tutorials",
+          written: "Geschreven gidsen",
+          interactive: "Interactieve voorbeelden",
         },
       },
     },
     common: {
       title: "Titel",
-      slug: "Slug", 
+      slug: "Slug",
       path: "Pad",
       language: "Taal",
       order: "Volgorde",
       project: "Project",
       template: "Sjabloon",
-      loading: "Laden...",
+      loading: "Laden..."
     },
   },
-
-  // Website types and pages
-  websiteTypes: {
-    onePageWebsites: "Eén-Pagina Websites",
-    onePageDesc: "Snel, eenvoudig, effectief",
-    multiPageWebsites: "Multi-Pagina Websites",
-    multiPageDesc: "Volledige bedrijfs aanwezigheid",
-    onlineShops: "Online Winkels",
-    onlineShopsDesc: "Verkoop producten online",
-    customWebsites: "Aangepaste Websites",
-    customDesc: "Op maat gemaakte oplossingen",
-    
-    // One-page website content
-    onePage: {
-      hero: {
-        eyebrow: "Eén-pagina website",
-        title: "Eén-Pagina Website",
-        subtitle: "De snelste manier om online te komen. Eén schone, professionele pagina die laat zien wie u bent, wat u doet en hoe contact op te nemen.",
+  onboarding: {
+    step0: {
+      title: "Laten we beginnen",
+      subtitle: "Vertel ons over je bedrijf en wat je graag zou willen creëren",
+      progress: {
+        intent: "Intentie",
+        details: "Details", 
+        branding: "Branding"
       },
-      overview: {
-        badge: "Eenvoudig en Effectief",
-        title: "Perfect voor kleine bedrijven en freelancers",
-        subtitle: "Als u gewoon online zichtbaar wilt zijn – snel, eenvoudig en betrouwbaar – dan is de Eén-Pagina Website uw beste startpunt.",
+      intents: {
+        website: {
+          title: "Een website bouwen",
+          description: "Een professionele website maken voor je bedrijf"
+        },
+        prints: {
+          title: "Drukwerk ontwerpen",
+          description: "Visitekaartjes, folders en marketing materialen maken"
+        },
+        pos: {
+          title: "Point of Sale",
+          description: "Betalingsverwerking en voorraadbeheer opzetten"
+        }
       },
-      included: {
-        title: "Wat is inbegrepen",
-        subtitle: "Eén pagina, alle basis onderdelen gedekt:",
-        items: [
-          "Een professionele landing pagina met schoon ontwerp",
-          "Secties voor uw diensten, foto's, contactgegevens en bedrijfsinformatie",
-          "Eenvoudig contactformulier met email notificaties",
-          "Mobiel geoptimaliseerd ontwerp dat op alle apparaten werkt",
-          "Basis SEO instellingen om gevonden te worden in Google zoekopdrachten",
-          "Betrouwbare hosting en domein inbegrepen in het eerste jaar",
-        ],
+      form: {
+        businessName: {
+          label: "Bedrijfsnaam",
+          placeholder: "Voer je bedrijfsnaam in",
+          required: "Bedrijfsnaam is verplicht"
+        },
+        businessType: {
+          label: "Bedrijfstype",
+          placeholder: "bijv. Restaurant, Consultancy, Detailhandel"
+        },
+        primaryCountry: {
+          label: "Hoofdland",
+          placeholder: "Selecteer je land"
+        },
+        primaryLanguage: {
+          label: "Hoofdtaal",
+          placeholder: "Selecteer hoofdtaal"
+        },
+        primaryGoal: {
+          label: "Hoofddoel",
+          placeholder: "Wat is je hoofddoel?"
+        },
+        brandColors: {
+          primaryLabel: "Primaire merkkleur",
+          secondaryLabel: "Secundaire merkkleur",
+          primaryPlaceholder: "#1D4ED8",
+          secondaryPlaceholder: "#6366F1"
+        },
+        themeMode: {
+          label: "Voorkeursthema",
+          light: "Licht",
+          dark: "Donker",
+          auto: "Auto"
+        },
+        notes: {
+          label: "Extra notities",
+          placeholder: "Eventuele specifieke vereisten of voorkeuren..."
+        }
       },
-      benefits: {
-        title: "Waarom kiezen voor een Eén-Pagina Website?",
-        subtitle: "Snel op te zetten, makkelijk te onderhouden, standaard mobiel-vriendelijk.",
+      actions: {
+        back: "Terug",
+        continue: "Ga door naar branding",
+        continueDetails: "Ga door naar details",
+        complete: "Voltooi setup",
+        creating: "Maken..."
       },
-    },
+      success: {
+        title: "Welkom bij JustCodeWorks!",
+        subtitle: "Je onboarding is voltooid. Doorverwijzen naar je dashboard...",
+        redirecting: "Doorverwijzen..."
+      },
+      errors: {
+        general: "Er is iets misgegaan. Probeer opnieuw.",
+        businessName: "Bedrijfsnaam kan niet leeg zijn",
+        invalidColor: "Voer een geldige hex kleur in (bijv. #1D4ED8)",
+        submitFailed: "Fout bij het opslaan van onboarding data. Probeer opnieuw."
+      },
+      countries: [
+        "Verenigde Staten",
+        "Verenigd Koninkrijk", 
+        "Canada",
+        "Australië",
+        "Duitsland",
+        "Frankrijk",
+        "Spanje",
+        "Portugal",
+        "Brazilië",
+        "Mexico",
+        "Anders"
+      ],
+      languages: {
+        en: "English",
+        pt: "Português",
+        es: "Español", 
+        fr: "Français",
+        de: "Deutsch"
+      },
+      goals: {
+        "get-leads": "Leads / aanvragen krijgen",
+        "show-info": "Info / menu tonen",
+        "sell-online": "Online verkopen",
+        "take-bookings": "Boekingen aannemen",
+        "other": "Anders"
+      }
+    }
   },
-
-  // Website promise section
   websitePromise: {
     items: [
-      "Gratis domein en hosting het eerste jaar",
+      "Gratis domein en hosting eerste jaar",
       "Veilige EU-gebaseerde servers",
       "SSL certificaat en dagelijkse backups",
-      "Snelle levertijd",
-      "Doorlopende upgrade opties",
+      "Snelle levertijden",
+      "Continue upgrade opties",
     ],
-    description: "Alle websites worden gemaakt met ons intelligente systeem dat content creatie eenvoudig en intuïtief maakt — zodat u zich kunt focussen op uw bedrijf, niet op de tools.",
+    description: "Alle websites zijn gebouwd met ons slimme systeem dat het maken van content eenvoudig en intuïtief maakt — zodat je je kunt focussen op je bedrijf, niet op de tools.",
     exploreTitle: "Ontdek Onze Website Types",
-  },
+  }
 };
 
-export type Dictionary = typeof nlTranslation;
-
-export default nlTranslation;
+export default dutchDictionary;

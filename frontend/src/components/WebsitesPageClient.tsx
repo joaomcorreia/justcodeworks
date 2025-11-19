@@ -264,11 +264,20 @@ export default function WebsitesPageClient({ dict }: WebsitesPageClientProps) {
                     </div>
                     
                     <div className="space-y-3">
-                      <Link href={type.demoUrl} target="_blank">
-                        <button className={`w-full px-6 py-3 bg-gradient-to-r ${type.gradient} text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105`}>
-                          View Live Demo
+                      {type.demoUrl ? (
+                        <Link href={type.demoUrl} target="_blank">
+                          <button className={`w-full px-6 py-3 bg-gradient-to-r ${type.gradient} text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105`}>
+                            View Live Demo
+                          </button>
+                        </Link>
+                      ) : (
+                        <button 
+                          disabled
+                          className={`w-full px-6 py-3 bg-gradient-to-r ${type.gradient} text-white font-semibold rounded-xl opacity-50 cursor-not-allowed`}
+                        >
+                          Demo Coming Soon
                         </button>
-                      </Link>
+                      )}
                       <button 
                         onClick={openOnboardingModal}
                         className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors border border-gray-200"

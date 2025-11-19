@@ -8,6 +8,8 @@ import { useEditMode } from "@/components/edit-mode-provider";
 import { useAuth } from "@/contexts/auth-context";
 import { useOnePageWebsitesConfig, getOnePageFieldValue } from "@/hooks/use-onepage-websites-config";
 import { OnePageEditorPanel } from "@/components/onepage-editor-panel";
+import MainNavigation from "@/components/MainNavigation";
+import Footer from "@/components/Footer";
 
 export default function OnePageWebsitesPage({
   params,
@@ -53,9 +55,11 @@ export default function OnePageWebsitesPage({
     t?.websiteTypes?.onePage?.benefits?.subtitle ?? "Fast to set up, easy to maintain, mobile-friendly by default.";
 
   return (
-    <MarketingPageShell>
-      {/* [AUTH] editor gated - only show for authenticated users */}
-      {user && <OnePageEditorPanel />}
+    <>
+      <MainNavigation locale={locale} />
+      <MarketingPageShell>
+        {/* [AUTH] editor gated - only show for authenticated users */}
+        {user && <OnePageEditorPanel />}
 
       <section
         id="jcw-main-onepage-hero01"
@@ -147,13 +151,15 @@ export default function OnePageWebsitesPage({
         </MarketingSection>
       </section>
 
-      {editMode && user && (
-        <p className="fixed left-3 bottom-20 z-30 rounded-full bg-slate-900/90 px-3 py-1 text-[10px] text-slate-300">
-          One-page websites source:{" "}
-          {source === "backend" ? "Django API" : "Local storage"}
-          {error ? ` · ${error}` : ""}
-        </p>
-      )}
-    </MarketingPageShell>
+        {editMode && user && (
+          <p className="fixed left-3 bottom-20 z-30 rounded-full bg-slate-900/90 px-3 py-1 text-[10px] text-slate-300">
+            One-page websites source:{" "}
+            {source === "backend" ? "Django API" : "Local storage"}
+            {error ? ` · ${error}` : ""}
+          </p>
+        )}
+      </MarketingPageShell>
+      <Footer dict={t} />
+    </>
   );
 }

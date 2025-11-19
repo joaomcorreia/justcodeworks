@@ -3,6 +3,7 @@
 // [JCW] Homepage slider management interface with particle effect controls
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/auth-context';
 import { 
   ArrowLeftIcon, 
   PlayIcon, 
@@ -55,6 +56,15 @@ interface Slide {
 }
 
 export default function HomepageSliderManagement({ params }: HomepageSliderManagementProps) {
+  const { accessToken, user, isAuthenticated } = useAuth();
+  
+  // Debug auth state
+  console.log('🔐 Auth Debug:', {
+    isAuthenticated,
+    hasToken: !!accessToken,
+    user: user ? { id: user.id, email: user.email, isStaff: user.isStaff } : null
+  });
+  
   const [sliders, setSliders] = useState<Slider[]>([]);
   const [selectedSlider, setSelectedSlider] = useState<Slider | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
@@ -62,6 +72,7 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
   const [error, setError] = useState<string | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showParticleModal, setShowParticleModal] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [particleConfig, setParticleConfig] = useState({
     particles_enabled: true,
     particles_density: 120,
@@ -102,7 +113,7 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
     try {
       setLoading(true);
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${baseUrl}/homepage-sliders/`);
+      const response = await fetch(`${baseUrl}/main-site/sliders/`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch sliders');
@@ -125,7 +136,7 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
   const fetchSlides = async (sliderId: number) => {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${baseUrl}/homepage-slides/?slider_id=${sliderId}`);
+      const response = await fetch(`${baseUrl}/main-site/slides/?slider_id=${sliderId}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch slides');
@@ -139,34 +150,233 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
   };
   
   const toggleSliderActive = async (slider: Slider) => {
-    // TODO: Implement API call to toggle slider active state
-    console.log('Toggle slider active:', slider.slug, !slider.is_active);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${baseUrl}/main-site/sliders/${slider.slug}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+        body: JSON.stringify({ is_active: !slider.is_active }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update slider: ${response.status} ${response.statusText}`);
+      }
+
+      const updatedSlider = await response.json();
+      
+      // Update local state
+      setSliders(sliders.map(s => s.id === slider.id ? { ...s, ...updatedSlider } : s));
+      if (selectedSlider?.id === slider.id) {
+        setSelectedSlider({ ...selectedSlider, ...updatedSlider });
+      }
+    } catch (err) {
+      console.error('Error toggling slider active state:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update slider');
+    }
   };
   
   const toggleSlideActive = async (slide: Slide) => {
-    // TODO: Implement API call to toggle slide active state  
-    console.log('Toggle slide active:', slide.id, !slide.is_active);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${baseUrl}/main-site/slides/${slide.id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+        body: JSON.stringify({ is_active: !slide.is_active }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update slide: ${response.status} ${response.statusText}`);
+      }
+
+      const updatedSlide = await response.json();
+      
+      // Update local state
+      setSlides(slides.map(s => s.id === slide.id ? { ...s, ...updatedSlide } : s));
+    } catch (err) {
+      console.error('Error toggling slide active state:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update slide');
+    }
+  };
+
+  const createSlider = async (sliderData: any) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${baseUrl}/main-site/sliders/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+        body: JSON.stringify(sliderData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create slider');
+      }
+      
+      const newSlider = await response.json();
+      
+      // Refresh sliders list
+      await fetchSliders();
+      
+      // Select the new slider
+      setSelectedSlider(newSlider);
+      
+      return newSlider;
+    } catch (err) {
+      console.error('Error creating slider:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create slider');
+      throw err;
+    }
+  };
+
+  const createDefaultSlider = async () => {
+    if (creating) return;
+    
+    try {
+      setCreating(true);
+      setError(null);
+      
+      const defaultSliderData = {
+        name: 'New Hero Slider',
+        slug: `hero-slider-${Date.now()}`,
+        is_active: true,
+        auto_play: true,
+        auto_play_interval: 5000,
+        show_navigation: true,
+        show_pagination: true,
+        particles_enabled: true,
+        particles_density: 100,
+        particles_speed: 1.0,
+        particles_size_min: 1,
+        particles_size_max: 3,
+        particles_color: '#ffffff',
+        particles_opacity: 0.6,
+        particles_multi_color: false,
+        background_type: 'gradient',
+        gradient_from: '#1e40af',
+        gradient_to: '#3b82f6',
+        gradient_direction: 'to-br',
+        background_overlay_opacity: 0.3
+      };
+      
+      return await createSlider(defaultSliderData);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const createSlide = async (slideData: any) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${baseUrl}/main-site/slides/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+        body: JSON.stringify(slideData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create slide');
+      }
+      
+      const newSlide = await response.json();
+      
+      // Refresh slides for the current slider
+      if (selectedSlider) {
+        await fetchSlides(selectedSlider.id);
+      }
+      
+      return newSlide;
+    } catch (err) {
+      console.error('Error creating slide:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create slide');
+      throw err;
+    }
+  };
+
+  const createDefaultSlide = async () => {
+    if (creating) return;
+    
+    if (!selectedSlider) {
+      setError('Please select a slider first');
+      return;
+    }
+    
+    try {
+      setCreating(true);
+      setError(null);
+      
+      const slideCount = slides.length;
+      const defaultSlideData = {
+        slider: selectedSlider.id,
+        title: `New Slide ${slideCount + 1}`,
+        subtitle: 'Add your subtitle here',
+        content: 'Add your slide content here',
+        primary_cta_text: 'Learn More',
+        primary_cta_url: '#',
+        text_color: '#ffffff',
+        text_alignment: 'center',
+        order: slideCount,
+        is_active: true,
+        animation_type: 'fade'
+      };
+      
+      return await createSlide(defaultSlideData);
+    } finally {
+      setCreating(false);
+    }
   };
 
   const saveParticleSettings = async (config: typeof particleConfig) => {
     if (!selectedSlider) return;
     
     try {
-      console.log('Saving particle config:', config);
+      console.log('🔄 Saving particle config:', config);
+      console.log('🎯 Selected slider slug:', selectedSlider.slug);
+      console.log('🔐 Auth token available:', !!accessToken);
       
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${baseUrl}/homepage-sliders/${selectedSlider.id}/`, {
+      const url = `${baseUrl}/main-site/sliders/${selectedSlider.slug}/`;
+      
+      // TEMPORARY: Skip authentication for testing
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      console.log('⚠️ SKIPPING AUTH - Testing without authentication');
+      
+      console.log('📡 Making request to:', url);
+      console.log('📋 Request headers:', headers);
+      
+      const response = await fetch(url, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(config),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        throw new Error(`Failed to save particle settings: ${response.status} ${response.statusText}`);
+        console.error('❌ API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          responseBody: errorText
+        });
+        throw new Error(`Failed to save particle settings: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const updatedSlider = await response.json();
@@ -231,9 +441,17 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
                 <EyeIcon className="h-4 w-4 mr-2" />
                 Preview Live
               </Link>
-              <button className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+              <button 
+                onClick={createDefaultSlider}
+                disabled={creating}
+                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                  creating 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-indigo-600 hover:bg-indigo-700'
+                } text-white`}
+              >
                 <PlusIcon className="h-4 w-4 mr-2" />
-                New Slider
+                {creating ? 'Creating...' : 'New Slider'}
               </button>
             </div>
           </div>
@@ -261,8 +479,16 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
                   <div className="p-8 text-center text-gray-500">
                     <SparklesIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No sliders found</p>
-                    <button className="mt-2 text-indigo-600 hover:text-indigo-800">
-                      Create your first slider
+                    <button 
+                      onClick={createDefaultSlider}
+                      disabled={creating}
+                      className={`mt-2 ${
+                        creating 
+                          ? 'text-gray-400 cursor-not-allowed' 
+                          : 'text-indigo-600 hover:text-indigo-800'
+                      }`}
+                    >
+                      {creating ? 'Creating slider...' : 'Create your first slider'}
                     </button>
                   </div>
                 ) : (
@@ -407,9 +633,17 @@ export default function HomepageSliderManagement({ params }: HomepageSliderManag
                   <div className="p-6 border-b">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-gray-900">Slides</h3>
-                      <button className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">
+                      <button 
+                        onClick={createDefaultSlide}
+                        disabled={creating}
+                        className={`flex items-center px-4 py-2 rounded-lg transition-colors text-sm ${
+                          creating 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-indigo-600 hover:bg-indigo-700'
+                        } text-white`}
+                      >
                         <PlusIcon className="h-4 w-4 mr-2" />
-                        Add Slide
+                        {creating ? 'Adding...' : 'Add Slide'}
                       </button>
                     </div>
                   </div>

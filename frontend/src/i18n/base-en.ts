@@ -82,6 +82,7 @@ const baseEn = {
     },
   },
   sections: {
+    solutionsTitle: "Choose Your Perfect Solution",
     printingTitle: "Your brand, beautifully printed.",
     printingText:
       "Placeholder section – we'll later add the full printing layout from your old homepage.",
@@ -514,7 +515,7 @@ const baseEn = {
       order: "Order",
       project: "Project",
       template: "Template",
-      loading: "Loading...",
+      loading: "Loading..."
     },
   },
   // [ONBOARDING] Step 0 Multi-Intent Onboarding

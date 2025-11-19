@@ -391,6 +391,10 @@ class SiteProject(TimeStampedModel):
         blank=True,
         help_text="Additional locale codes for this project.",
     )
+    enable_arabic_language = models.BooleanField(
+        default=False,
+        help_text="Enable Arabic language for this website. When enabled, Arabic will be available in the language selector.",
+    )
 
     # Style and theming fields
     default_theme = models.CharField(max_length=16, default="dark")
@@ -503,12 +507,36 @@ class SiteProject(TimeStampedModel):
         default="website",
         help_text="The product/service selected during Step 0 onboarding."
     )
+    
+    # Hero slider template selection
+    hero_slider_template = models.ForeignKey(
+        'main_site.SliderTemplate',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="site_projects",
+        help_text="Which HQ slider template this site uses as hero slider.",
+    )
+    
+    # HQ vs Tenant separation flag
+    is_headquarters = models.BooleanField(
+        default=False,
+        help_text="Marks this project as the main Just Code Works website (HQ)."
+    )
 
     class Meta:
         ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
+    
+    def get_site_type_display(self):
+        """Return a clear indicator of whether this is HQ or tenant."""
+        if self.is_headquarters:
+            return "🏢 HQ Site"
+        return "👤 Tenant Site"
+    
+    get_site_type_display.short_description = "Site Type"
 
 
 class LocaleChoices(models.TextChoices):
@@ -900,88 +928,6 @@ class NavigationItem(TimeStampedModel):
         return f"{self.location} ({self.locale}) – {self.label}"
 
 
-class DashboardTemplate(TimeStampedModel):
-    """
-    High-level template for tenant dashboards.
-    One template can be used by many tenants.
-    """
-
-    key = models.SlugField(
-        max_length=100,
-        unique=True,
-        help_text="Internal key used to identify this dashboard template (e.g. 'default-tenant-dashboard').",
-    )
-    name = models.CharField(
-        max_length=150,
-        help_text="Human-readable name (e.g. 'Default tenant dashboard').",
-    )
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    is_default_for_tenants = models.BooleanField(
-        default=False,
-        help_text="If true, this template is used as the default for tenant dashboards.",
-    )
-
-    class Meta:
-        ordering = ["key"]
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class DashboardBlock(TimeStampedModel):
-    """
-    A block/widget on a dashboard template.
-    For example: 'Live preview card', 'Next steps', 'Upgrade banner', etc.
-    """
-
-    template = models.ForeignKey(
-        DashboardTemplate,
-        on_delete=models.CASCADE,
-        related_name="blocks",
-    )
-
-    key = models.SlugField(
-        max_length=100,
-        help_text="Internal key for this block (e.g. 'live-preview', 'next-steps', 'stats').",
-    )
-    title = models.CharField(
-        max_length=150,
-        help_text="Title shown in the dashboard UI.",
-    )
-    description = models.TextField(
-        blank=True,
-        help_text="Optional description or helper text.",
-    )
-
-    # Where this block should render (e.g. 'main', 'sidebar')
-    region = models.CharField(
-        max_length=50,
-        default="main",
-        help_text="Logical region in the dashboard layout (e.g. 'main', 'sidebar').",
-    )
-
-    order = models.PositiveIntegerField(
-        default=0,
-        help_text="Blocks with lower order appear first within their region.",
-    )
-
-    is_active = models.BooleanField(default=True)
-
-    # Optional target route this block links to when clicked
-    target_route = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Optional route to navigate to when interacting with this block (e.g. '/dashboard/website').",
-    )
-
-    class Meta:
-        ordering = ["region", "order", "id"]
-
-    def __str__(self) -> str:
-        return f"{self.template.key} — {self.key}"
-
-
 # [GARAGE-FORM] Quote Request Model for Garage/Auto Service Leads
 class QuoteRequest(TimeStampedModel):
     """
@@ -1039,10 +985,119 @@ class QuoteRequest(TimeStampedModel):
         return f"{self.site_project.name} — {self.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
 
 
-# [SLIDERS] Slider system for homepage and other pages
+# [MAIN WEBSITE SLIDERS] Slider system for main JCW website
+class MainWebsiteSlider(TimeStampedModel):
+    """
+    Homepage sliders for the main JustCodeWorks website (not tenant websites)
+    """
+    name = models.CharField(max_length=200, help_text="Slider name for admin reference")
+    slug = models.SlugField(unique=True, help_text="Unique identifier for the slider")
+    
+    # Slider Settings
+    is_active = models.BooleanField(default=True)
+    auto_play = models.BooleanField(default=True, help_text="Auto-advance slides")
+    auto_play_interval = models.PositiveIntegerField(default=5000, help_text="Interval in milliseconds")
+    show_navigation = models.BooleanField(default=True, help_text="Show navigation arrows")
+    show_pagination = models.BooleanField(default=True, help_text="Show pagination dots")
+    
+    # Particle Effect Settings
+    particles_enabled = models.BooleanField(default=True, help_text="Enable particle effects")
+    particles_density = models.PositiveIntegerField(default=100, help_text="Number of particles (50-300)")
+    particles_speed = models.FloatField(default=1.0, help_text="Particle movement speed (0.5-3.0)")
+    particles_size_min = models.PositiveIntegerField(default=1, help_text="Minimum particle size")
+    particles_size_max = models.PositiveIntegerField(default=3, help_text="Maximum particle size")
+    particles_color = models.CharField(max_length=7, default="#ffffff", help_text="Primary particle color (hex)")
+    particles_colors = models.TextField(blank=True, help_text="JSON array of additional particle colors")
+    particles_opacity = models.FloatField(default=0.6, help_text="Particle opacity (0.1-1.0)")
+    particles_multi_color = models.BooleanField(default=False, help_text="Use multiple particle colors")
+    
+    # Background Settings
+    background_type = models.CharField(max_length=20, choices=[
+        ('gradient', 'Gradient'),
+        ('image', 'Background Image'),
+        ('video', 'Background Video'),
+    ], default='gradient')
+    
+    # Gradient Settings
+    gradient_from = models.CharField(max_length=7, default="#1e40af", help_text="Gradient start color (hex)")
+    gradient_to = models.CharField(max_length=7, default="#3b82f6", help_text="Gradient end color (hex)")
+    gradient_direction = models.CharField(max_length=10, choices=[
+        ('to-r', 'To Right'),
+        ('to-l', 'To Left'),
+        ('to-b', 'To Bottom'),
+        ('to-t', 'To Top'),
+        ('to-br', 'To Bottom Right'),
+        ('to-bl', 'To Bottom Left'),
+        ('to-tr', 'To Top Right'),
+        ('to-tl', 'To Top Left'),
+    ], default='to-br')
+    
+    # Image/Video Settings
+    background_image = models.URLField(blank=True, null=True)
+    background_video = models.URLField(blank=True, null=True)
+    background_overlay_opacity = models.FloatField(default=0.3, help_text="Overlay opacity over image/video")
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Main Website Slider'
+        verbose_name_plural = 'Main Website Sliders'
+    
+    def __str__(self):
+        return f"🏢 {self.name}"
+
+
+class MainWebsiteSlide(TimeStampedModel):
+    """
+    Individual slides within a main website slider
+    """
+    slider = models.ForeignKey(MainWebsiteSlider, on_delete=models.CASCADE, related_name='slides')
+    title = models.CharField(max_length=300)
+    subtitle = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True, help_text="Main slide content/description")
+    
+    # CTA Buttons
+    primary_cta_text = models.CharField(max_length=100, blank=True, null=True)
+    primary_cta_url = models.CharField(max_length=500, blank=True, null=True)
+    secondary_cta_text = models.CharField(max_length=100, blank=True, null=True)
+    secondary_cta_url = models.CharField(max_length=500, blank=True, null=True)
+    
+    # Slide-specific styling
+    text_color = models.CharField(max_length=7, default="#ffffff", help_text="Text color (hex)")
+    text_alignment = models.CharField(max_length=10, choices=[
+        ('left', 'Left'),
+        ('center', 'Center'),
+        ('right', 'Right'),
+    ], default='center')
+    
+    # Slide image/media
+    slide_image = models.URLField(blank=True, null=True)
+    slide_video = models.URLField(blank=True, null=True)
+    
+    # Display settings
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    # Animation settings
+    animation_type = models.CharField(max_length=20, choices=[
+        ('fade', 'Fade'),
+        ('slide', 'Slide'),
+        ('zoom', 'Zoom'),
+        ('none', 'No Animation'),
+    ], default='fade')
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Main Website Slide'
+        verbose_name_plural = 'Main Website Slides'
+    
+    def __str__(self):
+        return f"🏢 {self.slider.name} - {self.title}"
+
+
+# [TENANT SLIDERS] Slider system for tenant websites
 class HomepageSlider(TimeStampedModel):
     """
-    Homepage sliders with particle effects and customizable settings
+    Homepage sliders for TENANT websites (not main JCW website)
     """
     name = models.CharField(max_length=200, help_text="Slider name for admin reference")
     slug = models.SlugField(unique=True, help_text="Unique identifier for the slider")
@@ -1098,12 +1153,12 @@ class HomepageSlider(TimeStampedModel):
         verbose_name_plural = 'Homepage Sliders'
     
     def __str__(self):
-        return self.name
+        return f"👤 {self.name} ({self.site_project.name if self.site_project else 'No Project'})"
 
 
 class HomepageSlide(TimeStampedModel):
     """
-    Individual slides within a homepage slider
+    Individual slides within a TENANT homepage slider
     """
     slider = models.ForeignKey(HomepageSlider, on_delete=models.CASCADE, related_name='slides')
     title = models.CharField(max_length=300)
@@ -1146,7 +1201,7 @@ class HomepageSlide(TimeStampedModel):
         verbose_name_plural = 'Homepage Slides'
     
     def __str__(self):
-        return f"{self.slider.name} - {self.title}"
+        return f"👤 {self.slider.name} - {self.title}"
 
 
 class TestimonialCarousel(TimeStampedModel):

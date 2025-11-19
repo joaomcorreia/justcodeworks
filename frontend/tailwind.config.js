@@ -17,5 +17,17 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // RTL support plugin
+    function({ addUtilities }) {
+      addUtilities({
+        '.rtl': {
+          direction: 'rtl',
+        },
+        '.ltr': {
+          direction: 'ltr',
+        },
+      })
+    }
+  ],
 }
