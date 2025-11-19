@@ -1,95 +1,138 @@
-# JustCodeWorks AI Coding Instructions
+# JCW – AI Coding Agent Instructions
 
-## 🏗️ Architecture Overview
+## 1. Project Context
 
-This is a **multi-tenant website builder** with Django REST API backend and Next.js i18n frontend.
+Project: **Just Code Works (JCW) – V1 fresh start**  
+Stack: **Django** backend + **Next.js App Router (TypeScript + Tailwind)** frontend.  
+Goal: Multi-tenant website builder with HQ site + user dashboard, but V1 is focused on a clean, working base (no legacy migrations, no old template systems, no huge refactors).
 
-### Core Components
-- **Backend**: Django 5 + DRF at `backend/` - Multi-tenant site/page/section management
-- **Frontend**: Next.js 14 App Router + TypeScript at `frontend/` - Customer-facing websites with editing
-- **Template System**: SiteTemplate model drives layout switching (`template_key: "jcw-main"`)
-- **Multi-tenancy**: Each user gets isolated `SiteProject` → `Page` → `Section` → `Field` hierarchy
+You are an assistant working inside **VS Code** on **Windows**.
 
-## 🔧 Development Workflow (Windows CMD Only)
+---
 
-```cmd
-cd C:\projects\justcodeworks\backend
-python manage.py runserver 8000
+## 2. Environment Rules
 
-cd C:\projects\justcodeworks\frontend
-npm run dev
-```
+- Assume **Windows CMD**, not PowerShell.
+- Do **not** use `&&` or PowerShell syntax in any commands.
+- Typical commands should look like:
 
-**Port conflicts**: Use `netstat -ano | findstr :3000` then `taskkill /PID <pid> /F`
-**Cache issues**: Run `npm run clean` before `npm run dev`
+  ```cmd
+  cd C:\projects\justcodeworks\backend
+  python manage.py runserver 8000
 
-## 🎯 Key Patterns & Conventions
+  cd C:\projects\justcodeworks\frontend
+  npm run dev -- -p 3001
+Never suggest destructive shell commands unless the user explicitly asks for them.
 
-### Backend (Django/DRF)
-- **API URLs**: All in `sites/api_urls.py` with DRF ViewSets
-- **Models**: TimeStampedModel base class, UUID primary keys for user-facing models
-- **Testing**: Extensive test coverage in `test_*.py` files - always add tests for new features
-- **Auth**: JWT-based, all write endpoints require authentication
+Forbidden without explicit request:
 
-### Frontend (Next.js)
-- **i18n Structure**: `src/i18n/base-en.ts` → locale-specific files, use `getDictionary(locale)`
-- **Server/Client Split**: Server components for initial render, `*Client.tsx` for interactivity
-- **Sentinel Comments**: Use `// [AUTH]`, `// [JCW]`, `// [I18N]`, `// [UI]` for code organization
-- **No Turbopack**: Stable Next.js config only (`reactStrictMode: true`)
+rm -rf, rmdir /S /Q
 
-### Template Lab System
-- **Template Keys**: `template_key` field determines layout (e.g., "jcw-main", "one-page-basic")
-- **Layout Switching**: Frontend reads `template_key` from API to choose components
-- **Data Structure**: `SiteTemplate` → `SiteProject.site_template` → API exposes `template_key`
+git clean -fdx
 
-## 📁 Critical File Locations
+Deleting or renaming large folders (like backend, frontend, src/app, .github).
 
-```
-backend/sites/
-├── models.py          # Core data models (SiteTemplate, SiteProject, Page, Section)
-├── api_urls.py        # All API endpoints
-├── views.py           # DRF ViewSets and custom APIs
-└── serializers.py     # API response formatting
+3. How You Should Work
+General mindset
 
-frontend/src/
-├── app/[locale]/      # Next.js App Router with i18n
-├── i18n/base-en.ts    # Master translation dictionary
-├── components/        # Reusable UI components
-└── lib/api.ts         # API client and TypeScript types
-```
+Make small, precise changes, not big refactors.
 
-## 🚨 Critical Rules
+Prefer editing existing files over creating new structure.
 
-1. **Windows CMD Syntax**: Use `cd C:\path` not `cd /path`, no `&&` chaining
-2. **Authentication Gates**: All editing UI must check auth state before rendering
-3. **i18n First**: All user-facing text goes through translation system
-4. **Test Coverage**: Add tests for any new models, APIs, or core functionality
-5. **Template Consistency**: Respect `template_key` for layout decisions
+If something is ambiguous: ask the user instead of guessing.
 
-## 🔍 Quick Debugging
+When modifying code
 
-```cmd
-# Find auth-related code
-cd C:\projects\justcodeworks\frontend
-findstr /s /n /c:"[AUTH]" src\*.tsx
+Only touch the files and functions the user names.
 
-# Find JCW-specific components
-findstr /s /n /c:"[JCW]" src\*.tsx
+Before changing a file, make sure it actually exists (search first).
 
-# Check i18n usage
-findstr /s /n /c:"[I18N]" src\*.ts src\*.tsx
-```
+Keep changes minimal and focused on the task.
 
-## 🎨 UI Guidelines
+Show diffs / edited snippets, not whole files unless necessary.
 
-- **No Green Accents**: Use blue color scheme throughout
-- **Responsive**: Mobile-first design with Tailwind classes
-- **Edit Mode**: Editing controls only visible when authenticated
-- **Template Awareness**: Components should adapt based on `template_key`
+Do not introduce new architecture, patterns, or large abstractions unless the user explicitly requests it.
 
-## ⚡ Common Tasks
+4. Things You MUST NOT Do On Your Own
+Unless the user explicitly asks for it in this session, you must not:
 
-**Adding new API endpoint**: Update `sites/api_urls.py`, create ViewSet in `views.py`
-**New translation key**: Add to `base-en.ts`, update locale files
-**Template switching**: Check `template_key` in component logic
-**Auth gating**: Wrap editing UI in auth context checks
+Rebuild or redesign the routing tree for Django or Next.js.
+
+Rewrite the auth system (JWT, sessions, middleware, guards, etc.).
+
+Replace the template / section / builder systems with a new design.
+
+Add new Django models or migrations.
+
+Change CORS, CSRF, or global security settings.
+
+Implement features that are described as “future”, “planned”, or “v2+” in any docs.
+
+Delete or “clean up” old code just because it looks unused.
+
+If you see large documentation (like old builder specs, template lab reports, etc.), treat them as reference only, not as automatic todo lists.
+
+5. How to Treat Documentation in This Repo
+Files like project_setup.md are high-level reference.
+Use them to understand the architecture, not as instructions to implement everything you see.
+
+Any long documentation describing:
+
+Step 0 builder,
+
+Template Lab,
+
+Advanced printing system,
+
+Complex SEO,
+
+v2/v3/v4 plans,
+
+…is historical / planning material.
+Do not start building or refactoring towards those designs unless the user clearly says:
+“Implement this now”.
+
+6. When the User Asks You to Edit Files
+When the user wants file changes, follow this pattern:
+
+Identify the exact file(s) they mention.
+
+Confirm the current content (by reading it).
+
+Apply only the changes needed for the requested behaviour.
+
+Keep existing structure and style where possible.
+
+Avoid touching unrelated parts of the file.
+
+Do not:
+
+“Improve” surrounding code unless asked.
+
+Convert entire files to a new style or pattern.
+
+Introduce new dependencies without explicit approval.
+
+7. Communication Style
+Be concise and practical.
+
+Clearly separate:
+
+What you changed,
+
+Why you changed it,
+
+What the user should run or test (if needed).
+
+If something is risky or not fully verified, say so explicitly.
+
+8. Summary
+Your priorities in this repo:
+
+Follow the user’s current request only.
+
+Avoid destructive or large-scale changes.
+
+Treat big docs as reference, not automatic tasks.
+
+Keep JCW V1 simple, stable, and easy to extend later.
